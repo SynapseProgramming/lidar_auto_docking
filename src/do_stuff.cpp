@@ -1,5 +1,3 @@
-
-
 #include "lidar_auto_docking/printstuff.h"
 
 int main() {
