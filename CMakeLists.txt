@@ -21,6 +21,32 @@ find_package(ament_cmake REQUIRED)
 # further dependencies manually.
 # find_package(<dependency> REQUIRED)
 
+
+# link header files definition to cpp definition
+add_executable(do_stuff src/do_stuff.cpp src/print_stuff.cpp)
+
+
+install(
+  DIRECTORY include/
+  DESTINATION include
+)
+
+
+# allow target to access header files defined in include
+target_include_directories(do_stuff
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>)
+
+
+
+
+
+install(TARGETS
+  do_stuff
+  DESTINATION lib/${PROJECT_NAME})	
+
+
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
   # the following line skips the linter which checks for copyrights
