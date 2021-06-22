@@ -61,9 +61,9 @@ geometry_msgs::msg::Point getCentroid(
  * @param transform The transformation to align source with target.
  * @return True if successful, false otherwise.
  */
-// bool alignPCA(const std::vector<geometry_msgs::msg::Point> source,
-//              const std::vector<geometry_msgs::msg::Point> target,
-//              geometry_msgs::Transform & transform);
+bool alignPCA(const std::vector<geometry_msgs::msg::Point> source,
+              const std::vector<geometry_msgs::msg::Point> target,
+              geometry_msgs::msg::Transform& transform);
 
 /**
  * @brief Perform SVD optimization to align two point clouds
@@ -75,7 +75,7 @@ geometry_msgs::msg::Point getCentroid(
  */
 // bool alignSVD(const std::vector<geometry_msgs::msg::Point> source,
 //              const std::vector<geometry_msgs::msg::Point> target,
-//              geometry_msgs::Transform & transform);
+//              geometry_msgs::msg::Transform & transform);
 
 /**
  * @brief Perform Iterative Closest Point (ICP) algorithm to
@@ -88,7 +88,7 @@ geometry_msgs::msg::Point getCentroid(
 /*
 double alignICP(const std::vector<geometry_msgs::msg::Point> source,
                const std::vector<geometry_msgs::msg::Point> target,
-               geometry_msgs::Transform & transform,
+               geometry_msgs::msg::Transform & transform,
                size_t max_iterations = 10,
                double min_delta_rmsd = 0.000001);
 */

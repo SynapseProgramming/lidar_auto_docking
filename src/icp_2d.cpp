@@ -103,19 +103,16 @@ bool computeCorrespondences(
   // All points have correspondence
   return true;
 }
-/*
+
 bool alignPCA(const std::vector<geometry_msgs::msg::Point> source,
               const std::vector<geometry_msgs::msg::Point> target,
-              geometry_msgs::Transform& t)
-{
+              geometry_msgs::msg::Transform& t) {
   // Get initial rotation angle
   double theta = thetaFromQuaternion(t.rotation);
 
   // Transform source based on initial transfrom
-  std::vector<geometry_msgs::msg::Point> source_t = transform(source,
-                                                         t.translation.x,
-                                                         t.translation.y,
-                                                         theta);
+  std::vector<geometry_msgs::msg::Point> source_t =
+      transform(source, t.translation.x, t.translation.y, theta);
 
   // Get centroid of source and target
   geometry_msgs::msg::Point cs = getCentroid(source_t);
@@ -127,8 +124,7 @@ bool alignPCA(const std::vector<geometry_msgs::msg::Point> source,
 
   // Compute P for source
   Eigen::MatrixXf Ps(2, source_t.size());
-  for (size_t i = 0; i < source_t.size(); i++)
-  {
+  for (size_t i = 0; i < source_t.size(); i++) {
     Ps(0, i) = source_t[i].x - cs.x;
     Ps(1, i) = source_t[i].y - cs.y;
   }
@@ -143,15 +139,13 @@ bool alignPCA(const std::vector<geometry_msgs::msg::Point> source,
   // Sort the eigen vectors for the ideal dock.
   // There are only two eigenvalues. If they come out not sorted,
   // swap the vectors, and make sure the axes are still right handed.
-  if (eig_of_Ms(0, 0) < eig_of_Ms(1, 0))
-  {
+  if (eig_of_Ms(0, 0) < eig_of_Ms(1, 0)) {
     A.col(0).swap(A.col(1));
     A.col(1) = -A.col(1);
   }
   // Compute P for target
   Eigen::MatrixXf Pt(2, target.size());
-  for (size_t i = 0; i < target.size(); i++)
-  {
+  for (size_t i = 0; i < target.size(); i++) {
     Pt(0, i) = target[i].x - ct.x;
     Pt(1, i) = target[i].y - ct.y;
   }
@@ -166,8 +160,7 @@ bool alignPCA(const std::vector<geometry_msgs::msg::Point> source,
   // Sort the eigen vectors for the candidate dock.
   // There are only two eigenvalues. If they come out not sorted,
   // swap the vectors.
-  if (eig_of_Mt(0, 0) < eig_of_Mt(1, 0))
-  {
+  if (eig_of_Mt(0, 0) < eig_of_Mt(1, 0)) {
     B.col(0).swap(B.col(1));
     B.col(1) = -B.col(1);
   }
@@ -181,10 +174,10 @@ bool alignPCA(const std::vector<geometry_msgs::msg::Point> source,
   t.rotation.w = cos(theta / 2.0);
   return true;
 }
-
+/*
 bool alignSVD(const std::vector<geometry_msgs::msg::Point> source,
               const std::vector<geometry_msgs::msg::Point> target,
-              geometry_msgs::Transform& t)
+              geometry_msgs::msg::Transform& t)
 {
   double theta = thetaFromQuaternion(t.rotation);
 
@@ -277,7 +270,7 @@ double getRMSD(const std::vector<geometry_msgs::msg::Point> source,
 
 double alignICP(const std::vector<geometry_msgs::msg::Point> source,
                 const std::vector<geometry_msgs::msg::Point> target,
-                geometry_msgs::Transform & t,
+                geometry_msgs::msg::Transform & t,
                 size_t max_iterations,
                 double min_delta_rmsd)
 {
