@@ -94,7 +94,7 @@ tf2::Vector3 SampleSet::center() {
 
   return tf2::Vector3(x_mean, y_mean, 0.0);
 }
-/*
+
 void ScanMask::addScan(sensor_msgs::msg::LaserScan& scan) {
   if (!filled) {
     angle_min = scan.angle_min;
@@ -137,7 +137,7 @@ bool ScanMask::hasSample(Sample* s, float thresh) {
   }
   return false;
 }
-
+/*
 ScanProcessor::ScanProcessor(const sensor_msgs::msg::LaserScan& scan,
                              ScanMask& mask_, float mask_threshold) {
   scan_ = scan;

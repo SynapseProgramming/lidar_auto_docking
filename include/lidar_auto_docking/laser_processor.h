@@ -91,7 +91,7 @@ class SampleSet : public std::set<Sample*, CompareSample> {
   tf2::Vector3 center();
   std_msgs::msg::Header header;
 };
-/*
+
 /// A mask for filtering out Samples based on range
 class ScanMask {
   SampleSet mask_;
@@ -113,7 +113,7 @@ class ScanMask {
 
   bool hasSample(Sample* s, float thresh);
 };
-
+/*
 typedef SampleSet* SampleSetPtr;
 typedef SampleSet* SampleSetConstPtr;
 
