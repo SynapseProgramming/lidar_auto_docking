@@ -67,37 +67,32 @@ geometry_msgs::msg::Point getCentroid(
   pt.y /= points.size();
   return pt;
 }
-/*
+
 // Computes correspondences for alignment
 // correspondences will be equal in size to source, and contain the
 // closest point in target that corresponds to that in source.
-bool computeCorrespondences(const std::vector<geometry_msgs::msg::Point>&
-source, const std::vector<geometry_msgs::msg::Point>& target,
-                            std::vector<geometry_msgs::msg::Point>&
-correspondences)
-{
+bool computeCorrespondences(
+    const std::vector<geometry_msgs::msg::Point>& source,
+    const std::vector<geometry_msgs::msg::Point>& target,
+    std::vector<geometry_msgs::msg::Point>& correspondences) {
   correspondences.clear();
   std::vector<size_t> c_num;
 
-  for (size_t i = 0; i < source.size(); i++)
-  {
+  for (size_t i = 0; i < source.size(); i++) {
     double d = 1.0;
     size_t best = 0;
 
-    for (size_t j = 0; j < target.size(); j++)
-    {
+    for (size_t j = 0; j < target.size(); j++) {
       double dx = source[i].x - target[j].x;
       double dy = source[i].y - target[j].y;
       double dist = dx * dx + dy * dy;
-      if (dist < d)
-      {
+      if (dist < d) {
         best = j;
         d = dist;
       }
     }
 
-    if (d >= 1.0)
-    {
+    if (d >= 1.0) {
       // No correspondence found!
       return false;
     }
@@ -108,7 +103,7 @@ correspondences)
   // All points have correspondence
   return true;
 }
-
+/*
 bool alignPCA(const std::vector<geometry_msgs::msg::Point> source,
               const std::vector<geometry_msgs::msg::Point> target,
               geometry_msgs::Transform& t)
