@@ -73,9 +73,9 @@ bool alignPCA(const std::vector<geometry_msgs::msg::Point> source,
  * @param transform The transformation to align source with target.
  * @return True if successful, false otherwise.
  */
-// bool alignSVD(const std::vector<geometry_msgs::msg::Point> source,
-//              const std::vector<geometry_msgs::msg::Point> target,
-//              geometry_msgs::msg::Transform & transform);
+bool alignSVD(const std::vector<geometry_msgs::msg::Point> source,
+              const std::vector<geometry_msgs::msg::Point> target,
+              geometry_msgs::msg::Transform& transform);
 
 /**
  * @brief Perform Iterative Closest Point (ICP) algorithm to

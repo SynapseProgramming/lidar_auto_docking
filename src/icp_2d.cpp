@@ -174,18 +174,15 @@ bool alignPCA(const std::vector<geometry_msgs::msg::Point> source,
   t.rotation.w = cos(theta / 2.0);
   return true;
 }
-/*
+
 bool alignSVD(const std::vector<geometry_msgs::msg::Point> source,
               const std::vector<geometry_msgs::msg::Point> target,
-              geometry_msgs::msg::Transform& t)
-{
+              geometry_msgs::msg::Transform& t) {
   double theta = thetaFromQuaternion(t.rotation);
 
   // Transform source based on initial transform
-  std::vector<geometry_msgs::msg::Point> source_t = transform(source,
-                                                         t.translation.x,
-                                                         t.translation.y,
-                                                         theta);
+  std::vector<geometry_msgs::msg::Point> source_t =
+      transform(source, t.translation.x, t.translation.y, theta);
 
   // Get Correspondences
   //  Technically this should be source_t -> target, however
@@ -195,8 +192,7 @@ bool alignSVD(const std::vector<geometry_msgs::msg::Point> source,
   //  so that we map each point in the target onto a point in the
   //  source, since the laser may not see the whole dock.
   std::vector<geometry_msgs::msg::Point> corr;
-  if (!computeCorrespondences(target, source_t, corr))
-  {
+  if (!computeCorrespondences(target, source_t, corr)) {
     return false;
   }
 
@@ -206,16 +202,14 @@ bool alignSVD(const std::vector<geometry_msgs::msg::Point> source,
 
   // Compute P
   Eigen::MatrixXf P(2, corr.size());
-  for (size_t i = 0; i < corr.size(); i++)
-  {
+  for (size_t i = 0; i < corr.size(); i++) {
     P(0, i) = corr[i].x - cs.x;
     P(1, i) = corr[i].y - cs.y;
   }
 
   // Compute Q
   Eigen::MatrixXf Q(2, target.size());
-  for (size_t i = 0; i < target.size(); i++)
-  {
+  for (size_t i = 0; i < target.size(); i++) {
     Q(0, i) = target[i].x - ct.x;
     Q(1, i) = target[i].y - ct.y;
   }
@@ -224,8 +218,8 @@ bool alignSVD(const std::vector<geometry_msgs::msg::Point> source,
   Eigen::MatrixXf M = P * Q.transpose();
 
   // Find SVD of M
-  Eigen::JacobiSVD<Eigen::MatrixXf> svd(M, Eigen::ComputeThinU |
-Eigen::ComputeThinV);
+  Eigen::JacobiSVD<Eigen::MatrixXf> svd(
+      M, Eigen::ComputeThinU | Eigen::ComputeThinV);
 
   // Get R (rotation matrix from source to target)
   Eigen::MatrixXf R = svd.matrixV() * svd.matrixU().transpose();
@@ -240,7 +234,7 @@ Eigen::ComputeThinV);
   t.rotation.w = cos(theta / 2.0);
   return true;
 }
-
+/*
 double getRMSD(const std::vector<geometry_msgs::msg::Point> source,
                const std::vector<geometry_msgs::msg::Point> target)
 {
