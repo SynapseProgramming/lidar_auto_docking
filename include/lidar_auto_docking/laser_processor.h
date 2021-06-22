@@ -65,7 +65,7 @@ class Sample {
  private:
   Sample(){};
 };
-/*
+
 /// The comparator allowing the creation of an ordered "SampleSet"
 struct CompareSample {
   CompareSample() {}
@@ -74,7 +74,7 @@ struct CompareSample {
     return (a->index < b->index);
   }
 };
-
+/*
 /// An ordered set of Samples
 class SampleSet : public std::set<Sample*, CompareSample> {
  public:
