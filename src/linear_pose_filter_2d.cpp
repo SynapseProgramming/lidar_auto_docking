@@ -134,7 +134,7 @@ void LinearPoseFilter2D::setFilterState(
   std::fill(yaw_in_.begin(), yaw_in_.end(),
             getUnnormalizedYaw(input_pose, yaw_out));
 }
-/*
+
 void LinearPoseFilter2D::setFilterState(
     const std::vector<geometry_msgs::msg::Pose>& input_poses,
     const std::vector<geometry_msgs::msg::Pose>& output_poses) {
@@ -163,7 +163,7 @@ void LinearPoseFilter2D::setFilterState(
     if (yaw_previous == yaw_out_.end()) {
       // Dereference the newest output pose, convert it to a yaw and save it to
       // the vector of unnormalized yaws.
-      *(--yaw_previous) = tf::getYaw((--output_poses.end())->orientation);
+      *(--yaw_previous) = tf2::getYaw((--output_poses.end())->orientation);
     }
 
     // Convert the output pose to unnormalized yaw wrt the previous yaw and
@@ -190,11 +190,12 @@ void LinearPoseFilter2D::setFilterState(
   yaw_previous = yaw_out_.end();
   std::deque<float>::iterator yaw_in = yaw_in_.end();
   std::vector<geometry_msgs::msg::Pose>::const_iterator pose_in =
-input_poses.end(); while (pose_in != earliest_pose_in) {
+      input_poses.end();
+  while (pose_in != earliest_pose_in) {
     *(--yaw_in) = getUnnormalizedYaw(*(--pose_in), *(--yaw_previous));
   }
 }
-*/
+
 geometry_msgs::msg::Pose LinearPoseFilter2D::originPose() {
   //  geometry_msgs::msg::Pose origin;
   auto origin = geometry_msgs::msg::Pose();

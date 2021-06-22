@@ -26,10 +26,6 @@
 // ROS includes.
 #include <geometry_msgs/msg/pose.hpp>
 
-// TODO: convert to std_sharedptr
-// Boost includes.
-//#include <boost/shared_ptr.hpp>
-
 class LinearPoseFilter2D {
  public:
   /**
@@ -64,7 +60,7 @@ class LinearPoseFilter2D {
    * @brief Method to reset the filter to ensure that if the filter is being
    * reused, it is not corrupted by old values. Sets sample histories to the
    * origin.
-   */ //(TODO)
+   */ //(OK)
   void reset();
 
   /**
@@ -74,7 +70,7 @@ class LinearPoseFilter2D {
    * inputs.
    * @param output_pose The initial output pose that will be set for all
    * previous outputs.
-   *///(TODO)
+   *///(OK)
   void setFilterState(const geometry_msgs::msg::Pose& input_pose,
                       const geometry_msgs::msg::Pose& output_pose);
 
@@ -96,11 +92,10 @@ class LinearPoseFilter2D {
    * to.
    * @param output_poses Set of output poses to set the output state time
    * history to.
-   */
-  //  void setFilterState(const std::vector<geometry_msgs::msg::Pose>&
-  //  input_poses,
-  //                    const std::vector<geometry_msgs::msg::Pose>&
-  //                    output_poses);
+   */ //(OK)
+  void setFilterState(
+      const std::vector<geometry_msgs::msg::Pose>& input_poses,
+      const std::vector<geometry_msgs::msg::Pose>& output_poses);
 
   /**
    * @brief Not yet implemented but need to have methods that take only input
@@ -138,7 +133,7 @@ class LinearPoseFilter2D {
    *        If the filter has never produced an output before, the zero will be
    * given.
    * @return Most recently filtered yaw.
-   */ //(ok)
+   */
   float getNewestOutputYaw();
 
   std::deque<geometry_msgs::msg::Pose>
@@ -152,6 +147,6 @@ class LinearPoseFilter2D {
   std::vector<float> a_;  /// Vector of output coefficients.
 };
 
-// typedef boost::shared_ptr<LinearPoseFilter2D> LinearPoseFilter2DPtr;
+typedef std::shared_ptr<LinearPoseFilter2D> LinearPoseFilter2DPtr;
 
 #endif  // LIDAR_AUTO_DOCK_LINEAR_POSE_FILTER_H
