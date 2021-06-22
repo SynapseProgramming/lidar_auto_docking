@@ -81,7 +81,7 @@ class DockPerception {
 
     LinearPoseFilter2DPtr
         dock_pose_filter_;  /// Low pass filter object for filtering dock poses.
-
+//TODO: import the private member functions
     // TF frame to track dock within
     std::string tracking_frame_;
     // Best estimate of where the dock is
