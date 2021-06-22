@@ -41,19 +41,17 @@ double thetaFromQuaternion(const geometry_msgs::msg::Quaternion& q);
  * @param theta The rotation, in the current frame of points.
  * @return The transformed points.
  */
-/*
-std::vector<geometry_msgs::Point>
-transform(const std::vector<geometry_msgs::Point>& points,
-          double x,
-          double y,
-          double theta);
-*/
+
+std::vector<geometry_msgs::msg::Point> transform(
+    const std::vector<geometry_msgs::msg::Point>& points, double x, double y,
+    double theta);
+
 /**
  * @brief Get the centroid of a set of points.
  * @param points The points to find centroid of.
  */
-// geometry_msgs::Point
-// getCentroid(const std::vector<geometry_msgs::Point> points);
+// geometry_msgs::msg::Point
+// getCentroid(const std::vector<geometry_msgs::msg::Point> points);
 
 /**
  * @brief Perform PCA algorithm to align two point clouds in
@@ -63,8 +61,8 @@ transform(const std::vector<geometry_msgs::Point>& points,
  * @param transform The transformation to align source with target.
  * @return True if successful, false otherwise.
  */
-// bool alignPCA(const std::vector<geometry_msgs::Point> source,
-//              const std::vector<geometry_msgs::Point> target,
+// bool alignPCA(const std::vector<geometry_msgs::msg::Point> source,
+//              const std::vector<geometry_msgs::msg::Point> target,
 //              geometry_msgs::Transform & transform);
 
 /**
@@ -75,8 +73,8 @@ transform(const std::vector<geometry_msgs::Point>& points,
  * @param transform The transformation to align source with target.
  * @return True if successful, false otherwise.
  */
-// bool alignSVD(const std::vector<geometry_msgs::Point> source,
-//              const std::vector<geometry_msgs::Point> target,
+// bool alignSVD(const std::vector<geometry_msgs::msg::Point> source,
+//              const std::vector<geometry_msgs::msg::Point> target,
 //              geometry_msgs::Transform & transform);
 
 /**
@@ -88,8 +86,8 @@ transform(const std::vector<geometry_msgs::Point>& points,
  * @return Fitness score, negative if error.
  */
 /*
-double alignICP(const std::vector<geometry_msgs::Point> source,
-               const std::vector<geometry_msgs::Point> target,
+double alignICP(const std::vector<geometry_msgs::msg::Point> source,
+               const std::vector<geometry_msgs::msg::Point> target,
                geometry_msgs::Transform & transform,
                size_t max_iterations = 10,
                double min_delta_rmsd = 0.000001);

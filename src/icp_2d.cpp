@@ -33,22 +33,18 @@ double thetaFromQuaternion(const geometry_msgs::msg::Quaternion& q) {
   // Compute theta (this only works if q is in 2d)
   return 2.0 * atan2(q.z, q.w);
 }
-/*
-std::vector<geometry_msgs::Point>
-transform(const std::vector<geometry_msgs::Point>& points,
-          double x,
-          double y,
-          double theta)
-{
-  std::vector<geometry_msgs::Point> points_t;
+
+std::vector<geometry_msgs::msg::Point> transform(
+    const std::vector<geometry_msgs::msg::Point>& points, double x, double y,
+    double theta) {
+  std::vector<geometry_msgs::msg::Point> points_t;
 
   double cos_th = cos(theta);
   double sin_th = sin(theta);
 
-  for (size_t i = 0; i < points.size(); i++)
-  {
-    geometry_msgs::Point pt = points[i];
-    geometry_msgs::Point pt_t;
+  for (size_t i = 0; i < points.size(); i++) {
+    geometry_msgs::msg::Point pt = points[i];
+    geometry_msgs::msg::Point pt_t;
 
     // Rotate then Translate
     pt_t.x = cos_th * pt.x - sin_th * pt.y + x;
@@ -59,10 +55,11 @@ transform(const std::vector<geometry_msgs::Point>& points,
 
   return points_t;
 }
-
-geometry_msgs::Point getCentroid(const std::vector<geometry_msgs::Point> points)
+/*
+geometry_msgs::msg::Point getCentroid(const
+std::vector<geometry_msgs::msg::Point> points)
 {
-  geometry_msgs::Point pt;
+  geometry_msgs::msg::Point pt;
   for (size_t i = 0; i < points.size(); i++)
   {
     pt.x += points[i].x;
@@ -76,9 +73,10 @@ geometry_msgs::Point getCentroid(const std::vector<geometry_msgs::Point> points)
 // Computes correspondences for alignment
 // correspondences will be equal in size to source, and contain the
 // closest point in target that corresponds to that in source.
-bool computeCorrespondences(const std::vector<geometry_msgs::Point>& source,
-                            const std::vector<geometry_msgs::Point>& target,
-                            std::vector<geometry_msgs::Point>& correspondences)
+bool computeCorrespondences(const std::vector<geometry_msgs::msg::Point>&
+source, const std::vector<geometry_msgs::msg::Point>& target,
+                            std::vector<geometry_msgs::msg::Point>&
+correspondences)
 {
   correspondences.clear();
   std::vector<size_t> c_num;
@@ -113,22 +111,22 @@ bool computeCorrespondences(const std::vector<geometry_msgs::Point>& source,
   return true;
 }
 
-bool alignPCA(const std::vector<geometry_msgs::Point> source,
-              const std::vector<geometry_msgs::Point> target,
+bool alignPCA(const std::vector<geometry_msgs::msg::Point> source,
+              const std::vector<geometry_msgs::msg::Point> target,
               geometry_msgs::Transform& t)
 {
   // Get initial rotation angle
   double theta = thetaFromQuaternion(t.rotation);
 
   // Transform source based on initial transfrom
-  std::vector<geometry_msgs::Point> source_t = transform(source,
+  std::vector<geometry_msgs::msg::Point> source_t = transform(source,
                                                          t.translation.x,
                                                          t.translation.y,
                                                          theta);
 
   // Get centroid of source and target
-  geometry_msgs::Point cs = getCentroid(source_t);
-  geometry_msgs::Point ct = getCentroid(target);
+  geometry_msgs::msg::Point cs = getCentroid(source_t);
+  geometry_msgs::msg::Point ct = getCentroid(target);
 
   // Update translation
   t.translation.x += ct.x - cs.x;
@@ -191,14 +189,14 @@ bool alignPCA(const std::vector<geometry_msgs::Point> source,
   return true;
 }
 
-bool alignSVD(const std::vector<geometry_msgs::Point> source,
-              const std::vector<geometry_msgs::Point> target,
+bool alignSVD(const std::vector<geometry_msgs::msg::Point> source,
+              const std::vector<geometry_msgs::msg::Point> target,
               geometry_msgs::Transform& t)
 {
   double theta = thetaFromQuaternion(t.rotation);
 
   // Transform source based on initial transform
-  std::vector<geometry_msgs::Point> source_t = transform(source,
+  std::vector<geometry_msgs::msg::Point> source_t = transform(source,
                                                          t.translation.x,
                                                          t.translation.y,
                                                          theta);
@@ -210,15 +208,15 @@ bool alignSVD(const std::vector<geometry_msgs::Point> source,
   //  data as target. The correspondences then need to be setup
   //  so that we map each point in the target onto a point in the
   //  source, since the laser may not see the whole dock.
-  std::vector<geometry_msgs::Point> corr;
+  std::vector<geometry_msgs::msg::Point> corr;
   if (!computeCorrespondences(target, source_t, corr))
   {
     return false;
   }
 
   // Get centroid of source_t and corr
-  geometry_msgs::Point cs = getCentroid(corr);
-  geometry_msgs::Point ct = getCentroid(target);
+  geometry_msgs::msg::Point cs = getCentroid(corr);
+  geometry_msgs::msg::Point ct = getCentroid(target);
 
   // Compute P
   Eigen::MatrixXf P(2, corr.size());
@@ -257,11 +255,11 @@ Eigen::ComputeThinV);
   return true;
 }
 
-double getRMSD(const std::vector<geometry_msgs::Point> source,
-               const std::vector<geometry_msgs::Point> target)
+double getRMSD(const std::vector<geometry_msgs::msg::Point> source,
+               const std::vector<geometry_msgs::msg::Point> target)
 {
   // Compute correspondences
-  std::vector<geometry_msgs::Point> corr;
+  std::vector<geometry_msgs::msg::Point> corr;
   if (!computeCorrespondences(source, target, corr))
   {
     // No correspondences, return massive number
@@ -284,8 +282,8 @@ double getRMSD(const std::vector<geometry_msgs::Point> source,
   return rmsd;
 }
 
-double alignICP(const std::vector<geometry_msgs::Point> source,
-                const std::vector<geometry_msgs::Point> target,
+double alignICP(const std::vector<geometry_msgs::msg::Point> source,
+                const std::vector<geometry_msgs::msg::Point> target,
                 geometry_msgs::Transform & t,
                 size_t max_iterations,
                 double min_delta_rmsd)
@@ -307,7 +305,7 @@ double alignICP(const std::vector<geometry_msgs::Point> source,
     }
 
     // Transform source to target
-    std::vector<geometry_msgs::Point>
+    std::vector<geometry_msgs::msg::Point>
     source_t = transform(source,
                          t.translation.x,
                          t.translation.y,
@@ -330,7 +328,7 @@ double alignICP(const std::vector<geometry_msgs::Point> source,
   }
 
   // Transform source to target one last time
-  std::vector<geometry_msgs::Point>
+  std::vector<geometry_msgs::msg::Point>
   source_t = transform(source,
                        t.translation.x,
                        t.translation.y,
