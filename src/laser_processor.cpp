@@ -54,7 +54,7 @@ Sample* Sample::Extract(int ind, const sensor_msgs::msg::LaserScan& scan) {
     return NULL;
   }
 }
-/*
+
 void SampleSet::clear() {
   for (SampleSet::iterator i = begin(); i != end(); i++) {
     delete (*i);
@@ -62,7 +62,7 @@ void SampleSet::clear() {
   set<Sample*, CompareSample>::clear();
 }
 
-void SampleSet::appendToCloud(sensor_msgs::PointCloud& cloud, int r, int g,
+void SampleSet::appendToCloud(sensor_msgs::msg::PointCloud& cloud, int r, int g,
                               int b) {
   float color_val = 0;
 
@@ -70,7 +70,7 @@ void SampleSet::appendToCloud(sensor_msgs::PointCloud& cloud, int r, int g,
   color_val = *reinterpret_cast<float*>(&rgb);
 
   for (iterator sample_iter = begin(); sample_iter != end(); sample_iter++) {
-    geometry_msgs::Point32 point;
+    geometry_msgs::msg::Point32 point;
     point.x = (*sample_iter)->x;
     point.y = (*sample_iter)->y;
     point.z = 0;
@@ -82,7 +82,7 @@ void SampleSet::appendToCloud(sensor_msgs::PointCloud& cloud, int r, int g,
   }
 }
 
-tf::Point SampleSet::center() {
+tf2::Vector3 SampleSet::center() {
   float x_mean = 0.0;
   float y_mean = 0.0;
   for (iterator i = begin(); i != end(); i++)
@@ -92,9 +92,9 @@ tf::Point SampleSet::center() {
     y_mean += ((*i)->y) / size();
   }
 
-  return tf::Point(x_mean, y_mean, 0.0);
+  return tf2::Vector3(x_mean, y_mean, 0.0);
 }
-
+/*
 void ScanMask::addScan(sensor_msgs::msg::LaserScan& scan) {
   if (!filled) {
     angle_min = scan.angle_min;

@@ -48,6 +48,7 @@
 #include "geometry_msgs/msg/point.hpp"
 #include "sensor_msgs/msg/laser_scan.hpp"
 #include "sensor_msgs/msg/point_cloud.hpp"
+#include "tf2/LinearMath/Vector3.h"
 #include "tf2/transform_datatypes.h"
 
 namespace laser_processor {
@@ -74,7 +75,7 @@ struct CompareSample {
     return (a->index < b->index);
   }
 };
-/*
+
 /// An ordered set of Samples
 class SampleSet : public std::set<Sample*, CompareSample> {
  public:
@@ -84,13 +85,13 @@ class SampleSet : public std::set<Sample*, CompareSample> {
 
   void clear();
 
-  void appendToCloud(sensor_msgs::PointCloud& cloud, int r = 0, int g = 0,
+  void appendToCloud(sensor_msgs::msg::PointCloud& cloud, int r = 0, int g = 0,
                      int b = 0);
-
-  tf::Point center();
-  std_msgs::Header header;
+  // TODO: center is now returned as a Vector3
+  tf2::Vector3 center();
+  std_msgs::msg::Header header;
 };
-
+/*
 /// A mask for filtering out Samples based on range
 class ScanMask {
   SampleSet mask_;
