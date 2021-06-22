@@ -48,7 +48,7 @@ class LinearPoseFilter2D {
    *          The number of coefficients is the order of the filter + 1.
    * @param a Filter coefficients for the output samples.
    *          Vector a should have the same number of elements as b,
-   *          with the first element being 1. (TODO)
+   *          with the first element being 1. (OK)
    */
   void setCoeff(const std::vector<float>& b, const std::vector<float>& a);
 
@@ -57,8 +57,8 @@ class LinearPoseFilter2D {
    * position.y and the yaw of the pose.
    * @param pose Input pose to be filtered.
    * @return Filtered pose.
-   */
-  //  geometry_msgs::Pose filter(const geometry_msgs::Pose& pose);
+   */    //  (OK)
+  geometry_msgs::msg::Pose filter(const geometry_msgs::msg::Pose& pose);
 
   /**
    * @brief Method to reset the filter to ensure that if the filter is being
@@ -127,16 +127,16 @@ class LinearPoseFilter2D {
    * @param reference_yaw The yaw with which to reference and whose sign is
    * respected.
    * @return Unnormalized yaw in radians.
-   */
-  //  float getUnnormalizedYaw(geometry_msgs::Pose pose, float reference_yaw);
+   */ //(OK)
+  float getUnnormalizedYaw(geometry_msgs::msg::Pose pose, float reference_yaw);
 
   /**
    * @brief Method to get the most recent filtered unnormalized yaw.
    *        If the filter has never produced an output before, the zero will be
    * given.
    * @return Most recently filtered yaw.
-   */
-  // float getNewestOutputYaw();
+   */ //(ok)
+  float getNewestOutputYaw();
 
   std::deque<geometry_msgs::msg::Pose>
       out_;  /// Vector of previous output poses.

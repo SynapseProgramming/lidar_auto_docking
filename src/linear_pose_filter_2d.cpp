@@ -26,6 +26,8 @@
 #include <tf2/transform_datatypes.h>
 #include <tf2/utils.h>
 
+#include <iostream>
+
 LinearPoseFilter2D::LinearPoseFilter2D(const std::vector<float>& b,
                                        const std::vector<float>& a) {
   setCoeff(b, a);
@@ -69,9 +71,9 @@ void LinearPoseFilter2D::setCoeff(const std::vector<float>& b,
     }
   }
 }
-/*
-geometry_msgs::Pose LinearPoseFilter2D::filter(
-    const geometry_msgs::Pose& pose) {
+
+geometry_msgs::msg::Pose LinearPoseFilter2D::filter(
+    const geometry_msgs::msg::Pose& pose) {
   // Add the new input pose to the vector of inputs.
   in_.push_back(pose);
   yaw_in_.push_back(getUnnormalizedYaw(pose, getNewestOutputYaw()));
@@ -85,7 +87,7 @@ geometry_msgs::Pose LinearPoseFilter2D::filter(
   yaw_out_.pop_front();
 
   // Grab the iterator to the new output.
-  std::deque<geometry_msgs::Pose>::iterator outn = --out_.end();
+  std::deque<geometry_msgs::msg::Pose>::iterator outn = --out_.end();
   std::deque<float>::iterator yaw_outn = --yaw_out_.end();
 
   // Terminal index of vector.
@@ -112,7 +114,7 @@ geometry_msgs::Pose LinearPoseFilter2D::filter(
   // Return the output.
   return *outn;
 }
-
+/*
 void LinearPoseFilter2D::reset() {
   // Copy in the origins.
   setFilterState(originPose(), originPose());
@@ -193,7 +195,6 @@ void LinearPoseFilter2D::setFilterState(
   }
 }
 */
-// THIS FUNCTION IS NEEDED FOR setcoeff
 geometry_msgs::msg::Pose LinearPoseFilter2D::originPose() {
   //  geometry_msgs::Pose origin;
   auto origin = geometry_msgs::msg::Pose();
@@ -207,11 +208,11 @@ geometry_msgs::msg::Pose LinearPoseFilter2D::originPose() {
 
   return origin;
 }
-/*
-float LinearPoseFilter2D::getUnnormalizedYaw(geometry_msgs::Pose pose,
+
+float LinearPoseFilter2D::getUnnormalizedYaw(geometry_msgs::msg::Pose pose,
                                              float reference_yaw) {
   // Get the normalized yaw.
-  float yaw = tf::getYaw(pose.orientation);
+  float yaw = tf2::getYaw(pose.orientation);
 
   // Add the normalized difference in angles to the reference.
   return reference_yaw + angles::normalize_angle(yaw - reference_yaw);
@@ -225,7 +226,6 @@ float LinearPoseFilter2D::getNewestOutputYaw() {
     return *(--yaw_out_.end());
   }
 }
-*/
 
 // test main function. for testing only.
 int main() {
@@ -233,6 +233,20 @@ int main() {
   std::vector<float> b = {6, 7, 8, 9, 10};
 
   LinearPoseFilter2D obj(a, b);
+  auto input = geometry_msgs::msg::Pose();
+
+  input.position.x = 1.3426270484924317;
+  input.position.y = 5.729197978973389;
+  input.position.z = 0;
+  input.orientation.x = 0;
+  input.orientation.y = 0;
+  input.orientation.z = 0.3788803919588129;
+  input.orientation.w = 0.9254456486413107;
+
+  auto output = geometry_msgs::msg::Pose();
+  output = obj.filter(input);
+  std::cout << output.position.x << " " << output.position.y << " "
+            << input.orientation.z << " " << input.orientation.w;
 
   return 0;
 }

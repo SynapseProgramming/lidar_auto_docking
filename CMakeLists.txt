@@ -21,11 +21,12 @@ find_package(ament_cmake REQUIRED)
 # further dependencies manually.
 find_package(geometry_msgs REQUIRED)
 find_package(tf2 REQUIRED)
+find_package(angles REQUIRED)
 
 
 # link header files definition to cpp definition
 add_executable(linear_pose_filter_2d_test src/linear_pose_filter_2d.cpp)
-ament_target_dependencies(linear_pose_filter_2d_test geometry_msgs tf2)
+ament_target_dependencies(linear_pose_filter_2d_test geometry_msgs tf2 angles)
 
 install(
   DIRECTORY include/
