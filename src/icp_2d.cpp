@@ -55,13 +55,11 @@ std::vector<geometry_msgs::msg::Point> transform(
 
   return points_t;
 }
-/*
-geometry_msgs::msg::Point getCentroid(const
-std::vector<geometry_msgs::msg::Point> points)
-{
+
+geometry_msgs::msg::Point getCentroid(
+    const std::vector<geometry_msgs::msg::Point> points) {
   geometry_msgs::msg::Point pt;
-  for (size_t i = 0; i < points.size(); i++)
-  {
+  for (size_t i = 0; i < points.size(); i++) {
     pt.x += points[i].x;
     pt.y += points[i].y;
   }
@@ -69,7 +67,7 @@ std::vector<geometry_msgs::msg::Point> points)
   pt.y /= points.size();
   return pt;
 }
-
+/*
 // Computes correspondences for alignment
 // correspondences will be equal in size to source, and contain the
 // closest point in target that corresponds to that in source.

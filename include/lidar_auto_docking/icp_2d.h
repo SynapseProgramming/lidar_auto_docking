@@ -50,8 +50,8 @@ std::vector<geometry_msgs::msg::Point> transform(
  * @brief Get the centroid of a set of points.
  * @param points The points to find centroid of.
  */
-// geometry_msgs::msg::Point
-// getCentroid(const std::vector<geometry_msgs::msg::Point> points);
+geometry_msgs::msg::Point getCentroid(
+    const std::vector<geometry_msgs::msg::Point> points);
 
 /**
  * @brief Perform PCA algorithm to align two point clouds in
