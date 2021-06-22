@@ -19,12 +19,13 @@ endif()
 find_package(ament_cmake REQUIRED)
 # uncomment the following section in order to fill in
 # further dependencies manually.
-# find_package(<dependency> REQUIRED)
+find_package(geometry_msgs REQUIRED)
+find_package(tf2 REQUIRED)
 
 
 # link header files definition to cpp definition
-add_executable(do_stuff src/do_stuff.cpp src/print_stuff.cpp)
-
+add_executable(linear_pose_filter_2d_test src/linear_pose_filter_2d.cpp)
+ament_target_dependencies(linear_pose_filter_2d_test geometry_msgs tf2)
 
 install(
   DIRECTORY include/
@@ -33,7 +34,7 @@ install(
 
 
 # allow target to access header files defined in include
-target_include_directories(do_stuff
+target_include_directories( linear_pose_filter_2d_test
   PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include>)
@@ -43,7 +44,7 @@ target_include_directories(do_stuff
 
 
 install(TARGETS
-  do_stuff
+  linear_pose_filter_2d_test
   DESTINATION lib/${PROJECT_NAME})	
 
 
