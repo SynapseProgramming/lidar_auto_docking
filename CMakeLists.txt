@@ -27,10 +27,9 @@ find_package(Eigen3 REQUIRED)
 
 
 # link header files definition to cpp definition
-add_executable(icp_2d_test src/icp_2d.cpp)
-ament_target_dependencies(icp_2d_test geometry_msgs Eigen3)
+#add_executable(icp_2d_test src/icp_2d.cpp)
 
-
+#ament_target_dependencies(icp_2d_test geometry_msgs Eigen3)
 #ament_target_dependencies(laser_processor_test geometry_msgs tf2 sensor_msgs)
 #ament_target_dependencies(laser_processor_test geometry_msgs tf2 angles)
 
@@ -42,17 +41,17 @@ install(
 
 
 # allow target to access header files defined in include
-target_include_directories( icp_2d_test
-  PUBLIC
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-    $<INSTALL_INTERFACE:include>)
+#target_include_directories( icp_2d_test
+#  PUBLIC
+#    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+#    $<INSTALL_INTERFACE:include>)
 
 
 
 
 
 install(TARGETS
-icp_2d_test
+#icp_2d_test
 #  linear_pose_filter_2d_test
 #  laser_processor_test
   DESTINATION lib/${PROJECT_NAME})	

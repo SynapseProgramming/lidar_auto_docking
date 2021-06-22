@@ -306,5 +306,3 @@ double alignICP(const std::vector<geometry_msgs::msg::Point> source,
 }
 
 }  // namespace icp_2d
-
-int main() { return 0; }
