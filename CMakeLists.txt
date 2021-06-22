@@ -26,8 +26,8 @@ find_package(sensor_msgs REQUIRED)
 
 
 # link header files definition to cpp definition
-#add_executable(laser_processor_test src/laser_processor.cpp)
-
+add_executable(perception_test src/perception.cpp src/laser_processor.cpp src/linear_pose_filter_2d.cpp)
+ament_target_dependencies(perception_test geometry_msgs tf2 sensor_msgs rclcpp)
 
 
 #ament_target_dependencies(laser_processor_test geometry_msgs tf2 sensor_msgs)
