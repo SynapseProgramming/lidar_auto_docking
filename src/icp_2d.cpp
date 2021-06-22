@@ -258,13 +258,11 @@ double getRMSD(const std::vector<geometry_msgs::msg::Point> source,
 
   return rmsd;
 }
-/*
+
 double alignICP(const std::vector<geometry_msgs::msg::Point> source,
                 const std::vector<geometry_msgs::msg::Point> target,
-                geometry_msgs::msg::Transform & t,
-                size_t max_iterations,
-                double min_delta_rmsd)
-{
+                geometry_msgs::msg::Transform& t, size_t max_iterations,
+                double min_delta_rmsd) {
   // Initial alignment with PCA
   alignPCA(source, target, t);
 
@@ -272,31 +270,25 @@ double alignICP(const std::vector<geometry_msgs::msg::Point> source,
   double prev_rmsd = -1.0;
 
   // Iteratively refine with SVD
-  for (size_t iteration = 0; iteration < max_iterations; iteration++)
-  {
+  for (size_t iteration = 0; iteration < max_iterations; iteration++) {
     // Perform SVD
-    if (!alignSVD(source, target, t))
-    {
+    if (!alignSVD(source, target, t)) {
       // SVD failed
       return -1.0;
     }
 
     // Transform source to target
-    std::vector<geometry_msgs::msg::Point>
-    source_t = transform(source,
-                         t.translation.x,
-                         t.translation.y,
-                         thetaFromQuaternion(t.rotation));
+    std::vector<geometry_msgs::msg::Point> source_t =
+        transform(source, t.translation.x, t.translation.y,
+                  thetaFromQuaternion(t.rotation));
 
     // As above, this should technically be the other way around,
     // However, at this phase we want to check the
     double rmsd = getRMSD(target, source_t);
 
     // Check termination condition
-    if (prev_rmsd > 0.0)
-    {
-      if (fabs(prev_rmsd - rmsd) < min_delta_rmsd)
-      {
+    if (prev_rmsd > 0.0) {
+      if (fabs(prev_rmsd - rmsd) < min_delta_rmsd) {
         // Terminate on RMSD, return based on ideal -> observed
         return getRMSD(source_t, target);
       }
@@ -305,16 +297,14 @@ double alignICP(const std::vector<geometry_msgs::msg::Point> source,
   }
 
   // Transform source to target one last time
-  std::vector<geometry_msgs::msg::Point>
-  source_t = transform(source,
-                       t.translation.x,
-                       t.translation.y,
-                       thetaFromQuaternion(t.rotation));
+  std::vector<geometry_msgs::msg::Point> source_t =
+      transform(source, t.translation.x, t.translation.y,
+                thetaFromQuaternion(t.rotation));
 
   // Return RMSD based on ideal -> observed
   return getRMSD(source_t, target);
 }
-*/
+
 }  // namespace icp_2d
 
 int main() { return 0; }

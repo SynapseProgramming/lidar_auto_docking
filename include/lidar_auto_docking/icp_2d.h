@@ -85,13 +85,12 @@ bool alignSVD(const std::vector<geometry_msgs::msg::Point> source,
  * @param transform The transformation to align source with target.
  * @return Fitness score, negative if error.
  */
-/*
+
 double alignICP(const std::vector<geometry_msgs::msg::Point> source,
-               const std::vector<geometry_msgs::msg::Point> target,
-               geometry_msgs::msg::Transform & transform,
-               size_t max_iterations = 10,
-               double min_delta_rmsd = 0.000001);
-*/
+                const std::vector<geometry_msgs::msg::Point> target,
+                geometry_msgs::msg::Transform& transform,
+                size_t max_iterations = 10, double min_delta_rmsd = 0.000001);
+
 }  // namespace icp_2d
 
 #endif  // FETCH_AUTO_DOCK_ICP_2D_H
