@@ -113,7 +113,7 @@ class ScanMask {
 
   bool hasSample(Sample* s, float thresh);
 };
-/*
+
 typedef SampleSet* SampleSetPtr;
 typedef SampleSet* SampleSetConstPtr;
 
@@ -133,7 +133,7 @@ class ScanProcessor {
 
   void splitConnected(float thresh);
 };
-*/
+
 }  // namespace laser_processor
 
 #endif  // FETCH_AUTO_DOCK_LASER_PROCESSOR_H

@@ -137,7 +137,7 @@ bool ScanMask::hasSample(Sample* s, float thresh) {
   }
   return false;
 }
-/*
+
 ScanProcessor::ScanProcessor(const sensor_msgs::msg::LaserScan& scan,
                              ScanMask& mask_, float mask_threshold) {
   scan_ = scan;
@@ -239,7 +239,7 @@ void ScanProcessor::splitConnected(float thresh) {
 
   clusters_.insert(clusters_.begin(), tmp_clusters.begin(), tmp_clusters.end());
 }
-*/
+
 }  // namespace laser_processor
 
 int main() {
