@@ -227,27 +227,3 @@ float LinearPoseFilter2D::getNewestOutputYaw() {
     return *(--yaw_out_.end());
   }
 }
-
-// test main function. for testing only.
-int main() {
-  std::vector<float> a = {1, 2, 3, 4, 5};
-  std::vector<float> b = {6, 7, 8, 9, 10};
-
-  LinearPoseFilter2D obj(a, b);
-  auto input = geometry_msgs::msg::Pose();
-
-  input.position.x = 1.3426270484924317;
-  input.position.y = 5.729197978973389;
-  input.position.z = 0;
-  input.orientation.x = 0;
-  input.orientation.y = 0;
-  input.orientation.z = 0.3788803919588129;
-  input.orientation.w = 0.9254456486413107;
-
-  auto output = geometry_msgs::msg::Pose();
-  output = obj.filter(input);
-  std::cout << output.position.x << " " << output.position.y << " "
-            << input.orientation.z << " " << input.orientation.w;
-
-  return 0;
-}
