@@ -26,12 +26,11 @@ find_package(sensor_msgs REQUIRED)
 
 
 # link header files definition to cpp definition
-add_executable(laser_processor_test src/laser_processor.cpp)
-ament_target_dependencies(laser_processor_test geometry_msgs tf2 sensor_msgs)
+#add_executable(laser_processor_test src/laser_processor.cpp)
 
 
 
-
+#ament_target_dependencies(laser_processor_test geometry_msgs tf2 sensor_msgs)
 #ament_target_dependencies(laser_processor_test geometry_msgs tf2 angles)
 
 
@@ -42,10 +41,10 @@ install(
 
 
 # allow target to access header files defined in include
-target_include_directories( laser_processor_test
-  PUBLIC
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-    $<INSTALL_INTERFACE:include>)
+#target_include_directories( laser_processor_test
+#  PUBLIC
+#    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+#    $<INSTALL_INTERFACE:include>)
 
 
 
@@ -53,7 +52,7 @@ target_include_directories( laser_processor_test
 
 install(TARGETS
 #  linear_pose_filter_2d_test
-  laser_processor_test
+#  laser_processor_test
   DESTINATION lib/${PROJECT_NAME})	
 
 

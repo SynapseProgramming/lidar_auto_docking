@@ -241,8 +241,3 @@ void ScanProcessor::splitConnected(float thresh) {
 }
 
 }  // namespace laser_processor
-
-int main() {
-  std::cout << "test";
-  return 0;
-}
