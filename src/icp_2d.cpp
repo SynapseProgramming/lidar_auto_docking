@@ -234,14 +234,12 @@ bool alignSVD(const std::vector<geometry_msgs::msg::Point> source,
   t.rotation.w = cos(theta / 2.0);
   return true;
 }
-/*
+
 double getRMSD(const std::vector<geometry_msgs::msg::Point> source,
-               const std::vector<geometry_msgs::msg::Point> target)
-{
+               const std::vector<geometry_msgs::msg::Point> target) {
   // Compute correspondences
   std::vector<geometry_msgs::msg::Point> corr;
-  if (!computeCorrespondences(source, target, corr))
-  {
+  if (!computeCorrespondences(source, target, corr)) {
     // No correspondences, return massive number
     // (we considered using std::numeric_limits<double>::max() here, but
     //  that could lead to under/overflow later on when comparing RMSD)
@@ -250,8 +248,7 @@ double getRMSD(const std::vector<geometry_msgs::msg::Point> source,
 
   // Get Root Mean Squared Distance (RMSD)
   double rmsd = 0.0;
-  for (size_t i = 0; i < source.size(); i++)
-  {
+  for (size_t i = 0; i < source.size(); i++) {
     double dx = source[i].x - corr[i].x;
     double dy = source[i].y - corr[i].y;
     rmsd += dx * dx + dy * dy;
@@ -261,7 +258,7 @@ double getRMSD(const std::vector<geometry_msgs::msg::Point> source,
 
   return rmsd;
 }
-
+/*
 double alignICP(const std::vector<geometry_msgs::msg::Point> source,
                 const std::vector<geometry_msgs::msg::Point> target,
                 geometry_msgs::msg::Transform & t,
