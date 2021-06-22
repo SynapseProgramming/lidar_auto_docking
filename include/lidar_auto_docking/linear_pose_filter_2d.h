@@ -64,8 +64,8 @@ class LinearPoseFilter2D {
    * @brief Method to reset the filter to ensure that if the filter is being
    * reused, it is not corrupted by old values. Sets sample histories to the
    * origin.
-   */
-  //  void reset();
+   */ //(TODO)
+  void reset();
 
   /**
    * @brief Method to set the sample history of the filter to some state.
@@ -74,9 +74,9 @@ class LinearPoseFilter2D {
    * inputs.
    * @param output_pose The initial output pose that will be set for all
    * previous outputs.
-   */
-  // void setFilterState(const geometry_msgs::Pose& input_pose,
-  //                    const geometry_msgs::Pose& output_pose);
+   *///(TODO)
+  void setFilterState(const geometry_msgs::msg::Pose& input_pose,
+                      const geometry_msgs::msg::Pose& output_pose);
 
   /**
    * @brief Method to set the sample history of the filter to some (set of)
@@ -97,16 +97,19 @@ class LinearPoseFilter2D {
    * @param output_poses Set of output poses to set the output state time
    * history to.
    */
-  //  void setFilterState(const std::vector<geometry_msgs::Pose>& input_poses,
-  //                    const std::vector<geometry_msgs::Pose>& output_poses);
+  //  void setFilterState(const std::vector<geometry_msgs::msg::Pose>&
+  //  input_poses,
+  //                    const std::vector<geometry_msgs::msg::Pose>&
+  //                    output_poses);
 
   /**
    * @brief Not yet implemented but need to have methods that take only input
    * histories and then recreate the appropriate output histories. This is
    * because the input history encodes the entire filter history.
    */
-  // void setFilterState(const geometry_msgs::Pose& input_pose);
-  // void setFilterState(const std::vector<geometry_msgs::Pose>& input_poses);
+  // void setFilterState(const geometry_msgs::msg::Pose& input_pose);
+  // void setFilterState(const std::vector<geometry_msgs::msg::Pose>&
+  // input_poses);
 
  private:
   /**

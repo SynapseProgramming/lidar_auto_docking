@@ -114,17 +114,17 @@ geometry_msgs::msg::Pose LinearPoseFilter2D::filter(
   // Return the output.
   return *outn;
 }
-/*
+
 void LinearPoseFilter2D::reset() {
   // Copy in the origins.
   setFilterState(originPose(), originPose());
 }
 
 void LinearPoseFilter2D::setFilterState(
-    const geometry_msgs::Pose& input_pose,
-    const geometry_msgs::Pose& output_pose) {
+    const geometry_msgs::msg::Pose& input_pose,
+    const geometry_msgs::msg::Pose& output_pose) {
   // Get output yaw.
-  float yaw_out = tf::getYaw(output_pose.orientation);
+  float yaw_out = tf2::getYaw(output_pose.orientation);
   // Fill the output buffer with poses
   std::fill(out_.begin(), out_.end(), output_pose);
   std::fill(yaw_out_.begin(), yaw_out_.end(), yaw_out);
@@ -134,14 +134,14 @@ void LinearPoseFilter2D::setFilterState(
   std::fill(yaw_in_.begin(), yaw_in_.end(),
             getUnnormalizedYaw(input_pose, yaw_out));
 }
-
+/*
 void LinearPoseFilter2D::setFilterState(
-    const std::vector<geometry_msgs::Pose>& input_poses,
-    const std::vector<geometry_msgs::Pose>& output_poses) {
+    const std::vector<geometry_msgs::msg::Pose>& input_poses,
+    const std::vector<geometry_msgs::msg::Pose>& output_poses) {
   // Check length of new output set.
   // If it is less than or equal to the output buffer size, then copy all of it
   // into the output buffer.
-  std::vector<geometry_msgs::Pose>::const_iterator earliest_pose_out;
+  std::vector<geometry_msgs::msg::Pose>::const_iterator earliest_pose_out;
   if (output_poses.size() <= out_.size()) {
     earliest_pose_out = output_poses.begin();
   } else {
@@ -156,7 +156,7 @@ void LinearPoseFilter2D::setFilterState(
   // Copy unnormalized output yaw.
   std::deque<float>::iterator yaw_out = yaw_out_.end();
   std::deque<float>::iterator yaw_previous = yaw_out_.end();
-  std::vector<geometry_msgs::Pose>::const_iterator pose_out =
+  std::vector<geometry_msgs::msg::Pose>::const_iterator pose_out =
       output_poses.end();
   while (pose_out != earliest_pose_out) {
     // // If this is the first time then initialize previous yaw.
@@ -174,7 +174,7 @@ void LinearPoseFilter2D::setFilterState(
   // Check length of new input set.
   // If it is less than or equal to the input buffer size, then copy all of it
   // into the input buffer.
-  std::vector<geometry_msgs::Pose>::const_iterator earliest_pose_in;
+  std::vector<geometry_msgs::msg::Pose>::const_iterator earliest_pose_in;
   if (input_poses.size() <= in_.size()) {
     earliest_pose_in = input_poses.begin();
   } else {
@@ -189,14 +189,14 @@ void LinearPoseFilter2D::setFilterState(
   // Copy unnormalized input yaw.
   yaw_previous = yaw_out_.end();
   std::deque<float>::iterator yaw_in = yaw_in_.end();
-  std::vector<geometry_msgs::Pose>::const_iterator pose_in = input_poses.end();
-  while (pose_in != earliest_pose_in) {
+  std::vector<geometry_msgs::msg::Pose>::const_iterator pose_in =
+input_poses.end(); while (pose_in != earliest_pose_in) {
     *(--yaw_in) = getUnnormalizedYaw(*(--pose_in), *(--yaw_previous));
   }
 }
 */
 geometry_msgs::msg::Pose LinearPoseFilter2D::originPose() {
-  //  geometry_msgs::Pose origin;
+  //  geometry_msgs::msg::Pose origin;
   auto origin = geometry_msgs::msg::Pose();
   origin.position.x = 0;
   origin.position.y = 0;
