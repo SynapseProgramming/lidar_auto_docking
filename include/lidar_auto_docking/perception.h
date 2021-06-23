@@ -19,15 +19,17 @@
 #ifndef LIDAR_AUTO_DOCKING_PERCEPTION_H
 #define LIDAR_AUTO_DOCKING_PERCEPTION_H
 
-#include <geometry_msgs/msg/pose_stamped.h>
 #include <lidar_auto_docking/dock_candidate.h>
 #include <lidar_auto_docking/laser_processor.h>
 #include <lidar_auto_docking/linear_pose_filter_2d.h>
 #include <tf2_ros/transform_listener.h>
 
 #include <deque>
+#include <geometry_msgs/msg/pose_stamped.hpp>
+#include <mutex>
 #include <rclcpp/rclcpp.hpp>
 #include <sensor_msgs/msg/laser_scan.hpp>
+#include <sensor_msgs/msg/point_cloud2.hpp>
 #include <string>
 #include <vector>
 
@@ -72,37 +74,37 @@ class DockPerception {
    * @return True if quaternion is valid.
    */
   // static bool isValid(const tf::Quaternion& q);
-  /*
-    ros::Subscriber scan_sub_;
-    tf::TransformListener listener_;
 
-    bool running_;  // Should we be trying to find the dock
-    bool debug_;    // Should we output debugging info
+  rclcpp::Subscription<sensor_msgs::msg::LaserScan>::SharedPtr subscription_;
+  tf2_ros::TransformListener listener_;
 
-    LinearPoseFilter2DPtr
-        dock_pose_filter_;  /// Low pass filter object for filtering dock poses.
-//TODO: import the private member functions
-    // TF frame to track dock within
-    std::string tracking_frame_;
-    // Best estimate of where the dock is
-    geometry_msgs::PoseStamped dock_;
-    // Mutex on dock_
-    boost::mutex dock_mutex_;
-    // If true, then dock_ is based on actual sensor data
-    bool found_dock_;
-    // Last time that dock pose was updated
-    ros::Time dock_stamp_;
-    // Maximum allowable error between scan and "ideal" scan
-    double max_alignment_error_;
+  bool running_;  // Should we be trying to find the dock
+  bool debug_;    // Should we output debugging info
 
-    // Publish visualization of which points are detected as dock
-    ros::Publisher debug_points_;
+  // defined as std::shared_ptr<LinearPoseFilter2D> LinearPoseFilter2DPtr;
+  LinearPoseFilter2DPtr
+      dock_pose_filter_;  /// Low pass filter object for filtering dock poses.
+                          // TODO: import the private member functions
+  // TF frame to track dock within
+  std::string tracking_frame_;
+  // Best estimate of where the dock is
+  geometry_msgs::msg::PoseStamped dock_;
+  // Mutex on dock_
+  // boost::mutex dock_mutex_;
+  std::mutex dock_mutex_;
+  // If true, then dock_ is based on actual sensor data
+  bool found_dock_;
+  // Last time that dock pose was updated
+  rclcpp::Time dock_stamp_;
+  // Maximum allowable error between scan and "ideal" scan
+  double max_alignment_error_;
 
-    // The ideal cloud, located at origin of dock frame
-    std::vector<geometry_msgs::Point> ideal_cloud_;
-    // The ideal cloud (when only front is visible)
-    std::vector<geometry_msgs::Point> front_cloud_;
-    */
+  // Publish visualization of which points are detected as dock
+  rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr debug_points_;
+  // The ideal cloud, located at origin of dock frame
+  std::vector<geometry_msgs::msg::Point> ideal_cloud_;
+  // The ideal cloud (when only front is visible)
+  std::vector<geometry_msgs::msg::Point> front_cloud_;
 };
 
 #endif  // LIDAR_AUTO_DOCKING_PERCEPTION_H

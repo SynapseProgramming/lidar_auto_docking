@@ -72,7 +72,7 @@ DockPerception::DockPerception(ros::NodeHandle& nh)
   // Create ideal cloud
   // Front face is 300mm long
   for (double y = -0.15; y <= 0.15; y += 0.001) {
-    geometry_msgs::Point p;
+    geometry_msgs::msg::Point p;
     p.x = p.z = 0.0;
     p.y = y;
     ideal_cloud_.push_back(p);
@@ -80,7 +80,7 @@ DockPerception::DockPerception(ros::NodeHandle& nh)
   }
   // Each side is 100mm long, at 45 degree angle
   for (double x = 0.0; x < 0.05; x += 0.001) {
-    geometry_msgs::Point p;
+    geometry_msgs::msg::Point p;
     p.x = x;
     p.y = 0.15 + x;
     p.z = 0.0;
@@ -359,7 +359,7 @@ DockCandidatePtr DockPerception::extract(laser_processor::SampleSet* cluster) {
   }
 
   // Get distance from cloud center to previous pose
-  geometry_msgs::Point centroid = icp_2d::getCentroid(candidate->points);
+  geometry_msgs::msg::Point centroid = icp_2d::getCentroid(candidate->points);
   double dx = centroid.x - dock_.pose.position.x;
   double dy = centroid.y - dock_.pose.position.y;
   candidate->dist = (dx * dx + dy * dy);
