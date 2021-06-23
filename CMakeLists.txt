@@ -25,10 +25,18 @@ find_package(angles REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(Eigen3 REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(std_msgs REQUIRED)
 
 
 add_executable(perception_test src/perception.cpp src/laser_processor.cpp src/linear_pose_filter_2d.cpp src/icp_2d.cpp)
 ament_target_dependencies(perception_test geometry_msgs tf2 sensor_msgs rclcpp Eigen3 angles)
+
+
+
+
+add_executable(sharedptr_test src/sharedptr_test.cpp )
+ament_target_dependencies(sharedptr_test std_msgs rclcpp  )
+
 
 
 # link header files definition to cpp definition
@@ -59,8 +67,9 @@ install(TARGETS
 #icp_2d_test
 #  linear_pose_filter_2d_test
 #  laser_processor_test
-perception_test 
-  DESTINATION lib/${PROJECT_NAME})	
+perception_test
+sharedptr_test
+  DESTINATION lib/${PROJECT_NAME})
 
 
 if(BUILD_TESTING)
