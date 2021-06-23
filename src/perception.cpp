@@ -447,57 +447,49 @@ double DockPerception::fit(const DockCandidatePtr& candidate,
         transform.rotation.w = yaw_converter.w();
       }
     }
-  }  // remove this bracket later
-  /*
- // If the dock orientation is still really borked, fail.
- tf2::fromMsg(transform.rotation, cand_pose);
- if (!isValid(cand_pose)) {
-   ROS_ERROR_STREAM_NAMED(
-       "perception", "Dock candidate orientation estimate is
-                         invalid."); ROS_DEBUG_STREAM_NAMED( " perception
-                                 ", " Quaternion magnitude is "
-                         << cand_pose.length() << " Orientation is ["
-                         << cand_pose.x() << ", " << cand_pose.y() << ", "
-                         << cand_pose.z() << ", " << cand_pose.w() << "]");
-   return -1.0;
- }
- if (fabs(angles::normalize_angle(
-         tf2::getYaw(tf::inverse(cand_pose) * init_pose))) > 3.1415 / 2.0) {
-   fitness = -1.0;
- }
+    // If the dock orientation is still really borked, fail.
+    tf2::fromMsg(transform.rotation, cand_pose);
+    if (!isValid(cand_pose)) {
+      RCLCPP_ERROR(rclcpp::get_logger("rclcpp"),
+                   "Dock candidate orientation estimate is invalid.");
+      return -1.0;
+    }
+    if (fabs(angles::normalize_angle(
+            tf2::getYaw(cand_pose.inverse() * init_pose))) > 3.1415 / 2.0) {
+      fitness = -1.0;
+    }
 
- // Check that fitness is good enough
- if (!found_dock_ && fabs(fitness) > max_alignment_error_) {
-   // If not, signal no fit
-   fitness = -1.0;
- }
+    // Check that fitness is good enough
+    if (!found_dock_ && fabs(fitness) > max_alignment_error_) {
+      // If not, signal no fit
+      fitness = -1.0;
+    }
 
- // If width of candidate is smaller than the width of dock
- // then the whole dock is not visible...
- if (candidate->width() < 0.375) {
-   // ... and heading is unreliable when close to dock
-   ROS_DEBUG_STREAM_NAMED("perception",
-                          "Dock candidate width is unreliable.");
-   transform.rotation = pose.orientation;
-   fitness = 0.001234;
-   // Probably can use a different algorithm here, if necessary, which it
-   // might not be.
- }
+    // If width of candidate is smaller than the width of dock
+    // then the whole dock is not visible...
+    if (candidate->width() < 0.375) {
+      // ... and heading is unreliable when close to dock
+      RCLCPP_ERROR(rclcpp::get_logger("rclcpp"),
+                   "Dock candidate width is unreliable.");
+      transform.rotation = pose.orientation;
+      fitness = 0.001234;
+      // Probably can use a different algorithm here, if necessary, which it
+      // might not be.
+    }
 
- // Transform ideal cloud, and store for visualization
- candidate->points = icp_2d::transform(
-     ideal_cloud_, transform.translation.x, transform.translation.y,
-     icp_2d::thetaFromQuaternion(transform.rotation));
+    // Transform ideal cloud, and store for visualization
+    candidate->points = icp_2d::transform(
+        ideal_cloud_, transform.translation.x, transform.translation.y,
+        icp_2d::thetaFromQuaternion(transform.rotation));
 
- // Get pose
- pose.position.x = transform.translation.x;
- pose.position.y = transform.translation.y;
- pose.position.z = transform.translation.z;
- pose.orientation = transform.rotation;
+    // Get pose
+    pose.position.x = transform.translation.x;
+    pose.position.y = transform.translation.y;
+    pose.position.z = transform.translation.z;
+    pose.orientation = transform.rotation;
 
- return fitness;
-}
-*/
+    return fitness;
+  }
 
   RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Did not converge");
   return -1.0;
