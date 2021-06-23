@@ -23,6 +23,7 @@
 #include <lidar_auto_docking/laser_processor.h>
 #include <lidar_auto_docking/linear_pose_filter_2d.h>
 #include <tf2/LinearMath/Quaternion.h>
+#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 #include <tf2_ros/transform_listener.h>
 
 #include <deque>
@@ -33,7 +34,6 @@
 #include <sensor_msgs/msg/point_cloud2.hpp>
 #include <string>
 #include <vector>
-
 class DockPerception {
  public:
   //  explicit DockPerception(ros::NodeHandle& nh);
@@ -67,8 +67,9 @@ class DockPerception {
    * @param pose The fitted pose, if successful.
    * @returns Fitness score (>0 if successful)
    */
-  // double fit(const DockCandidatePtr& candidate, geometry_msgs::Pose& pose);
-
+  double fit(const DockCandidatePtr& candidate, geometry_msgs::msg::Pose& pose);
+  // DockCandidatePtr defined as
+  // typedef std::shared_ptr<DockCandidate> DockCandidatePtr;
   /**
    * @brief Method to check if the quaternion is valid.
    * @param q Quaternion to check.

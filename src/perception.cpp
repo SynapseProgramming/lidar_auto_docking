@@ -29,8 +29,8 @@
 #include <string>
 #include <vector>
 /*
-double getPoseDistance(const geometry_msgs::Pose a,
-                       const geometry_msgs::Pose b) {
+double getPoseDistance(const geometry_msgs::msg::Pose a,
+                       const geometry_msgs::msg::Pose b) {
   double dx = a.position.x - b.position.x;
   double dy = a.position.y - b.position.y;
   return sqrt(dx * dx + dy * dy);
@@ -129,9 +129,9 @@ bool DockPerception::getPose(geometry_msgs::PoseStamped& pose,
   }
 
   // Check for a valid orientation.
-  tf::Quaternion q;
+  tf2::Quaternion q;
   // change here
-  tf::quaternionMsgToTF(dock_.pose.orientation, q);
+  tf2::fromMsg(dock_.pose.orientation, q);
   if (!isValid(q)) {
     ROS_ERROR_STREAM_NAMED("perception", "Dock orientation invalid.");
     ROS_DEBUG_STREAM_NAMED("perception", "Quaternion magnitude is "
@@ -230,9 +230,9 @@ void DockPerception::callback(const sensor_msgs::LaserScanConstPtr& scan) {
 
   // Extract ICP pose/fit on best clusters
   DockCandidatePtr best;
-  geometry_msgs::Pose best_pose;
+  geometry_msgs::msg::Pose best_pose;
   while (!candidates.empty()) {
-    geometry_msgs::Pose pose = dock_.pose;
+    geometry_msgs::msg::Pose pose = dock_.pose;
     double score = fit(candidates.top(), pose);
     if (score >= 0) {
       best = candidates.top();
@@ -366,32 +366,28 @@ DockCandidatePtr DockPerception::extract(laser_processor::SampleSet* cluster) {
 
   return candidate;
 }
-
+*/
 double DockPerception::fit(const DockCandidatePtr& candidate,
-                           geometry_msgs::Pose& pose) {
+                           geometry_msgs::msg::Pose& pose) {
   // Setup initial pose
-  geometry_msgs::Transform transform;
+  geometry_msgs::msg::Transform transform;
   transform.translation.x = pose.position.x;
   transform.translation.y = pose.position.y;
   transform.rotation = pose.orientation;
 
   // Initial yaw. Presumably the initial goal orientation estimate.
-  tf::Quaternion init_pose, cand_pose;
-  tf::quaternionMsgToTF(pose.orientation, init_pose);
+  tf2::Quaternion init_pose, cand_pose;
+  tf2::fromMsg(pose.orientation, init_pose);
   if (!isValid(init_pose)) {
-    ROS_ERROR_STREAM_NAMED("perception",
-                           "Initial dock orientation estimate is invalid.");
-    ROS_DEBUG_STREAM_NAMED(
-        "perception", "Quaternion magnitude is "
-                          << init_pose.length() << " Quaternion is ["
-                          << init_pose.x() << ", " << init_pose.y() << ", "
-                          << init_pose.z() << ", " << init_pose.w() << "]");
+    RCLCPP_ERROR(rclcpp::get_logger("rclcpp"),
+                 "Initial dock orientation estimate is invalid.");
     return -1.0;
   }
 
   // ICP the dock
   double fitness = icp_2d::alignICP(ideal_cloud_, candidate->points, transform);
-  tf::quaternionMsgToTF(transform.rotation, cand_pose);
+  tf2::fromMsg(transform.rotation, cand_pose);
+  /*
   if (!isValid(cand_pose)) {
     ROS_WARN_STREAM_NAMED("perception",
                           "Dock candidate orientation estimate is invalid.");
@@ -414,7 +410,7 @@ double DockPerception::fit(const DockCandidatePtr& candidate,
     // Initialize the number of times we retry if the fitness is bad.
     double retry = 5;
     // If the fitness is hosed or the angle is borked, try again.
-    tf::quaternionMsgToTF(transform.rotation, cand_pose);
+    tf2::fromMsg(transform.rotation, cand_pose);
     while (retry-- &&
            (fitness > max_alignment_error_ ||
             fabs(angles::normalize_angle(tf::getYaw(
@@ -434,7 +430,7 @@ double DockPerception::fit(const DockCandidatePtr& candidate,
       fitness = icp_2d::alignICP(ideal_cloud_, candidate->points, transform);
 
       // If the dock orientation seems flipped, flip it.
-      tf::quaternionMsgToTF(transform.rotation, cand_pose);
+      tf2::fromMsg(transform.rotation, cand_pose);
       if (fabs(angles::normalize_angle(tf::getYaw(
               tf::inverse(cand_pose) * init_pose))) > 3.1415 * (2.0 / 3.0)) {
         transform.rotation = tf::createQuaternionMsgFromYaw(
@@ -443,7 +439,7 @@ double DockPerception::fit(const DockCandidatePtr& candidate,
     }
 
     // If the dock orientation is still really borked, fail.
-    tf::quaternionMsgToTF(transform.rotation, cand_pose);
+    tf2::fromMsg(transform.rotation, cand_pose);
     if (!isValid(cand_pose)) {
       ROS_ERROR_STREAM_NAMED("perception",
                              "Dock candidate orientation estimate is invalid.");
@@ -487,16 +483,14 @@ double DockPerception::fit(const DockCandidatePtr& candidate,
     pose.position.y = transform.translation.y;
     pose.position.z = transform.translation.z;
     pose.orientation = transform.rotation;
-    return fitness;
-  }
 
-  // Signal no fit
-  ROS_DEBUG_NAMED("dock_perception", "Did not converge");
-  ROS_INFO_STREAM("Did not converge.");
+  return fitness;
+}
+*/
+
+  RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Did not converge");
   return -1.0;
 }
-
-*/
 
 bool DockPerception::isValid(const tf2::Quaternion& q) {
   return 1e-3 >= fabs(1.0 - q.length());
