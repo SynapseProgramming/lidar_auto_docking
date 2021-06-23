@@ -329,11 +329,13 @@ void DockPerception::callback(const sensor_msgs::LaserScanConstPtr& scan) {
   found_dock_ = true;
 }
 
-DockCandidatePtr DockPerception::extract(laser_processor::SampleSet* cluster) {
-  DockCandidatePtr candidate(new DockCandidate());
 
-  tf::Point tf_point;
-  tf::StampedTransform t_frame;
+DockCandidatePtr DockPerception::extract(laser_processor::SampleSet* cluster) {
+  DockCandidatePtr candidate = std::make_shared<DockCandidate>();
+
+  tf2::Vector3 tf_point;
+  //  tf::StampedTransform t_frame;
+  tf2::Stamped<tf2::Transform> t_frame;
   try {
     listener_.waitForTransform(tracking_frame_, cluster->header.frame_id,
                                cluster->header.stamp, ros::Duration(0.1));

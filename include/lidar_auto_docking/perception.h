@@ -60,6 +60,7 @@ class DockPerception {
    *        lengths and slopes of each line found using ransac.
    * @param cluster The pointer to the cluster to extract from.
    */
+  // TODO: figure out how to write a transform listener first
   // DockCandidatePtr extract(laser_processor::SampleSet* cluster);
 
   /**
