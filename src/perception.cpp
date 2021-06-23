@@ -387,106 +387,107 @@ double DockPerception::fit(const DockCandidatePtr& candidate,
   // ICP the dock
   double fitness = icp_2d::alignICP(ideal_cloud_, candidate->points, transform);
   tf2::fromMsg(transform.rotation, cand_pose);
-  /*
+
   if (!isValid(cand_pose)) {
-    ROS_WARN_STREAM_NAMED("perception",
-                          "Dock candidate orientation estimate is invalid.");
-    ROS_DEBUG_STREAM_NAMED(
-        "perception", "Quaternion magnitude is "
-                          << cand_pose.length() << " Quaternion is ["
-                          << cand_pose.x() << ", " << cand_pose.y() << ", "
-                          << cand_pose.z() << ", " << cand_pose.w() << "]");
+    RCLCPP_ERROR(rclcpp::get_logger("rclcpp"),
+                 "Dock candidate orientation estimate is invalid.");
   }
 
   // If the dock orientation seems flipped, flip it.
   // Check it by finding the relative roation between the two quaternions.
-  if (fabs(angles::normalize_angle(tf::getYaw(
-          tf::inverse(cand_pose) * init_pose))) > 3.1415 * (2.0 / 3.0)) {
-    transform.rotation =
-        tf::createQuaternionMsgFromYaw(3.1415 + tf::getYaw(transform.rotation));
+  if (fabs(angles::normalize_angle(tf2::getYaw(
+          cand_pose.inverse() * init_pose))) > 3.1415 * (2.0 / 3.0)) {
+    double yaw_angle = 3.1415 + tf2::getYaw(transform.rotation);
+    tf2::Quaternion yaw_converter;
+    yaw_converter.setRPY(0, 0, yaw_angle);
+
+    transform.rotation.x = yaw_converter.x();
+    transform.rotation.y = yaw_converter.y();
+    transform.rotation.z = yaw_converter.z();
+    transform.rotation.w = yaw_converter.w();
   }
-
-  if (fitness >= 0.0) {
-    // Initialize the number of times we retry if the fitness is bad.
-    double retry = 5;
-    // If the fitness is hosed or the angle is borked, try again.
-    tf2::fromMsg(transform.rotation, cand_pose);
-    while (retry-- &&
-           (fitness > max_alignment_error_ ||
-            fabs(angles::normalize_angle(tf::getYaw(
-                tf::inverse(cand_pose) * init_pose))) > 3.1415 / 4.0)) {
-      // Try one more time.
-
-      // Perturb the pose to try to get it out of the local minima.
-      transform.translation.x +=
-          retry * (0.75 / 100.0) * static_cast<double>((rand() % 200) - 100);
-      transform.translation.y +=
-          retry * (0.75 / 100.0) * static_cast<double>((rand() % 200) - 100);
-      transform.rotation = tf::createQuaternionMsgFromYaw(
-          retry * (0.28 / 100.0) * double((rand() % 200) - 100) +
-          tf::getYaw(transform.rotation));
-
-      // Rerun ICP.
-      fitness = icp_2d::alignICP(ideal_cloud_, candidate->points, transform);
-
-      // If the dock orientation seems flipped, flip it.
+  /*
+    if (fitness >= 0.0) {
+      // Initialize the number of times we retry if the fitness is bad.
+      double retry = 5;
+      // If the fitness is hosed or the angle is borked, try again.
       tf2::fromMsg(transform.rotation, cand_pose);
-      if (fabs(angles::normalize_angle(tf::getYaw(
-              tf::inverse(cand_pose) * init_pose))) > 3.1415 * (2.0 / 3.0)) {
+      while (retry-- &&
+             (fitness > max_alignment_error_ ||
+              fabs(angles::normalize_angle(tf::getYaw(
+                  tf::inverse(cand_pose) * init_pose))) > 3.1415 / 4.0)) {
+        // Try one more time.
+
+        // Perturb the pose to try to get it out of the local minima.
+        transform.translation.x +=
+            retry * (0.75 / 100.0) * static_cast<double>((rand() % 200) - 100);
+        transform.translation.y +=
+            retry * (0.75 / 100.0) * static_cast<double>((rand() % 200) - 100);
         transform.rotation = tf::createQuaternionMsgFromYaw(
-            3.1415 + tf::getYaw(transform.rotation));
+            retry * (0.28 / 100.0) * double((rand() % 200) - 100) +
+            tf::getYaw(transform.rotation));
+
+        // Rerun ICP.
+        fitness = icp_2d::alignICP(ideal_cloud_, candidate->points, transform);
+
+        // If the dock orientation seems flipped, flip it.
+        tf2::fromMsg(transform.rotation, cand_pose);
+        if (fabs(angles::normalize_angle(tf::getYaw(
+                tf::inverse(cand_pose) * init_pose))) > 3.1415 * (2.0 / 3.0)) {
+          transform.rotation = tf::createQuaternionMsgFromYaw(
+              3.1415 + tf::getYaw(transform.rotation));
+        }
       }
+
+      // If the dock orientation is still really borked, fail.
+      tf2::fromMsg(transform.rotation, cand_pose);
+      if (!isValid(cand_pose)) {
+        ROS_ERROR_STREAM_NAMED(
+            "perception", "Dock candidate orientation estimate is
+                              invalid."); ROS_DEBUG_STREAM_NAMED( " perception
+                                      ", " Quaternion magnitude is "
+                              << cand_pose.length() << " Orientation is ["
+                              << cand_pose.x() << ", " << cand_pose.y() << ", "
+                              << cand_pose.z() << ", " << cand_pose.w() << "]");
+        return -1.0;
+      }
+      if (fabs(angles::normalize_angle(
+              tf::getYaw(tf::inverse(cand_pose) * init_pose))) > 3.1415 / 2.0) {
+        fitness = -1.0;
+      }
+
+      // Check that fitness is good enough
+      if (!found_dock_ && fabs(fitness) > max_alignment_error_) {
+        // If not, signal no fit
+        fitness = -1.0;
+      }
+
+      // If width of candidate is smaller than the width of dock
+      // then the whole dock is not visible...
+      if (candidate->width() < 0.375) {
+        // ... and heading is unreliable when close to dock
+        ROS_DEBUG_STREAM_NAMED("perception",
+                               "Dock candidate width is unreliable.");
+        transform.rotation = pose.orientation;
+        fitness = 0.001234;
+        // Probably can use a different algorithm here, if necessary, which it
+        // might not be.
+      }
+
+      // Transform ideal cloud, and store for visualization
+      candidate->points = icp_2d::transform(
+          ideal_cloud_, transform.translation.x, transform.translation.y,
+          icp_2d::thetaFromQuaternion(transform.rotation));
+
+      // Get pose
+      pose.position.x = transform.translation.x;
+      pose.position.y = transform.translation.y;
+      pose.position.z = transform.translation.z;
+      pose.orientation = transform.rotation;
+
+      return fitness;
     }
-
-    // If the dock orientation is still really borked, fail.
-    tf2::fromMsg(transform.rotation, cand_pose);
-    if (!isValid(cand_pose)) {
-      ROS_ERROR_STREAM_NAMED("perception",
-                             "Dock candidate orientation estimate is invalid.");
-      ROS_DEBUG_STREAM_NAMED(
-          "perception", "Quaternion magnitude is "
-                            << cand_pose.length() << " Orientation is ["
-                            << cand_pose.x() << ", " << cand_pose.y() << ", "
-                            << cand_pose.z() << ", " << cand_pose.w() << "]");
-      return -1.0;
-    }
-    if (fabs(angles::normalize_angle(
-            tf::getYaw(tf::inverse(cand_pose) * init_pose))) > 3.1415 / 2.0) {
-      fitness = -1.0;
-    }
-
-    // Check that fitness is good enough
-    if (!found_dock_ && fabs(fitness) > max_alignment_error_) {
-      // If not, signal no fit
-      fitness = -1.0;
-    }
-
-    // If width of candidate is smaller than the width of dock
-    // then the whole dock is not visible...
-    if (candidate->width() < 0.375) {
-      // ... and heading is unreliable when close to dock
-      ROS_DEBUG_STREAM_NAMED("perception",
-                             "Dock candidate width is unreliable.");
-      transform.rotation = pose.orientation;
-      fitness = 0.001234;
-      // Probably can use a different algorithm here, if necessary, which it
-      // might not be.
-    }
-
-    // Transform ideal cloud, and store for visualization
-    candidate->points = icp_2d::transform(
-        ideal_cloud_, transform.translation.x, transform.translation.y,
-        icp_2d::thetaFromQuaternion(transform.rotation));
-
-    // Get pose
-    pose.position.x = transform.translation.x;
-    pose.position.y = transform.translation.y;
-    pose.position.z = transform.translation.z;
-    pose.orientation = transform.rotation;
-
-  return fitness;
-}
-*/
+    */
 
   RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Did not converge");
   return -1.0;
