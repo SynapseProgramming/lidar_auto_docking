@@ -22,6 +22,7 @@
 #include <lidar_auto_docking/dock_candidate.h>
 #include <lidar_auto_docking/laser_processor.h>
 #include <lidar_auto_docking/linear_pose_filter_2d.h>
+#include <tf2/LinearMath/Quaternion.h>
 #include <tf2_ros/transform_listener.h>
 
 #include <deque>
@@ -73,7 +74,7 @@ class DockPerception {
    * @param q Quaternion to check.
    * @return True if quaternion is valid.
    */
-  // static bool isValid(const tf::Quaternion& q);
+  static bool isValid(const tf2::Quaternion& q);
 
   rclcpp::Subscription<sensor_msgs::msg::LaserScan>::SharedPtr subscription_;
   tf2_ros::TransformListener listener_;

@@ -496,9 +496,10 @@ double DockPerception::fit(const DockCandidatePtr& candidate,
   return -1.0;
 }
 
-bool DockPerception::isValid(const tf::Quaternion& q) {
+*/
+
+bool DockPerception::isValid(const tf2::Quaternion& q) {
   return 1e-3 >= fabs(1.0 - q.length());
 }
-*/
 
 int main() { return 0; }
