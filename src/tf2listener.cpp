@@ -21,5 +21,5 @@ void tf2_listener::waitTransform(std::string source, std::string target) {
     std::cout << "waiting " << warning_msg << "\n";
     rate.sleep();
   }
-  std::cout << "FOUND TRANSFORM";
+  // std::cout << "FOUND TRANSFORM";
 }

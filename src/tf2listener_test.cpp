@@ -28,7 +28,7 @@ class MinimalPublisher : public rclcpp::Node {
 
   void wait_for_transform() {
     obj.waitTransform(origin, destination);
-    // std::cout << "DO STUFF!\n";
+    std::cout << "DO STUFF!\n";
   }
 
  private:
