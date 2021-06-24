@@ -21,24 +21,13 @@ class tf2_listener {
   tf2_listener(rclcpp::Clock::SharedPtr clock) : buffer_(clock), rate(10) {
     tfl_ = std::make_shared<tf2_ros::TransformListener>(buffer_);
   }
-  // init_listener initialises node_ptr_, which allows the class to access node
-  // functions.
-  // also initialises the other members which require node functions
-  // void init_listener(std::shared_ptr<rclcpp::Node> node_ptr);
 
   void waitTransform(std::string source, std::string target);
 
  private:
-  //  std::shared_ptr<tf2_ros::Buffer> buffer_;
   tf2_ros::Buffer buffer_;
   std::shared_ptr<tf2_ros::TransformListener> tfl_;
-  // local node_ptr
-  std::shared_ptr<rclcpp::Node> node_ptr_;
-  //  rclcpp::Clock::SharedPtr clock;
   rclcpp::Rate rate;
-
-  std::string source_frameid;
-  std::string target_frameid;
 };
 
 #endif  // TF2LISTENER_H
