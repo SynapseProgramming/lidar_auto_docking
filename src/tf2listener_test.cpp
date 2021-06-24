@@ -12,7 +12,17 @@ class MinimalPublisher : public rclcpp::Node {
 
   void wait_for_transform() {
     obj.waitTransform(origin, destination);
-    std::cout << "DO STUFF!\n";
+    std::cout << "GOT TRANSFORMATIONS";
+    geometry_msgs::msg::TransformStamped echo_transform;
+    echo_transform = obj.getTransform(origin, destination);
+
+    auto translation = echo_transform.transform.translation;
+    auto rotation = echo_transform.transform.rotation;
+    std::cout << "- Translation: [" << translation.x << ", " << translation.y
+              << ", " << translation.z << "]" << std::endl;
+    std::cout << "- Rotation: in Quaternion [" << rotation.x << ", "
+              << rotation.y << ", " << rotation.z << ", " << rotation.w << "]"
+              << std::endl;
   }
 
  private:

@@ -39,7 +39,7 @@ add_executable(sharedptr_test src/sharedptr_test.cpp )
 ament_target_dependencies(sharedptr_test std_msgs rclcpp  )
 
 add_executable(transforml_test src/tf2listener_test.cpp src/tf2listener.cpp )
-ament_target_dependencies(transforml_test tf2 rclcpp tf2_ros )
+ament_target_dependencies(transforml_test tf2 rclcpp tf2_ros geometry_msgs )
 target_include_directories( transforml_test
   PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>

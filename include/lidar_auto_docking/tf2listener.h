@@ -22,7 +22,10 @@ class tf2_listener {
     tfl_ = std::make_shared<tf2_ros::TransformListener>(buffer_);
   }
 
-  void waitTransform(std::string source, std::string target);
+  void waitTransform(std::string origin, std::string destination);
+
+  geometry_msgs::msg::TransformStamped getTransform(std::string origin,
+                                                    std::string destination);
 
  private:
   tf2_ros::Buffer buffer_;
