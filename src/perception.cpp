@@ -519,7 +519,7 @@ bool DockPerception::isValid(const tf2::Quaternion& q) {
 
 class MinimalPublisher : public rclcpp::Node {
  public:
-  MinimalPublisher() : Node("perception_test") {}
+  MinimalPublisher() : Node("perception_test"), rate(10) {}
 
   // the init_objects function would return a shared_ptr to this class. It will
   // be stored in new_ptr before being passed to
@@ -532,10 +532,32 @@ class MinimalPublisher : public rclcpp::Node {
   // shared_ptr_from_this would return a shared pointer of the current class
   std::shared_ptr<rclcpp::Node> shared_ptr_from_this() {
     return shared_from_this();
+    init_dock_pose.header.frame_id = "base_link";
+  }
+
+  void main_test() {
+    perception_ptr->start(init_dock_pose);
+    while (rclcpp::ok() && !perception_ptr->getPose(dock_pose, "base_link")) {
+      perception_ptr->start(init_dock_pose);
+      std::cout << "still finding dock!\n";
+      rate.sleep();
+    }
+    std::cout << "FOUND DOCK!\n";
+    while (rclcpp::ok()) {
+      std::cout << "wrt map ";
+      std::cout << "x: " << dock_pose.pose.position.x
+                << " y: " << dock_pose.pose.position.y;
+      std::cout << " z: " << dock_pose.pose.orientation.z
+                << " w: " << dock_pose.pose.orientation.w << "\n";
+      rate.sleep();
+    }
   }
 
  private:
   std::shared_ptr<DockPerception> perception_ptr;
+  geometry_msgs::msg::PoseStamped dock_pose;
+  geometry_msgs::msg::PoseStamped init_dock_pose;
+  rclcpp::Rate rate;
 };
 
 int main(int argc, char* argv[]) {
@@ -544,7 +566,7 @@ int main(int argc, char* argv[]) {
       std::make_shared<MinimalPublisher>();
 
   min_ptr->init_objects();
-
+  min_ptr->main_test();
   rclcpp::spin(min_ptr);
   rclcpp::shutdown();
   return 0;
