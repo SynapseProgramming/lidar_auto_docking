@@ -20,8 +20,6 @@ class SepPublisher {
       // create string obj.
       auto message = std_msgs::msg::Int32();
       message.data = this->count;
-      //  RCLCPP_INFO(main_ptr_->get_logger(), "Publishing: '%d'",
-      //  message.data);
 
       std::cout << "Sep Class : " << message.data << "\n";
       // publish message
@@ -29,9 +27,6 @@ class SepPublisher {
       this->count += 10;
     });
   }
-
-  // This function would initialise
-  // void init_node(std::shared_ptr<rclcpp::Node> main_ptr) {}
 
  private:
   int count = 0;
@@ -51,7 +46,6 @@ class MinimalPublisher : public rclcpp::Node {
       // create string obj.
       auto message = std_msgs::msg::Int32();
       message.data = this->count;
-      //  RCLCPP_INFO(this->get_logger(), "Publishing: '%d'", message.data);
       std::cout << "main class: " << message.data << "\n";
       // publish message
       publisher_->publish(message);
@@ -78,7 +72,6 @@ class MinimalPublisher : public rclcpp::Node {
   rclcpp::TimerBase::SharedPtr timer_;
   rclcpp::Publisher<std_msgs::msg::Int32>::SharedPtr publisher_;
   std::shared_ptr<SepPublisher> obj_ptr;
-  // SepPublisher obj;
 };
 
 int main(int argc, char* argv[]) {
