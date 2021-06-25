@@ -99,7 +99,6 @@ found_dock_(false),listener_(nodeptr->get_clock()) { ros::NodeHandle pnh("~");
 }
 */
 
-/*
 bool DockPerception::start(const geometry_msgs::msg::PoseStamped& pose) {
   running_ = false;
   found_dock_ = false;
@@ -107,7 +106,7 @@ bool DockPerception::start(const geometry_msgs::msg::PoseStamped& pose) {
   running_ = true;
   return true;
 }
-*/
+
 bool DockPerception::stop() {
   running_ = false;
   return true;

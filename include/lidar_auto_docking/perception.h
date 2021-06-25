@@ -49,7 +49,7 @@ class DockPerception {
    * @brief Start dock detection.
    * @param pose The initial estimate of dock pose
    */
-  // bool start(const geometry_msgs::msg::PoseStamped& pose);
+  bool start(const geometry_msgs::msg::PoseStamped& pose);
 
   /** @brief Stop tracking the dock. */
   bool stop();
