@@ -39,8 +39,8 @@ double getPoseDistance(const geometry_msgs::msg::Pose a,
 
 /*
 DockPerception::DockPerception(ros::NodeHandle& nh)
-    : running_(false), tracking_frame_("odom"), found_dock_(false) {
-  ros::NodeHandle pnh("~");
+    : running_(false), tracking_frame_("odom"),
+found_dock_(false),listener_(nodeptr->get_clock()) { ros::NodeHandle pnh("~");
   debug_ = true;
 
   // enable debugging for first time test
@@ -328,35 +328,39 @@ void DockPerception::callback(const sensor_msgs::LaserScanConstPtr& scan) {
   dock_stamp_ = scan->header.stamp;
   found_dock_ = true;
 }
-
+*/
 
 DockCandidatePtr DockPerception::extract(laser_processor::SampleSet* cluster) {
   DockCandidatePtr candidate = std::make_shared<DockCandidate>();
 
   tf2::Vector3 tf_point;
   //  tf::StampedTransform t_frame;
-  tf2::Stamped<tf2::Transform> t_frame;
+  // tf2::Stamped<tf2::Transform> t_frame;
+  geometry_msgs::msg::TransformStamped t_frame;
+  tf2::Stamped<tf2::Transform> tf2_t_frame;
   try {
-    listener_.waitForTransform(tracking_frame_, cluster->header.frame_id,
-                               cluster->header.stamp, ros::Duration(0.1));
-    listener_.lookupTransform(tracking_frame_, cluster->header.frame_id,
-                              ros::Time(0), t_frame);
-  } catch (tf::TransformException const& ex) {
-    ROS_WARN_STREAM_THROTTLE(1.0, "Couldn't transform laser point");
+    listener_.waitTransform(tracking_frame_, cluster->header.frame_id);
+
+    t_frame = listener_.getTransform(tracking_frame_, cluster->header.frame_id);
+  } catch (const tf2::TransformException& ex) {
+    //  ROS_WARN_STREAM_THROTTLE(1.0, "Couldn't transform laser point");
+    std::cout << "ERROR. COULD NOT TRANSFORM POINT\n";
     return candidate;
   }
   // Transform each point into tracking frame
   size_t i = 0;
   for (laser_processor::SampleSet::iterator p = cluster->begin();
        p != cluster->end(); p++, i++) {
-    geometry_msgs::PointStamped pt;
+    geometry_msgs::msg::PointStamped pt;
     pt.header = cluster->header;
-    pt.point.x = (*p)->x;
-    pt.point.y = (*p)->y;
+
+    tf2::fromMsg(t_frame, tf2_t_frame);
+    tf2::Vector3 tf2_point((*p)->x, (*p)->y, 0);
+    // apply transform operation
+    tf2_point = tf2_t_frame * tf2_point;
+    pt.point.x = tf2_point.getX();
+    pt.point.y = tf2_point.getY();
     pt.point.z = 0;
-    tf::pointMsgToTF(pt.point, tf_point);
-    tf_point = t_frame * tf_point;
-    tf::pointTFToMsg(tf_point, pt.point);
     candidate->points.push_back(pt.point);
   }
 
@@ -368,7 +372,7 @@ DockCandidatePtr DockPerception::extract(laser_processor::SampleSet* cluster) {
 
   return candidate;
 }
-*/
+
 double DockPerception::fit(const DockCandidatePtr& candidate,
                            geometry_msgs::msg::Pose& pose) {
   // Setup initial pose

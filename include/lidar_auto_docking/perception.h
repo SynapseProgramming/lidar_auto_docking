@@ -23,11 +23,14 @@
 #include <lidar_auto_docking/laser_processor.h>
 #include <lidar_auto_docking/linear_pose_filter_2d.h>
 #include <tf2/LinearMath/Quaternion.h>
+#include <tf2/impl/convert.h>
+#include <tf2/transform_datatypes.h>
 #include <tf2/utils.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 #include <tf2_ros/transform_listener.h>
 
 #include <deque>
+#include <geometry_msgs/msg/point.hpp>
 #include <geometry_msgs/msg/pose_stamped.hpp>
 #include <mutex>
 #include <rclcpp/rclcpp.hpp>
@@ -35,6 +38,9 @@
 #include <sensor_msgs/msg/point_cloud2.hpp>
 #include <string>
 #include <vector>
+
+#include "lidar_auto_docking/tf2listener.h"
+
 class DockPerception {
  public:
   //  explicit DockPerception(ros::NodeHandle& nh);
@@ -61,7 +67,7 @@ class DockPerception {
    * @param cluster The pointer to the cluster to extract from.
    */
   // TODO: figure out how to write a transform listener first
-  // DockCandidatePtr extract(laser_processor::SampleSet* cluster);
+  DockCandidatePtr extract(laser_processor::SampleSet* cluster);
 
   /**
    * @brief Try to fit a dock to candidate
@@ -80,7 +86,7 @@ class DockPerception {
   static bool isValid(const tf2::Quaternion& q);
 
   rclcpp::Subscription<sensor_msgs::msg::LaserScan>::SharedPtr subscription_;
-  tf2_ros::TransformListener listener_;
+  tf2_listener listener_;
 
   bool running_;  // Should we be trying to find the dock
   bool debug_;    // Should we output debugging info
