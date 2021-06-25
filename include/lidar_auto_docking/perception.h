@@ -49,13 +49,13 @@ class DockPerception {
    * @brief Start dock detection.
    * @param pose The initial estimate of dock pose
    */
-  // bool start(const geometry_msgs::PoseStamped& pose);
+  // bool start(const geometry_msgs::msg::PoseStamped& pose);
 
   /** @brief Stop tracking the dock. */
   // bool stop();
 
   /** @brief Get the pose of the dock. */
-  // bool getPose(geometry_msgs::PoseStamped& pose, std::string frame = "");
+  bool getPose(geometry_msgs::msg::PoseStamped& pose, std::string frame = "");
 
  private:
   /** @brief Callback to process laser scans */

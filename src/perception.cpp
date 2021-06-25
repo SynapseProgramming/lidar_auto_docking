@@ -100,7 +100,7 @@ found_dock_(false),listener_(nodeptr->get_clock()) { ros::NodeHandle pnh("~");
 */
 
 /*
-bool DockPerception::start(const geometry_msgs::PoseStamped& pose) {
+bool DockPerception::start(const geometry_msgs::msg::PoseStamped& pose) {
   running_ = false;
   found_dock_ = false;
   dock_ = pose;
@@ -112,30 +112,34 @@ bool DockPerception::stop() {
   running_ = false;
   return true;
 }
-
-bool DockPerception::getPose(geometry_msgs::PoseStamped& pose,
+*/
+bool DockPerception::getPose(geometry_msgs::msg::PoseStamped& pose,
                              std::string frame) {
   // All of this requires a lock on the dock_
-  boost::mutex::scoped_lock lock(dock_mutex_);
+  // boost::mutex::scoped_lock lock(dock_mutex_);
+  std::lock_guard<std::mutex> lock(dock_mutex_);
 
   if (!found_dock_) {
     return false;
   }
+  // TODO: add in timeout function.
+  /*
   if (ros::Time::now() > dock_stamp_ + ros::Duration(0.35)) {
     ROS_DEBUG_NAMED("dock_perception", "Dock pose timed out");
     return false;
   }
-
+*/
   // Check for a valid orientation.
   tf2::Quaternion q;
   // change here
   tf2::fromMsg(dock_.pose.orientation, q);
   if (!isValid(q)) {
-    ROS_ERROR_STREAM_NAMED("perception", "Dock orientation invalid.");
-    ROS_DEBUG_STREAM_NAMED("perception", "Quaternion magnitude is "
-                                             << q.length() << " Quaternion is ["
-                                             << q.x() << ", " << q.y() << ", "
-                                             << q.z() << ", " << q.w() << "]");
+    std::cout << "Dock orientation invalid.\n";
+    //  ROS_DEBUG_STREAM_NAMED("perception", "Quaternion magnitude is "
+    //                                         << q.length() << " Quaternion is
+    //                                         ["
+    //                                       << q.x() << ", " << q.y() << ", "
+    //                                     << q.z() << ", " << q.w() << "]");
     return false;
   }
 
@@ -144,18 +148,17 @@ bool DockPerception::getPose(geometry_msgs::PoseStamped& pose,
   if (frame != "") {
     // Transform to desired frame
     try {
-      listener_.waitForTransform(frame, pose.header.frame_id, pose.header.stamp,
-                                 ros::Duration(0.1));
+      listener_.waitTransform(frame, pose.header.frame_id);
       listener_.transformPose(frame, pose, pose);
-    } catch (tf::TransformException const& ex) {
-      ROS_WARN_STREAM_THROTTLE(1.0, "Couldn't transform dock pose");
+    } catch (const tf2::TransformException& ex) {
+      std::cout << "Couldn't transform dock pose\n";
       return false;
     }
   }
 
   return found_dock_;
 }
-*/
+
 void DockPerception::callback(
     const sensor_msgs::msg::LaserScan::SharedPtr scan) {
   // Be lazy about search
