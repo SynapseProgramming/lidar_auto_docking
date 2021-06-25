@@ -517,4 +517,35 @@ bool DockPerception::isValid(const tf2::Quaternion& q) {
   return 1e-3 >= fabs(1.0 - q.length());
 }
 
-int main() { return 0; }
+class MinimalPublisher : public rclcpp::Node {
+ public:
+  MinimalPublisher() : Node("perception_test") {}
+
+  // the init_objects function would return a shared_ptr to this class. It will
+  // be stored in new_ptr before being passed to
+  // the init_node function of Sepclass to initialise its memeber functions.
+  void init_objects() {
+    std::shared_ptr<rclcpp::Node> new_ptr = shared_ptr_from_this();
+    perception_ptr = std::make_shared<DockPerception>(new_ptr);
+  }
+
+  // shared_ptr_from_this would return a shared pointer of the current class
+  std::shared_ptr<rclcpp::Node> shared_ptr_from_this() {
+    return shared_from_this();
+  }
+
+ private:
+  std::shared_ptr<DockPerception> perception_ptr;
+};
+
+int main(int argc, char* argv[]) {
+  rclcpp::init(argc, argv);
+  std::shared_ptr<MinimalPublisher> min_ptr =
+      std::make_shared<MinimalPublisher>();
+
+  min_ptr->init_objects();
+
+  rclcpp::spin(min_ptr);
+  rclcpp::shutdown();
+  return 0;
+}
