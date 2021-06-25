@@ -30,6 +30,7 @@
 #include <tf2_ros/transform_listener.h>
 
 #include <deque>
+#include <functional>
 #include <geometry_msgs/msg/point.hpp>
 #include <geometry_msgs/msg/pose_stamped.hpp>
 #include <mutex>
@@ -40,10 +41,11 @@
 #include <vector>
 
 #include "lidar_auto_docking/tf2listener.h"
+using std::placeholders::_1;
 
 class DockPerception {
  public:
-  //  explicit DockPerception(ros::NodeHandle& nh);
+  explicit DockPerception(std::shared_ptr<rclcpp::Node> node_ptr);
 
   /**
    * @brief Start dock detection.
@@ -84,7 +86,7 @@ class DockPerception {
    */
   static bool isValid(const tf2::Quaternion& q);
 
-  rclcpp::Subscription<sensor_msgs::msg::LaserScan>::SharedPtr subscription_;
+  rclcpp::Subscription<sensor_msgs::msg::LaserScan>::SharedPtr scan_sub_;
   tf2_listener listener_;
 
   bool running_;  // Should we be trying to find the dock
@@ -106,6 +108,8 @@ class DockPerception {
   rclcpp::Time dock_stamp_;
   // Maximum allowable error between scan and "ideal" scan
   double max_alignment_error_;
+  // local version of node_ptr_
+  std::shared_ptr<rclcpp::Node> node_ptr_;
 
   // Publish visualization of which points are detected as dock
   rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr debug_points_;

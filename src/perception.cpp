@@ -34,11 +34,13 @@ double getPoseDistance(const geometry_msgs::msg::Pose a,
   return sqrt(dx * dx + dy * dy);
 }
 
-/*
-DockPerception::DockPerception(ros::NodeHandle& nh)
-    : running_(false), tracking_frame_("odom"),
-found_dock_(false),listener_(nodeptr->get_clock()) { ros::NodeHandle pnh("~");
-  debug_ = true;
+DockPerception::DockPerception(std::shared_ptr<rclcpp::Node> node_ptr)
+    : listener_(node_ptr->get_clock()),
+      running_(false),
+      tracking_frame_("odom"),
+      found_dock_(false) {
+  node_ptr_ = node_ptr;
+  debug_ = false;
 
   // enable debugging for first time test
   // Should we publish the debugging cloud
@@ -62,9 +64,8 @@ found_dock_(false),listener_(nodeptr->get_clock()) { ros::NodeHandle pnh("~");
   // Limit the average reprojection error of points onto
   // the ideal dock. This prevents the robot docking
   // with something that is very un-dock-like.
-  if (!pnh.getParam("max_alignment_error", max_alignment_error_)) {
-    max_alignment_error_ = 0.01;
-  }
+  // TODO: parameterize (maybe)
+  max_alignment_error_ = 0.01;
 
   // Create ideal cloud
   // Front face is 300mm long
@@ -85,19 +86,20 @@ found_dock_(false),listener_(nodeptr->get_clock()) { ros::NodeHandle pnh("~");
     p.y = -0.15 - x;
     ideal_cloud_.insert(ideal_cloud_.begin(), p);
   }
-
-  // Debugging publishers first
-  if (debug_) {
-    debug_points_ = nh.advertise<sensor_msgs::msg::PointCloud2>("dock_points",
-10);
-  }
-
+  /*
+    // Debugging publishers first
+    if (debug_) {
+      debug_points_ =
+          nh.advertise<sensor_msgs::msg::PointCloud2>("dock_points", 10);
+    }
+  */
+  // TODO: figure out callback function
   // Init base scan only after publishers are created
-  scan_sub_ = nh.subscribe("base_scan", 1, &DockPerception::callback, this);
-
-  ROS_INFO_NAMED("perception", "Dock perception initialized");
+  //  scan_sub_ = nh.subscribe("base_scan", 1, &DockPerception::callback, this);
+  scan_sub_ = node_ptr_->create_subscription<sensor_msgs::msg::LaserScan>(
+      "scan", 10, std::bind(&DockPerception::callback, this, _1));
+  std::cout << "Dock perception initialized\n";
 }
-*/
 
 bool DockPerception::start(const geometry_msgs::msg::PoseStamped& pose) {
   running_ = false;
