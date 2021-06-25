@@ -107,12 +107,12 @@ bool DockPerception::start(const geometry_msgs::msg::PoseStamped& pose) {
   running_ = true;
   return true;
 }
-
+*/
 bool DockPerception::stop() {
   running_ = false;
   return true;
 }
-*/
+
 bool DockPerception::getPose(geometry_msgs::msg::PoseStamped& pose,
                              std::string frame) {
   // All of this requires a lock on the dock_

@@ -52,7 +52,7 @@ class DockPerception {
   // bool start(const geometry_msgs::msg::PoseStamped& pose);
 
   /** @brief Stop tracking the dock. */
-  // bool stop();
+  bool stop();
 
   /** @brief Get the pose of the dock. */
   bool getPose(geometry_msgs::msg::PoseStamped& pose, std::string frame = "");
