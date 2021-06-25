@@ -190,31 +190,26 @@ void DockPerception::callback(
       }
     }
   }
-  /*
-    // Make sure goal is in the tracking frame
-    if (dock_.header.frame_id != tracking_frame_) {
-      // boost::mutex::scoped_lock lock(dock_mutex_);
-      try {
+
+  // Make sure goal is in the tracking frame
+  if (dock_.header.frame_id != tracking_frame_) {
+    // boost::mutex::scoped_lock lock(dock_mutex_);
+    try {
       // wait for the transform between the frame the dock is currently
-    referenced to and the main reference frame
-        listener_.waitTransform(tracking_frame_, dock_->header.frame_id);
-        //  listener_.waitForTransform(tracking_frame_, dock_.header.frame_id,
-        //                           dock_.header.stamp, ros::Duration(0.1));
-        // TODO: implement and test tf2::buffer_transform first
-        t_frame =
-            listener_.getTransform(tracking_frame_, cluster->header.frame_id);
-        listener_.transformPose(tracking_frame_, dock_, dock_);
-      } catch (tf::TransformException const& ex) {
-        ROS_WARN_STREAM_THROTTLE(
-            1.0, "Couldn't transform dock pose to tracking frame");
-        return;
-      }
-      ROS_DEBUG_NAMED("dock_perception",
-                      "Transformed initial pose to (%f, %f, %f)",
-                      dock_.pose.position.x, dock_.pose.position.y,
-                      icp_2d::thetaFromQuaternion(dock_.pose.orientation));
+      // referenced to and the main reference frame
+      listener_.waitTransform(tracking_frame_, dock_.header.frame_id);
+
+      listener_.transformPose(tracking_frame_, dock_, dock_);
+    } catch (const tf2::TransformException& ex) {
+      std::cout << "Couldn't transform dock pose to tracking frame";
+      return;
     }
-    */
+    // ROS_DEBUG_NAMED("dock_perception",
+    //              "Transformed initial pose to (%f, %f, %f)",
+    //            dock_.pose.position.x, dock_.pose.position.y,
+    //          icp_2d::thetaFromQuaternion(dock_.pose.orientation));
+  }
+
   /*
       // Cluster the laser scan
       laser_processor::ScanMask mask;
