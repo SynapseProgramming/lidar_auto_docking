@@ -19,6 +19,7 @@
 #include <lidar_auto_docking/icp_2d.h>
 #include <lidar_auto_docking/perception.h>
 
+#include <chrono>
 #include <iostream>
 #include <list>
 #include <queue>
@@ -26,7 +27,7 @@
 #include <sensor_msgs/point_cloud2_iterator.hpp>
 #include <string>
 #include <vector>
-
+using namespace std::chrono_literals;
 double getPoseDistance(const geometry_msgs::msg::Pose a,
                        const geometry_msgs::msg::Pose b) {
   double dx = a.position.x - b.position.x;
@@ -123,6 +124,7 @@ bool DockPerception::getPose(geometry_msgs::msg::PoseStamped& pose,
   if (!found_dock_) {
     return false;
   }
+
   // TODO: add in timeout function.
   /*
   if (ros::Time::now() > dock_stamp_ + ros::Duration(0.35)) {
@@ -173,7 +175,7 @@ void DockPerception::callback(
       (dock_.pose.orientation.z == 0.0 && dock_.pose.orientation.w == 0.0)) {
     // Lock the dock_
     //  boost::mutex::scoped_lock lock(dock_mutex_);
-
+    //  std::cout << "LASER CALLBACK RUNNING\n";
     // dock_ is of type geometry_msgs::msg::PoseStamped
     // If goal is invalid, set to a point directly ahead of robot
     for (size_t i = scan->ranges.size() / 2; i < scan->ranges.size(); i++) {
@@ -244,6 +246,7 @@ void DockPerception::callback(
     geometry_msgs::msg::Pose pose = dock_.pose;
     double score = fit(candidates.top(), pose);
     if (score >= 0) {
+      //  std::cout << "THERE IS SOME SCORE! " << score << "\n";
       best = candidates.top();
       best_pose = pose;
       break;
@@ -279,14 +282,21 @@ void DockPerception::callback(
         */
     candidates.pop();
   }
-
+  // std::cout << "best test: " << best << "\n";
   // Did we find dock?
-  if (!best) {
-    std::cout << "DID NOT FIND THE DOCK!\n";
+  if (best.use_count() == 0) {
+    std::mutex dock_mutex_;
+    // If true, then dock_ is based on actual sensor data
+    bool found_dock_;
+
+    // Last time that dock pose was updated
+    rclcpp::Time dock_stamp_;
+    // Maximum allowable error between scan and "ideal" scan
+    //  std::cout << "DID NOT FIND THE DOCK!\n";
     return;
   }
 
-  std::cout << "Found the dock!\n";
+  // std::cout << "Found the dock!\n";
   /*
    // Update
    if (debug_) {
@@ -322,6 +332,7 @@ void DockPerception::callback(
 
   // If this is the first time we've found dock, take whole pose
   if (!found_dock_) {
+    //  std::cout << "ACTUALLY FOUND DOCKU\n";
     dock_.pose = best_pose;
     // Reset the dock pose filter.
     dock_pose_filter_->reset();
@@ -469,7 +480,7 @@ double DockPerception::fit(const DockCandidatePtr& candidate,
     tf2::fromMsg(transform.rotation, cand_pose);
     if (!isValid(cand_pose)) {
       RCLCPP_ERROR(rclcpp::get_logger("rclcpp"),
-                   "Dock candidate orientation estimate is invalid.");
+                   "Dock SampleSetcandidate orientation estimate is invalid.");
       return -1.0;
     }
     if (fabs(angles::normalize_angle(
@@ -485,10 +496,11 @@ double DockPerception::fit(const DockCandidatePtr& candidate,
 
     // If width of candidate is smaller than the width of dock
     // then the whole dock is not visible...
+    //  std::cout << "WIDTHH" << candidate->width() << "\n";
     if (candidate->width() < 0.375) {
       // ... and heading is unreliable when close to dock
-      RCLCPP_ERROR(rclcpp::get_logger("rclcpp"),
-                   "Dock candidate width is unreliable.");
+      //  RCLCPP_ERROR(rclcpp::get_logger("rclcpp"),
+      //             "Dock candidate width is unreliable.");
       transform.rotation = pose.orientation;
       fitness = 0.001234;
       // Probably can use a different algorithm here, if necessary, which it
@@ -527,36 +539,59 @@ class MinimalPublisher : public rclcpp::Node {
   void init_objects() {
     std::shared_ptr<rclcpp::Node> new_ptr = shared_ptr_from_this();
     perception_ptr = std::make_shared<DockPerception>(new_ptr);
+    perception_ptr->start(init_dock_pose);
   }
 
   // shared_ptr_from_this would return a shared pointer of the current class
   std::shared_ptr<rclcpp::Node> shared_ptr_from_this() {
     return shared_from_this();
+    perception_ptr->start(init_dock_pose);
     init_dock_pose.header.frame_id = "base_link";
   }
 
   void main_test() {
-    perception_ptr->start(init_dock_pose);
-    while (rclcpp::ok() && !perception_ptr->getPose(dock_pose, "base_link")) {
-      perception_ptr->start(init_dock_pose);
-      std::cout << "still finding dock!\n";
-      rate.sleep();
-    }
-    std::cout << "FOUND DOCK!\n";
-    while (rclcpp::ok()) {
-      std::cout << "wrt map ";
-      std::cout << "x: " << dock_pose.pose.position.x
-                << " y: " << dock_pose.pose.position.y;
-      std::cout << " z: " << dock_pose.pose.orientation.z
-                << " w: " << dock_pose.pose.orientation.w << "\n";
-      rate.sleep();
-    }
+    //  perception_ptr->start(init_dock_pose);
+    timer_ = this->create_wall_timer(50ms, [this]() {
+      if (this->perception_ptr->getPose(this->dock_pose, "base_link") ==
+              false &&
+          this->found_dockk == false) {
+        std::cout << "still finding dock!\n";
+
+        this->perception_ptr->start(this->init_dock_pose);
+
+      } else {
+        this->found_dockk = true;
+        // std::cout << "FOUND DOCK!\n";
+        this->perception_ptr->getPose(this->dock_pose, "base_link");
+        std::cout << "wrt base_link";
+        std::cout << "x: " << this->dock_pose.pose.position.x
+                  << " y: " << this->dock_pose.pose.position.y;
+        std::cout << " z: " << this->dock_pose.pose.orientation.z
+                  << " w: " << this->dock_pose.pose.orientation.w << "\n";
+      }
+    });
+    /*
+        while (rclcpp::ok() && !perception_ptr->getPose(dock_pose, "base_link"))
+       { rate.sleep();
+        }
+        std::cout << "FOUND DOCK!\n";
+        while (rclcpp::ok()) {
+          std::cout << "wrt map ";
+          std::cout << "x: " << dock_pose.pose.position.x
+                    << " y: " << dock_pose.pose.position.y;
+          std::cout << " z: " << dock_pose.pose.orientation.z
+                    << " w: " << dock_pose.pose.orientation.w << "\n";
+          rate.sleep();
+        }
+        */
   }
 
  private:
   std::shared_ptr<DockPerception> perception_ptr;
   geometry_msgs::msg::PoseStamped dock_pose;
   geometry_msgs::msg::PoseStamped init_dock_pose;
+  bool found_dockk = false;
+  rclcpp::TimerBase::SharedPtr timer_;
   rclcpp::Rate rate;
 };
 

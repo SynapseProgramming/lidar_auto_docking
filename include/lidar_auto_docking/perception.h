@@ -104,6 +104,7 @@ class DockPerception {
   std::mutex dock_mutex_;
   // If true, then dock_ is based on actual sensor data
   bool found_dock_;
+
   // Last time that dock pose was updated
   rclcpp::Time dock_stamp_;
   // Maximum allowable error between scan and "ideal" scan
