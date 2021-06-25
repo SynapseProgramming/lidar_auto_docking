@@ -26,14 +26,13 @@
 #include <sensor_msgs/point_cloud2_iterator.hpp>
 #include <string>
 #include <vector>
-/*
+
 double getPoseDistance(const geometry_msgs::msg::Pose a,
                        const geometry_msgs::msg::Pose b) {
   double dx = a.position.x - b.position.x;
   double dy = a.position.y - b.position.y;
   return sqrt(dx * dx + dy * dy);
 }
-*/
 
 /*
 DockPerception::DockPerception(ros::NodeHandle& nh)
@@ -89,7 +88,8 @@ found_dock_(false),listener_(nodeptr->get_clock()) { ros::NodeHandle pnh("~");
 
   // Debugging publishers first
   if (debug_) {
-    debug_points_ = nh.advertise<sensor_msgs::PointCloud2>("dock_points", 10);
+    debug_points_ = nh.advertise<sensor_msgs::msg::PointCloud2>("dock_points",
+10);
   }
 
   // Init base scan only after publishers are created
@@ -204,51 +204,54 @@ void DockPerception::callback(
       std::cout << "Couldn't transform dock pose to tracking frame";
       return;
     }
+    // TODO: Add in ROS2 debug info
     // ROS_DEBUG_NAMED("dock_perception",
     //              "Transformed initial pose to (%f, %f, %f)",
     //            dock_.pose.position.x, dock_.pose.position.y,
     //          icp_2d::thetaFromQuaternion(dock_.pose.orientation));
   }
 
-  /*
-      // Cluster the laser scan
-      laser_processor::ScanMask mask;
-      laser_processor::ScanProcessor processor(*scan, mask);
-      processor.splitConnected(0.04);  // TODO(enhancement) parameterize
-      processor.removeLessThan(5);
+  // Cluster the laser scan
+  laser_processor::ScanMask mask;
+  laser_processor::ScanProcessor processor(*scan, mask);
+  processor.splitConnected(0.04);  // TODO(enhancement) parameterize
+  processor.removeLessThan(5);
 
-      // Sort clusters based on distance to last dock
-      std::priority_queue<DockCandidatePtr, std::vector<DockCandidatePtr>,
-                          CompareCandidates>
-          candidates;
-      for (std::list<laser_processor::SampleSet*>::iterator i =
-               processor.getClusters().begin();
-           i != processor.getClusters().end(); i++) {
-        DockCandidatePtr c = extract(*i);
-        if (c && c->valid(found_dock_)) {
-          candidates.push(c);
-        }
-      }
-      ROS_DEBUG_STREAM_NAMED("dock_perception",
-                             "Extracted " << candidates.size() << " clusters");
+  // Sort clusters based on distance to last dock
+  std::priority_queue<DockCandidatePtr, std::vector<DockCandidatePtr>,
+                      CompareCandidates>
+      candidates;
+  for (std::list<laser_processor::SampleSet*>::iterator i =
+           processor.getClusters().begin();
+       i != processor.getClusters().end(); i++) {
+    DockCandidatePtr c = extract(*i);
+    if (c && c->valid(found_dock_)) {
+      candidates.push(c);
+    }
+  }
+  // TODO: ADD DEBUG STREAM
+  // ROS_DEBUG_STREAM_NAMED("dock_perception",
+  //                     "Extracted " << candidates.size() << " clusters");
 
-      // Extract ICP pose/fit on best clusters
-      DockCandidatePtr best;
-      geometry_msgs::msg::Pose best_pose;
-      while (!candidates.empty()) {
-        geometry_msgs::msg::Pose pose = dock_.pose;
-        double score = fit(candidates.top(), pose);
-        if (score >= 0) {
-          best = candidates.top();
-          best_pose = pose;
-          break;
-        } else  // Let's see what's wrong with this point cloud.
+  // Extract ICP pose/fit on best clusters
+  DockCandidatePtr best;
+  geometry_msgs::msg::Pose best_pose;
+  while (!candidates.empty()) {
+    geometry_msgs::msg::Pose pose = dock_.pose;
+    double score = fit(candidates.top(), pose);
+    if (score >= 0) {
+      best = candidates.top();
+      best_pose = pose;
+      break;
+    }
+    /*  TODO: Add in pointcloud visualisation feature in ros2
+         else  // Let's see what's wrong with this point cloud.
         {
           if (debug_) {
             DockCandidatePtr not_best = candidates.top();
 
             // Create point cloud
-            sensor_msgs::PointCloud2 cloud;
+            sensor_msgs::msg::PointCloud2 cloud;
             cloud.header.stamp = scan->header.stamp;
             cloud.header.frame_id = tracking_frame_;
             cloud.width = cloud.height = 0;
@@ -269,69 +272,70 @@ void DockPerception::callback(
             debug_points_.publish(cloud);
           }
         }
-        candidates.pop();
-      }
+        */
+    candidates.pop();
+  }
 
-      // Did we find dock?
-      if (!best) {
-        ROS_DEBUG_NAMED("dock_perception", "DID NOT FIND THE DOCK");
-        return;
-      }
+  // Did we find dock?
+  if (!best) {
+    std::cout << "DID NOT FIND THE DOCK!\n";
+    return;
+  }
 
-      ROS_DEBUG_NAMED("dock_perception", "Found the dock.");
+  std::cout << "Found the dock!\n";
+  /*
+   // Update
+   if (debug_) {
+     // Create point cloud
+     sensor_msgs::msg::PointCloud2 cloud;
+     cloud.header.stamp = scan->header.stamp;
+     cloud.header.frame_id = tracking_frame_;
+     cloud.width = cloud.height = 0;
 
-      // Update
-      if (debug_) {
-        // Create point cloud
-        sensor_msgs::PointCloud2 cloud;
-        cloud.header.stamp = scan->header.stamp;
-        cloud.header.frame_id = tracking_frame_;
-        cloud.width = cloud.height = 0;
+     // Allocate space for points
+     sensor_msgs::PointCloud2Modifier cloud_mod(cloud);
+     cloud_mod.setPointCloud2FieldsByString(1, "xyz");
+     cloud_mod.resize(best->points.size());
 
-        // Allocate space for points
-        sensor_msgs::PointCloud2Modifier cloud_mod(cloud);
-        cloud_mod.setPointCloud2FieldsByString(1, "xyz");
-        cloud_mod.resize(best->points.size());
+     // Fill in points
+     sensor_msgs::PointCloud2Iterator<float> cloud_iter(cloud, "x");
+     for (size_t i = 0; i < best->points.size(); i++) {
+       cloud_iter[0] = best->points[i].x;
+       cloud_iter[1] = best->points[i].y;
+       cloud_iter[2] = best->points[i].z;
+       ++cloud_iter;
+     }
+     debug_points_.publish(cloud);
+   }
+*/
+  // Everything after this modifies the dock_
+  // already mutex locked in this function.
+  // boost::mutex::scoped_lock lock(dock_mutex_);
 
-        // Fill in points
-        sensor_msgs::PointCloud2Iterator<float> cloud_iter(cloud, "x");
-        for (size_t i = 0; i < best->points.size(); i++) {
-          cloud_iter[0] = best->points[i].x;
-          cloud_iter[1] = best->points[i].y;
-          cloud_iter[2] = best->points[i].z;
-          ++cloud_iter;
-        }
-        debug_points_.publish(cloud);
-      }
+  // Update stamp
+  dock_.header.stamp = scan->header.stamp;
+  dock_.header.frame_id = tracking_frame_;
 
-      // Everything after this modifies the dock_
-      boost::mutex::scoped_lock lock(dock_mutex_);
+  // If this is the first time we've found dock, take whole pose
+  if (!found_dock_) {
+    dock_.pose = best_pose;
+    // Reset the dock pose filter.
+    dock_pose_filter_->reset();
+    // Set the filter state to the current pose estimate.
+    dock_pose_filter_->setFilterState(dock_.pose, dock_.pose);
+  } else {
+    // Check that pose is not too far from current pose
+    double d = getPoseDistance(dock_.pose, best_pose);
+    if (d > 0.05) {
+      std::cout << "Dock pose jumped: " << d << "\n";
+      return;
+    }
+  }
 
-      // Update stamp
-      dock_.header.stamp = scan->header.stamp;
-      dock_.header.frame_id = tracking_frame_;
-
-      // If this is the first time we've found dock, take whole pose
-      if (!found_dock_) {
-        dock_.pose = best_pose;
-        // Reset the dock pose filter.
-        dock_pose_filter_->reset();
-        // Set the filter state to the current pose estimate.
-        dock_pose_filter_->setFilterState(dock_.pose, dock_.pose);
-      } else {
-        // Check that pose is not too far from current pose
-        double d = getPoseDistance(dock_.pose, best_pose);
-        if (d > 0.05) {
-          ROS_DEBUG_STREAM_NAMED("dock_perception", "Dock pose jumped: " << d);
-          return;
-        }
-      }
-
-      // Filter the pose esitmate.
-      dock_.pose = dock_pose_filter_->filter(best_pose);
-      dock_stamp_ = scan->header.stamp;
-      found_dock_ = true;
-      */
+  // Filter the pose esitmate.
+  dock_.pose = dock_pose_filter_->filter(best_pose);
+  dock_stamp_ = scan->header.stamp;
+  found_dock_ = true;
 }
 
 DockCandidatePtr DockPerception::extract(laser_processor::SampleSet* cluster) {
