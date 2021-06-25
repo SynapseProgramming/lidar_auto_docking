@@ -59,14 +59,13 @@ class DockPerception {
 
  private:
   /** @brief Callback to process laser scans */
-  //  void callback(const sensor_msgs::LaserScanConstPtr& scan);
+  void callback(const sensor_msgs::msg::LaserScan::SharedPtr scan);
 
   /**
    * @brief Extract a DockCandidate from a cluster, filling in the
    *        lengths and slopes of each line found using ransac.
    * @param cluster The pointer to the cluster to extract from.
    */
-  // TODO: figure out how to write a transform listener first
   DockCandidatePtr extract(laser_processor::SampleSet* cluster);
 
   /**
@@ -94,7 +93,6 @@ class DockPerception {
   // defined as std::shared_ptr<LinearPoseFilter2D> LinearPoseFilter2DPtr;
   LinearPoseFilter2DPtr
       dock_pose_filter_;  /// Low pass filter object for filtering dock poses.
-                          // TODO: import the private member functions
   // TF frame to track dock within
   std::string tracking_frame_;
   // Best estimate of where the dock is

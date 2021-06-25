@@ -1,5 +1,7 @@
 #include "lidar_auto_docking/tf2listener.h"
 
+#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
+
 #include <chrono>
 #include <iostream>
 #include <memory>
