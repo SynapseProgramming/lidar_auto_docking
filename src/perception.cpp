@@ -118,7 +118,6 @@ bool DockPerception::stop() {
 bool DockPerception::getPose(geometry_msgs::msg::PoseStamped& pose,
                              std::string frame) {
   // All of this requires a lock on the dock_
-  // boost::mutex::scoped_lock lock(dock_mutex_);
   std::lock_guard<std::mutex> lock(dock_mutex_);
 
   if (!found_dock_) {
@@ -173,8 +172,6 @@ void DockPerception::callback(
   // Make sure goal is valid (orientation != 0 0 0 0)
   if (dock_.header.frame_id == "" ||
       (dock_.pose.orientation.z == 0.0 && dock_.pose.orientation.w == 0.0)) {
-    // Lock the dock_
-    //  boost::mutex::scoped_lock lock(dock_mutex_);
     // dock_ is of type geometry_msgs::msg::PoseStamped
     // If goal is invalid, set to a point directly ahead of robot
     for (size_t i = scan->ranges.size() / 2; i < scan->ranges.size(); i++) {
@@ -198,7 +195,6 @@ void DockPerception::callback(
 
   // Make sure goal is in the tracking frame
   if (dock_.header.frame_id != tracking_frame_) {
-    // boost::mutex::scoped_lock lock(dock_mutex_);
     try {
       // wait for the transform between the frame the dock is currently
       // referenced to and the main reference frame
@@ -281,7 +277,6 @@ void DockPerception::callback(
     candidates.pop();
   }
   // Did we find dock?
-  // TODO: TEST OUT THIS PART
   if (best.use_count() == 0) {
     std::cout << "DID NOT FIND THE DOCK!\n";
     return;
