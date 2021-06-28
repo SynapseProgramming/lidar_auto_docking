@@ -30,7 +30,7 @@ find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
 
 
-add_executable(perception_test src/perception.cpp src/laser_processor.cpp src/linear_pose_filter_2d.cpp src/icp_2d.cpp src/tf2listener.cpp)
+add_executable(perception_test src/perception_test.cpp src/perception.cpp src/laser_processor.cpp src/linear_pose_filter_2d.cpp src/icp_2d.cpp src/tf2listener.cpp)
 ament_target_dependencies(perception_test geometry_msgs tf2 sensor_msgs rclcpp Eigen3 angles tf2_ros tf2_geometry_msgs)
 
 

@@ -19,6 +19,7 @@
 #ifndef LIDAR_AUTO_DOCKING_DOCK_CANDIDATE_H
 #define LIDAR_AUTO_DOCKING_DOCK_CANDIDATE_H
 
+#include <cmath>
 #include <vector>
 
 #include "geometry_msgs/msg/point.hpp"
@@ -39,7 +40,8 @@ struct DockCandidate {
 
     geometry_msgs::msg::Point& pt1 = points.front();
     geometry_msgs::msg::Point& pt2 = points.back();
-    return (sqrt(pow((pt1.x - pt2.x), 2) + pow((pt1.y - pt2.y), 2)));
+    return (
+        std::sqrt(std::pow((pt1.x - pt2.x), 2) + std::pow((pt1.y - pt2.y), 2)));
   }
 
   /**
