@@ -94,9 +94,7 @@ DockPerception::DockPerception(std::shared_ptr<rclcpp::Node> node_ptr)
           nh.advertise<sensor_msgs::msg::PointCloud2>("dock_points", 10);
     }
   */
-  // TODO: figure out callback function
   // Init base scan only after publishers are created
-  //  scan_sub_ = nh.subscribe("base_scan", 1, &DockPerception::callback, this);
   scan_sub_ = node_ptr_->create_subscription<sensor_msgs::msg::LaserScan>(
       "scan", 10, std::bind(&DockPerception::callback, this, _1));
   std::cout << "Dock perception initialized\n";
@@ -338,8 +336,6 @@ DockCandidatePtr DockPerception::extract(laser_processor::SampleSet* cluster) {
   DockCandidatePtr candidate = std::make_shared<DockCandidate>();
 
   tf2::Vector3 tf_point;
-  //  tf::StampedTransform t_frame;
-  // tf2::Stamped<tf2::Transform> t_frame;
   geometry_msgs::msg::TransformStamped t_frame;
   tf2::Stamped<tf2::Transform> tf2_t_frame;
   try {
@@ -347,7 +343,6 @@ DockCandidatePtr DockPerception::extract(laser_processor::SampleSet* cluster) {
 
     t_frame = listener_.getTransform(tracking_frame_, cluster->header.frame_id);
   } catch (const tf2::TransformException& ex) {
-    //  ROS_WARN_STREAM_THROTTLE(1.0, "Couldn't transform laser point");
     std::cout << "ERROR. COULD NOT TRANSFORM POINT\n";
     return candidate;
   }
