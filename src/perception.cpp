@@ -172,10 +172,10 @@ void DockPerception::callback(
       (dock_.pose.orientation.z == 0.0 && dock_.pose.orientation.w == 0.0)) {
     // dock_ is of type geometry_msgs::msg::PoseStamped
     // If goal is invalid, set to a point directly ahead of robot
+    dock_.header = scan->header;
     for (size_t i = scan->ranges.size() / 2; i < scan->ranges.size(); i++) {
       if (std::isfinite(scan->ranges[i])) {
         double angle = scan->angle_min + i * scan->angle_increment;
-        dock_.header = scan->header;
         dock_.pose.position.x = cos(angle) * scan->ranges[i];
         dock_.pose.position.y = sin(angle) * scan->ranges[i];
         dock_.pose.orientation.x = 1.0;
