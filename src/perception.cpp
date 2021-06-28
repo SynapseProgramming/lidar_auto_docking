@@ -540,7 +540,6 @@ class MinimalPublisher : public rclcpp::Node {
 
       } else {
         this->found_dockk = true;
-        this->perception_ptr->getPose(this->dock_pose, "base_link");
         std::cout << "wrt base_link";
         std::cout << "x: " << this->dock_pose.pose.position.x
                   << " y: " << this->dock_pose.pose.position.y;
