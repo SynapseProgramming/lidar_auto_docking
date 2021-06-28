@@ -519,19 +519,18 @@ class MinimalPublisher : public rclcpp::Node {
   void init_objects() {
     std::shared_ptr<rclcpp::Node> new_ptr = shared_ptr_from_this();
     perception_ptr = std::make_shared<DockPerception>(new_ptr);
-    perception_ptr->start(init_dock_pose);
   }
 
   // shared_ptr_from_this would return a shared pointer of the current class
   std::shared_ptr<rclcpp::Node> shared_ptr_from_this() {
     return shared_from_this();
-    perception_ptr->start(init_dock_pose);
-    init_dock_pose.header.frame_id = "base_link";
   }
 
   void main_test() {
-    //  perception_ptr->start(init_dock_pose);
+    perception_ptr->start(init_dock_pose);
     timer_ = this->create_wall_timer(50ms, [this]() {
+      // if no dock is found yet, call start function with init_dock_pose to let
+      // perception assume the dock is 1m ahead of the bot.
       if (this->perception_ptr->getPose(this->dock_pose, "base_link") ==
               false &&
           this->found_dockk == false) {
@@ -541,7 +540,6 @@ class MinimalPublisher : public rclcpp::Node {
 
       } else {
         this->found_dockk = true;
-        // std::cout << "FOUND DOCK!\n";
         this->perception_ptr->getPose(this->dock_pose, "base_link");
         std::cout << "wrt base_link";
         std::cout << "x: " << this->dock_pose.pose.position.x
@@ -555,6 +553,8 @@ class MinimalPublisher : public rclcpp::Node {
  private:
   std::shared_ptr<DockPerception> perception_ptr;
   geometry_msgs::msg::PoseStamped dock_pose;
+  // init_dock_pose has an empty quaternion. This would force perception to
+  // assume that the dock 1m directly ahead of the robot.
   geometry_msgs::msg::PoseStamped init_dock_pose;
   bool found_dockk = false;
   rclcpp::TimerBase::SharedPtr timer_;
