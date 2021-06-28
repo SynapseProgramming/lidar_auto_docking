@@ -283,14 +283,7 @@ void DockPerception::callback(
   // Did we find dock?
   // TODO: TEST OUT THIS PART
   if (best.use_count() == 0) {
-    std::mutex dock_mutex_;
-    // If true, then dock_ is based on actual sensor data
-    bool found_dock_;
-
-    // Last time that dock pose was updated
-    rclcpp::Time dock_stamp_;
-    // Maximum allowable error between scan and "ideal" scan
-    //  std::cout << "DID NOT FIND THE DOCK!\n";
+    std::cout << "DID NOT FIND THE DOCK!\n";
     return;
   }
 
