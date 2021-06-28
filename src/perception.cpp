@@ -175,7 +175,6 @@ void DockPerception::callback(
       (dock_.pose.orientation.z == 0.0 && dock_.pose.orientation.w == 0.0)) {
     // Lock the dock_
     //  boost::mutex::scoped_lock lock(dock_mutex_);
-    //  std::cout << "LASER CALLBACK RUNNING\n";
     // dock_ is of type geometry_msgs::msg::PoseStamped
     // If goal is invalid, set to a point directly ahead of robot
     for (size_t i = scan->ranges.size() / 2; i < scan->ranges.size(); i++) {
@@ -246,7 +245,6 @@ void DockPerception::callback(
     geometry_msgs::msg::Pose pose = dock_.pose;
     double score = fit(candidates.top(), pose);
     if (score >= 0) {
-      //  std::cout << "THERE IS SOME SCORE! " << score << "\n";
       best = candidates.top();
       best_pose = pose;
       break;
@@ -282,8 +280,8 @@ void DockPerception::callback(
         */
     candidates.pop();
   }
-  // std::cout << "best test: " << best << "\n";
   // Did we find dock?
+  // TODO: TEST OUT THIS PART
   if (best.use_count() == 0) {
     std::mutex dock_mutex_;
     // If true, then dock_ is based on actual sensor data
@@ -296,7 +294,6 @@ void DockPerception::callback(
     return;
   }
 
-  // std::cout << "Found the dock!\n";
   /*
    // Update
    if (debug_) {
@@ -322,9 +319,6 @@ void DockPerception::callback(
      debug_points_.publish(cloud);
    }
 */
-  // Everything after this modifies the dock_
-  // already mutex locked in this function.
-  // boost::mutex::scoped_lock lock(dock_mutex_);
 
   // Update stamp
   dock_.header.stamp = scan->header.stamp;
@@ -332,7 +326,6 @@ void DockPerception::callback(
 
   // If this is the first time we've found dock, take whole pose
   if (!found_dock_) {
-    //  std::cout << "ACTUALLY FOUND DOCKU\n";
     dock_.pose = best_pose;
     // Reset the dock pose filter.
     dock_pose_filter_->reset();
@@ -480,7 +473,7 @@ double DockPerception::fit(const DockCandidatePtr& candidate,
     tf2::fromMsg(transform.rotation, cand_pose);
     if (!isValid(cand_pose)) {
       RCLCPP_ERROR(rclcpp::get_logger("rclcpp"),
-                   "Dock SampleSetcandidate orientation estimate is invalid.");
+                   "Dock candidate orientation estimate is invalid.");
       return -1.0;
     }
     if (fabs(angles::normalize_angle(
@@ -496,7 +489,6 @@ double DockPerception::fit(const DockCandidatePtr& candidate,
 
     // If width of candidate is smaller than the width of dock
     // then the whole dock is not visible...
-    //  std::cout << "WIDTHH" << candidate->width() << "\n";
     if (candidate->width() < 0.375) {
       // ... and heading is unreliable when close to dock
       //  RCLCPP_ERROR(rclcpp::get_logger("rclcpp"),
@@ -570,20 +562,6 @@ class MinimalPublisher : public rclcpp::Node {
                   << " w: " << this->dock_pose.pose.orientation.w << "\n";
       }
     });
-    /*
-        while (rclcpp::ok() && !perception_ptr->getPose(dock_pose, "base_link"))
-       { rate.sleep();
-        }
-        std::cout << "FOUND DOCK!\n";
-        while (rclcpp::ok()) {
-          std::cout << "wrt map ";
-          std::cout << "x: " << dock_pose.pose.position.x
-                    << " y: " << dock_pose.pose.position.y;
-          std::cout << " z: " << dock_pose.pose.orientation.z
-                    << " w: " << dock_pose.pose.orientation.w << "\n";
-          rate.sleep();
-        }
-        */
   }
 
  private:
