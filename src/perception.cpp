@@ -474,8 +474,8 @@ double DockPerception::fit(const DockCandidatePtr& candidate,
     // then the whole dock is not visible...
     if (candidate->width() < 0.375) {
       // ... and heading is unreliable when close to dock
-      //  RCLCPP_ERROR(rclcpp::get_logger("rclcpp"),
-      //             "Dock candidate width is unreliable.");
+      RCLCPP_ERROR(rclcpp::get_logger("rclcpp"),
+                   "Dock candidate width is unreliable.");
       transform.rotation = pose.orientation;
       fitness = 0.001234;
       // Probably can use a different algorithm here, if necessary, which it
