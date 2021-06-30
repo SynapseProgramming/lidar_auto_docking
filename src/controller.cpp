@@ -266,5 +266,5 @@ void BaseController::stop() {
   // Reset the approach controller
   dist_ = 0.4;
 }
-
+// TODO: Remove main test function later
 int main() { return 0; }
