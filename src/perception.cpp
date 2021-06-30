@@ -18,9 +18,8 @@
 #include <angles/angles.h>
 #include <lidar_auto_docking/icp_2d.h>
 #include <lidar_auto_docking/perception.h>
-// TODO: find alternative for tf.h header
-//#include <tf/tf.h>
 
+#include <chrono>
 #include <iostream>
 #include <list>
 #include <queue>
@@ -28,20 +27,21 @@
 #include <sensor_msgs/point_cloud2_iterator.hpp>
 #include <string>
 #include <vector>
-/*
+
 double getPoseDistance(const geometry_msgs::msg::Pose a,
                        const geometry_msgs::msg::Pose b) {
   double dx = a.position.x - b.position.x;
   double dy = a.position.y - b.position.y;
   return sqrt(dx * dx + dy * dy);
 }
-*/
 
-/*
-DockPerception::DockPerception(ros::NodeHandle& nh)
-    : running_(false), tracking_frame_("odom"), found_dock_(false) {
-  ros::NodeHandle pnh("~");
-  debug_ = true;
+DockPerception::DockPerception(std::shared_ptr<rclcpp::Node> node_ptr)
+    : listener_(node_ptr->get_clock()),
+      running_(false),
+      tracking_frame_("odom"),
+      found_dock_(false) {
+  node_ptr_ = node_ptr;
+  debug_ = false;
 
   // enable debugging for first time test
   // Should we publish the debugging cloud
@@ -65,9 +65,8 @@ DockPerception::DockPerception(ros::NodeHandle& nh)
   // Limit the average reprojection error of points onto
   // the ideal dock. This prevents the robot docking
   // with something that is very un-dock-like.
-  if (!pnh.getParam("max_alignment_error", max_alignment_error_)) {
-    max_alignment_error_ = 0.01;
-  }
+  // TODO: parameterize (maybe)
+  max_alignment_error_ = 0.01;
 
   // Create ideal cloud
   // Front face is 300mm long
@@ -88,21 +87,20 @@ DockPerception::DockPerception(ros::NodeHandle& nh)
     p.y = -0.15 - x;
     ideal_cloud_.insert(ideal_cloud_.begin(), p);
   }
-
-  // Debugging publishers first
-  if (debug_) {
-    debug_points_ = nh.advertise<sensor_msgs::PointCloud2>("dock_points", 10);
-  }
-
+  /*
+    // Debugging publishers first
+    if (debug_) {
+      debug_points_ =
+          nh.advertise<sensor_msgs::msg::PointCloud2>("dock_points", 10);
+    }
+  */
   // Init base scan only after publishers are created
-  scan_sub_ = nh.subscribe("base_scan", 1, &DockPerception::callback, this);
-
-  ROS_INFO_NAMED("perception", "Dock perception initialized");
+  scan_sub_ = node_ptr_->create_subscription<sensor_msgs::msg::LaserScan>(
+      "scan", 10, std::bind(&DockPerception::callback, this, _1));
+  std::cout << "Dock perception initialized\n";
 }
-*/
 
-/*
-bool DockPerception::start(const geometry_msgs::PoseStamped& pose) {
+bool DockPerception::start(const geometry_msgs::msg::PoseStamped& pose) {
   running_ = false;
   found_dock_ = false;
   dock_ = pose;
@@ -115,29 +113,33 @@ bool DockPerception::stop() {
   return true;
 }
 
-bool DockPerception::getPose(geometry_msgs::PoseStamped& pose,
+bool DockPerception::getPose(geometry_msgs::msg::PoseStamped& pose,
                              std::string frame) {
   // All of this requires a lock on the dock_
-  boost::mutex::scoped_lock lock(dock_mutex_);
+  std::lock_guard<std::mutex> lock(dock_mutex_);
 
   if (!found_dock_) {
     return false;
   }
+
+  // TODO: add in timeout function.
+  /*
   if (ros::Time::now() > dock_stamp_ + ros::Duration(0.35)) {
     ROS_DEBUG_NAMED("dock_perception", "Dock pose timed out");
     return false;
   }
-
+*/
   // Check for a valid orientation.
   tf2::Quaternion q;
   // change here
   tf2::fromMsg(dock_.pose.orientation, q);
   if (!isValid(q)) {
-    ROS_ERROR_STREAM_NAMED("perception", "Dock orientation invalid.");
-    ROS_DEBUG_STREAM_NAMED("perception", "Quaternion magnitude is "
-                                             << q.length() << " Quaternion is ["
-                                             << q.x() << ", " << q.y() << ", "
-                                             << q.z() << ", " << q.w() << "]");
+    std::cout << "Dock orientation invalid.\n";
+    //  ROS_DEBUG_STREAM_NAMED("perception", "Quaternion magnitude is "
+    //                                         << q.length() << " Quaternion is
+    //                                         ["
+    //                                       << q.x() << ", " << q.y() << ", "
+    //                                     << q.z() << ", " << q.w() << "]");
     return false;
   }
 
@@ -146,11 +148,10 @@ bool DockPerception::getPose(geometry_msgs::PoseStamped& pose,
   if (frame != "") {
     // Transform to desired frame
     try {
-      listener_.waitForTransform(frame, pose.header.frame_id, pose.header.stamp,
-                                 ros::Duration(0.1));
+      listener_.waitTransform(frame, pose.header.frame_id);
       listener_.transformPose(frame, pose, pose);
-    } catch (tf::TransformException const& ex) {
-      ROS_WARN_STREAM_THROTTLE(1.0, "Couldn't transform dock pose");
+    } catch (const tf2::TransformException& ex) {
+      std::cout << "Couldn't transform dock pose\n";
       return false;
     }
   }
@@ -158,32 +159,33 @@ bool DockPerception::getPose(geometry_msgs::PoseStamped& pose,
   return found_dock_;
 }
 
-void DockPerception::callback(const sensor_msgs::LaserScanConstPtr& scan) {
+void DockPerception::callback(
+    const sensor_msgs::msg::LaserScan::SharedPtr scan) {
   // Be lazy about search
   if (!running_) {
     return;
   }
-
+  // lock dock_ to prevent other functions from modifying dock_
+  std::lock_guard<std::mutex> lock(dock_mutex_);
   // Make sure goal is valid (orientation != 0 0 0 0)
   if (dock_.header.frame_id == "" ||
       (dock_.pose.orientation.z == 0.0 && dock_.pose.orientation.w == 0.0)) {
-    // Lock the dock_
-    boost::mutex::scoped_lock lock(dock_mutex_);
-
+    // dock_ is of type geometry_msgs::msg::PoseStamped
     // If goal is invalid, set to a point directly ahead of robot
+    dock_.header = scan->header;
     for (size_t i = scan->ranges.size() / 2; i < scan->ranges.size(); i++) {
       if (std::isfinite(scan->ranges[i])) {
         double angle = scan->angle_min + i * scan->angle_increment;
-        dock_.header = scan->header;
         dock_.pose.position.x = cos(angle) * scan->ranges[i];
         dock_.pose.position.y = sin(angle) * scan->ranges[i];
         dock_.pose.orientation.x = 1.0;
         dock_.pose.orientation.y = 0.0;
         dock_.pose.orientation.z = 0.0;
         dock_.pose.orientation.w = 0.0;
-        ROS_DEBUG_NAMED("dock_perception", "Set initial pose to (%f, %f, %f)",
-                        dock_.pose.position.x, dock_.pose.position.y,
-                        icp_2d::thetaFromQuaternion(dock_.pose.orientation));
+        //  ROS_DEBUG_NAMED("dock_perception", "Set initial pose to (%f, %f,
+        //  %f)",
+        //                dock_.pose.position.x, dock_.pose.position.y,
+        //              icp_2d::thetaFromQuaternion(dock_.pose.orientation));
         break;
       }
     }
@@ -191,20 +193,21 @@ void DockPerception::callback(const sensor_msgs::LaserScanConstPtr& scan) {
 
   // Make sure goal is in the tracking frame
   if (dock_.header.frame_id != tracking_frame_) {
-    boost::mutex::scoped_lock lock(dock_mutex_);
     try {
-      listener_.waitForTransform(tracking_frame_, dock_.header.frame_id,
-                                 dock_.header.stamp, ros::Duration(0.1));
+      // wait for the transform between the frame the dock is currently
+      // referenced to and the main reference frame
+      listener_.waitTransform(tracking_frame_, dock_.header.frame_id);
+
       listener_.transformPose(tracking_frame_, dock_, dock_);
-    } catch (tf::TransformException const& ex) {
-      ROS_WARN_STREAM_THROTTLE(
-          1.0, "Couldn't transform dock pose to tracking frame");
+    } catch (const tf2::TransformException& ex) {
+      std::cout << "Couldn't transform dock pose to tracking frame";
       return;
     }
-    ROS_DEBUG_NAMED("dock_perception",
-                    "Transformed initial pose to (%f, %f, %f)",
-                    dock_.pose.position.x, dock_.pose.position.y,
-                    icp_2d::thetaFromQuaternion(dock_.pose.orientation));
+    // TODO: Add in ROS2 debug info
+    // ROS_DEBUG_NAMED("dock_perception",
+    //              "Transformed initial pose to (%f, %f, %f)",
+    //            dock_.pose.position.x, dock_.pose.position.y,
+    //          icp_2d::thetaFromQuaternion(dock_.pose.orientation));
   }
 
   // Cluster the laser scan
@@ -225,8 +228,9 @@ void DockPerception::callback(const sensor_msgs::LaserScanConstPtr& scan) {
       candidates.push(c);
     }
   }
-  ROS_DEBUG_STREAM_NAMED("dock_perception",
-                         "Extracted " << candidates.size() << " clusters");
+  // TODO: ADD DEBUG STREAM
+  // ROS_DEBUG_STREAM_NAMED("dock_perception",
+  //                     "Extracted " << candidates.size() << " clusters");
 
   // Extract ICP pose/fit on best clusters
   DockCandidatePtr best;
@@ -238,70 +242,69 @@ void DockPerception::callback(const sensor_msgs::LaserScanConstPtr& scan) {
       best = candidates.top();
       best_pose = pose;
       break;
-    } else  // Let's see what's wrong with this point cloud.
-    {
-      if (debug_) {
-        DockCandidatePtr not_best = candidates.top();
-
-        // Create point cloud
-        sensor_msgs::PointCloud2 cloud;
-        cloud.header.stamp = scan->header.stamp;
-        cloud.header.frame_id = tracking_frame_;
-        cloud.width = cloud.height = 0;
-
-        // Allocate space for points
-        sensor_msgs::PointCloud2Modifier cloud_mod(cloud);
-        cloud_mod.setPointCloud2FieldsByString(1, "xyz");
-        cloud_mod.resize(not_best->points.size());
-
-        // Fill in points
-        sensor_msgs::PointCloud2Iterator<float> cloud_iter(cloud, "x");
-        for (size_t i = 0; i < not_best->points.size(); i++) {
-          cloud_iter[0] = not_best->points[i].x;
-          cloud_iter[1] = not_best->points[i].y;
-          cloud_iter[2] = not_best->points[i].z;
-          ++cloud_iter;
-        }
-        debug_points_.publish(cloud);
-      }
     }
+    /*  TODO: Add in pointcloud visualisation feature in ros2
+         else  // Let's see what's wrong with this point cloud.
+        {
+          if (debug_) {
+            DockCandidatePtr not_best = candidates.top();
+
+            // Create point cloud
+            sensor_msgs::msg::PointCloud2 cloud;
+            cloud.header.stamp = scan->header.stamp;
+            cloud.header.frame_id = tracking_frame_;
+            cloud.width = cloud.height = 0;
+
+            // Allocate space for points
+            sensor_msgs::PointCloud2Modifier cloud_mod(cloud);
+            cloud_mod.setPointCloud2FieldsByString(1, "xyz");
+            cloud_mod.resize(not_best->points.size());
+
+            // Fill in points
+            sensor_msgs::PointCloud2Iterator<float> cloud_iter(cloud, "x");
+            for (size_t i = 0; i < not_best->points.size(); i++) {
+              cloud_iter[0] = not_best->points[i].x;
+              cloud_iter[1] = not_best->points[i].y;
+              cloud_iter[2] = not_best->points[i].z;
+              ++cloud_iter;
+            }
+            debug_points_.publish(cloud);
+          }
+        }
+        */
     candidates.pop();
   }
-
   // Did we find dock?
-  if (!best) {
-    ROS_DEBUG_NAMED("dock_perception", "DID NOT FIND THE DOCK");
+  if (best.use_count() == 0) {
+    std::cout << "DID NOT FIND THE DOCK!\n";
     return;
   }
 
-  ROS_DEBUG_NAMED("dock_perception", "Found the dock.");
+  /*
+   // Update
+   if (debug_) {
+     // Create point cloud
+     sensor_msgs::msg::PointCloud2 cloud;
+     cloud.header.stamp = scan->header.stamp;
+     cloud.header.frame_id = tracking_frame_;
+     cloud.width = cloud.height = 0;
 
-  // Update
-  if (debug_) {
-    // Create point cloud
-    sensor_msgs::PointCloud2 cloud;
-    cloud.header.stamp = scan->header.stamp;
-    cloud.header.frame_id = tracking_frame_;
-    cloud.width = cloud.height = 0;
+     // Allocate space for points
+     sensor_msgs::PointCloud2Modifier cloud_mod(cloud);
+     cloud_mod.setPointCloud2FieldsByString(1, "xyz");
+     cloud_mod.resize(best->points.size());
 
-    // Allocate space for points
-    sensor_msgs::PointCloud2Modifier cloud_mod(cloud);
-    cloud_mod.setPointCloud2FieldsByString(1, "xyz");
-    cloud_mod.resize(best->points.size());
-
-    // Fill in points
-    sensor_msgs::PointCloud2Iterator<float> cloud_iter(cloud, "x");
-    for (size_t i = 0; i < best->points.size(); i++) {
-      cloud_iter[0] = best->points[i].x;
-      cloud_iter[1] = best->points[i].y;
-      cloud_iter[2] = best->points[i].z;
-      ++cloud_iter;
-    }
-    debug_points_.publish(cloud);
-  }
-
-  // Everything after this modifies the dock_
-  boost::mutex::scoped_lock lock(dock_mutex_);
+     // Fill in points
+     sensor_msgs::PointCloud2Iterator<float> cloud_iter(cloud, "x");
+     for (size_t i = 0; i < best->points.size(); i++) {
+       cloud_iter[0] = best->points[i].x;
+       cloud_iter[1] = best->points[i].y;
+       cloud_iter[2] = best->points[i].z;
+       ++cloud_iter;
+     }
+     debug_points_.publish(cloud);
+   }
+*/
 
   // Update stamp
   dock_.header.stamp = scan->header.stamp;
@@ -318,7 +321,7 @@ void DockPerception::callback(const sensor_msgs::LaserScanConstPtr& scan) {
     // Check that pose is not too far from current pose
     double d = getPoseDistance(dock_.pose, best_pose);
     if (d > 0.05) {
-      ROS_DEBUG_STREAM_NAMED("dock_perception", "Dock pose jumped: " << d);
+      std::cout << "Dock pose jumped: " << d << "\n";
       return;
     }
   }
@@ -329,34 +332,34 @@ void DockPerception::callback(const sensor_msgs::LaserScanConstPtr& scan) {
   found_dock_ = true;
 }
 
-
 DockCandidatePtr DockPerception::extract(laser_processor::SampleSet* cluster) {
   DockCandidatePtr candidate = std::make_shared<DockCandidate>();
 
   tf2::Vector3 tf_point;
-  //  tf::StampedTransform t_frame;
-  tf2::Stamped<tf2::Transform> t_frame;
+  geometry_msgs::msg::TransformStamped t_frame;
+  tf2::Stamped<tf2::Transform> tf2_t_frame;
   try {
-    listener_.waitForTransform(tracking_frame_, cluster->header.frame_id,
-                               cluster->header.stamp, ros::Duration(0.1));
-    listener_.lookupTransform(tracking_frame_, cluster->header.frame_id,
-                              ros::Time(0), t_frame);
-  } catch (tf::TransformException const& ex) {
-    ROS_WARN_STREAM_THROTTLE(1.0, "Couldn't transform laser point");
+    listener_.waitTransform(tracking_frame_, cluster->header.frame_id);
+
+    t_frame = listener_.getTransform(tracking_frame_, cluster->header.frame_id);
+  } catch (const tf2::TransformException& ex) {
+    std::cout << "ERROR. COULD NOT TRANSFORM POINT\n";
     return candidate;
   }
   // Transform each point into tracking frame
   size_t i = 0;
   for (laser_processor::SampleSet::iterator p = cluster->begin();
        p != cluster->end(); p++, i++) {
-    geometry_msgs::PointStamped pt;
+    geometry_msgs::msg::PointStamped pt;
     pt.header = cluster->header;
-    pt.point.x = (*p)->x;
-    pt.point.y = (*p)->y;
+
+    tf2::fromMsg(t_frame, tf2_t_frame);
+    tf2::Vector3 tf2_point((*p)->x, (*p)->y, 0);
+    // apply transform operation
+    tf2_point = tf2_t_frame * tf2_point;
+    pt.point.x = tf2_point.getX();
+    pt.point.y = tf2_point.getY();
     pt.point.z = 0;
-    tf::pointMsgToTF(pt.point, tf_point);
-    tf_point = t_frame * tf_point;
-    tf::pointTFToMsg(tf_point, pt.point);
     candidate->points.push_back(pt.point);
   }
 
@@ -368,7 +371,7 @@ DockCandidatePtr DockPerception::extract(laser_processor::SampleSet* cluster) {
 
   return candidate;
 }
-*/
+
 double DockPerception::fit(const DockCandidatePtr& candidate,
                            geometry_msgs::msg::Pose& pose) {
   // Setup initial pose
@@ -500,5 +503,3 @@ double DockPerception::fit(const DockCandidatePtr& candidate,
 bool DockPerception::isValid(const tf2::Quaternion& q) {
   return 1e-3 >= fabs(1.0 - q.length());
 }
-
-int main() { return 0; }

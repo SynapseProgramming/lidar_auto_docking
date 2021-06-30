@@ -18,3 +18,14 @@ geometry_msgs::msg::TransformStamped tf2_listener::getTransform(
 
   return echo_transform;
 }
+
+void tf2_listener::transformPose(std::string tracking_frame,
+                                 geometry_msgs::msg::PoseStamped &input_pose,
+                                 geometry_msgs::msg::PoseStamped &output_pose) {
+  // firstly, get the correct desired transformation.
+  geometry_msgs::msg::TransformStamped corrective_transform;
+  corrective_transform =
+      getTransform(tracking_frame, input_pose.header.frame_id);
+  // transform the input pose to be referenced to the main tracking frame.
+  tf2::doTransform(input_pose, output_pose, corrective_transform);
+}

@@ -23,11 +23,15 @@
 #include <lidar_auto_docking/laser_processor.h>
 #include <lidar_auto_docking/linear_pose_filter_2d.h>
 #include <tf2/LinearMath/Quaternion.h>
+#include <tf2/impl/convert.h>
+#include <tf2/transform_datatypes.h>
 #include <tf2/utils.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 #include <tf2_ros/transform_listener.h>
 
 #include <deque>
+#include <functional>
+#include <geometry_msgs/msg/point.hpp>
 #include <geometry_msgs/msg/pose_stamped.hpp>
 #include <mutex>
 #include <rclcpp/rclcpp.hpp>
@@ -35,33 +39,36 @@
 #include <sensor_msgs/msg/point_cloud2.hpp>
 #include <string>
 #include <vector>
+
+#include "lidar_auto_docking/tf2listener.h"
+using std::placeholders::_1;
+
 class DockPerception {
  public:
-  //  explicit DockPerception(ros::NodeHandle& nh);
+  explicit DockPerception(std::shared_ptr<rclcpp::Node> node_ptr);
 
   /**
    * @brief Start dock detection.
    * @param pose The initial estimate of dock pose
    */
-  // bool start(const geometry_msgs::PoseStamped& pose);
+  bool start(const geometry_msgs::msg::PoseStamped& pose);
 
   /** @brief Stop tracking the dock. */
-  // bool stop();
+  bool stop();
 
   /** @brief Get the pose of the dock. */
-  // bool getPose(geometry_msgs::PoseStamped& pose, std::string frame = "");
+  bool getPose(geometry_msgs::msg::PoseStamped& pose, std::string frame = "");
 
  private:
   /** @brief Callback to process laser scans */
-  //  void callback(const sensor_msgs::LaserScanConstPtr& scan);
+  void callback(const sensor_msgs::msg::LaserScan::SharedPtr scan);
 
   /**
    * @brief Extract a DockCandidate from a cluster, filling in the
    *        lengths and slopes of each line found using ransac.
    * @param cluster The pointer to the cluster to extract from.
    */
-  // TODO: figure out how to write a transform listener first
-  // DockCandidatePtr extract(laser_processor::SampleSet* cluster);
+  DockCandidatePtr extract(laser_processor::SampleSet* cluster);
 
   /**
    * @brief Try to fit a dock to candidate
@@ -79,8 +86,8 @@ class DockPerception {
    */
   static bool isValid(const tf2::Quaternion& q);
 
-  rclcpp::Subscription<sensor_msgs::msg::LaserScan>::SharedPtr subscription_;
-  tf2_ros::TransformListener listener_;
+  rclcpp::Subscription<sensor_msgs::msg::LaserScan>::SharedPtr scan_sub_;
+  tf2_listener listener_;
 
   bool running_;  // Should we be trying to find the dock
   bool debug_;    // Should we output debugging info
@@ -88,7 +95,6 @@ class DockPerception {
   // defined as std::shared_ptr<LinearPoseFilter2D> LinearPoseFilter2DPtr;
   LinearPoseFilter2DPtr
       dock_pose_filter_;  /// Low pass filter object for filtering dock poses.
-                          // TODO: import the private member functions
   // TF frame to track dock within
   std::string tracking_frame_;
   // Best estimate of where the dock is
@@ -98,10 +104,13 @@ class DockPerception {
   std::mutex dock_mutex_;
   // If true, then dock_ is based on actual sensor data
   bool found_dock_;
+
   // Last time that dock pose was updated
   rclcpp::Time dock_stamp_;
   // Maximum allowable error between scan and "ideal" scan
   double max_alignment_error_;
+  // local version of node_ptr_
+  std::shared_ptr<rclcpp::Node> node_ptr_;
 
   // Publish visualization of which points are detected as dock
   rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr debug_points_;
