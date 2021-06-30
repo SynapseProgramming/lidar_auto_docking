@@ -170,98 +170,84 @@ followed if (w != 0.0)
 
   return false;
 }
-
-bool BaseController::backup(double distance, double rotate_distance)
-{
+*/
+bool BaseController::backup(double distance, double rotate_distance) {
   // If the inputs are invalid then don't backup.
-  if (!std::isfinite(distance) ||
-      !std::isfinite(rotate_distance))
-  {
-    ROS_ERROR_STREAM_NAMED("controller", "Backup parameters are not valid.");
+  if (!std::isfinite(distance) || !std::isfinite(rotate_distance)) {
+    RCLCPP_ERROR(rclcpp::get_logger("rclcpp"),
+                 "Backup parameters are not valid.");
     stop();
     return true;
   }
 
   // Get current base pose in odom
-  geometry_msgs::PoseStamped pose;
+  geometry_msgs::msg::PoseStamped pose;
   pose.header.frame_id = "base_link";
   pose.pose.orientation.w = 1.0;
 
-  try
-  {
-    listener_.waitForTransform("odom",
-                               pose.header.frame_id,
-                               pose.header.stamp,
-                               ros::Duration(0.1));
+  try {
+    listener_.waitTransform("odom", pose.header.frame_id);
     listener_.transformPose("odom", pose, pose);
   }
-  catch (tf::TransformException const &ex)
-  {
-    ROS_WARN_STREAM_THROTTLE(1.0, "Couldn't get transform from base_link to
-odom"); stop(); return false;
+
+  catch (const tf2::TransformException& ex) {
+    RCLCPP_ERROR(rclcpp::get_logger("rclcpp"),
+                 "Couldn't get transform from base_link to odom");
+    stop();
+    return false;
   }
 
   // If just getting started, stow starting pose
-  if (!ready_)
-  {
+  if (!ready_) {
     start_ = pose;
     turning_ = false;
     ready_ = true;
   }
 
-  if (turning_)
-  {
+  if (turning_) {
     // Get yaw angles
-    tf::Quaternion q1, q2;
-    tf::quaternionMsgToTF(start_.pose.orientation, q1);
-    tf::quaternionMsgToTF(pose.pose.orientation, q2);
-    double theta = angles::normalize_angle(tf::getYaw(q2) - tf::getYaw(q1));
+    // tf::Quaternion q1, q2;
+    // tf::quaternionMsgToTF(start_.pose.orientation, q1);
+    // tf2::fromMsg(start_.pose.orientation, q1);
+    // tf::quaternionMsgToTF(pose.pose.orientation, q2);
+    // tf2::fromMsg(pose.pose.orientation, q2);
+    double theta =
+        angles::normalize_angle(tf2::getYaw(pose.pose.orientation) -
+                                tf2::getYaw(start_.pose.orientation));
     double error = angles::normalize_angle(rotate_distance - theta);
 
-    if (fabs(error) < 0.05)
-    {
+    if (fabs(error) < 0.05) {
       stop();
       return true;
+    } else if (rotate_distance > 0.0) {  // for rotation, take the  minimum
+                                         // value as the angular turning
+      command_.angular.z = std::min(1.0, fabs(error) * 1.3 + 0.1);
+    } else {
+      //  command_.angular.z = std::max(-2.0, -fabs(error)*2.0); original.
+      command_.angular.z = std::max(-1.0, -(fabs(error) * 1.3 + 0.1));
     }
-    else if (rotate_distance > 0.0)
-    { //for rotation, take the  minimum value as the angular turning rate
-    //  command_.angular.z = std::min(2.0, fabs(error)*2.0); original. too fast.
-        command_.angular.z = std::min(1.0, fabs(error)*1.3+0.1);
-    }
-    else
-    {
-    //  command_.angular.z = std::max(-2.0, -fabs(error)*2.0); original. too
-fast. command_.angular.z = std::max(-1.0, -(fabs(error)*1.3+0.1));
-    }
-  }
-  else
-  {
+  } else {
     // Check if have backed up enough
     double dx = pose.pose.position.x - start_.pose.position.x;
     double dy = pose.pose.position.y - start_.pose.position.y;
-    if ((dx * dx + dy * dy) > (distance * distance))
-    {
-      if (rotate_distance == 0.0)
-      {
+    if ((dx * dx + dy * dy) > (distance * distance)) {
+      if (rotate_distance == 0.0) {
         stop();
         return true;
-      }
-      else
-      {
+      } else {
         turning_ = true;
         command_.linear.x = 0.0;
       }
-    }
-    else
-    {
+    } else {
       command_.linear.x = -0.1;
     }
   }
 
-  cmd_vel_pub_.publish(command_);
+  cmd_vel_pub_->publish(command_);
+
   return false;
 }
-*/
+
 bool BaseController::getCommand(geometry_msgs::msg::Twist& command) {
   command = command_;
   return true;

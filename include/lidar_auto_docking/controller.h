@@ -19,6 +19,8 @@
 #ifndef LIDAR_AUTO_DOCKING_CONTROLLER_H
 #define LIDAR_AUTO_DOCKING_CONTROLLER_H
 
+#include <tf2/utils.h>
+
 #include <geometry_msgs/msg/twist.hpp>
 #include <nav_msgs/msg/path.hpp>
 
@@ -43,7 +45,7 @@ class BaseController {
    * @param distance        Distance in meters to backup.
    * @param rotate_distance Amount of angle in radians for the robot to yaw.
    */
-  // bool backup(double distance, double rotate_distance);
+  bool backup(double distance, double rotate_distance);
 
   /**
    * @brief Get the last command sent
