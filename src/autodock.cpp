@@ -1,10 +1,9 @@
 #include <functional>
 #include <geometry_msgs/msg/pose_stamped.hpp>
+#include <geometry_msgs/msg/twist.hpp>
 #include <memory>
 #include <string>
 #include <thread>
-//#include "example_interfaces/action/fibonacci.hpp"
-#include <geometry_msgs/msg/twist.hpp>
 
 #include "lidar_auto_docking/action/dock.hpp"
 #include "rclcpp/rclcpp.hpp"
@@ -64,10 +63,6 @@ class DockingServer : public rclcpp::Node {
     auto result = std::make_shared<Dock::Result>();
     // for our implementation, we would just count up for dock_pose and command.
 
-    // auto& sequence = feedback->sequence;
-    // sequence.push_back(0);
-    // sequence.push_back(1);
-
     // count up from 1 to 20
     for (int i = 1; i <= 20 && rclcpp::ok(); ++i) {
       // Check if there is a cancel request
@@ -86,9 +81,6 @@ class DockingServer : public rclcpp::Node {
       feedback->command.linear.x = i;
       feedback->command.linear.y = i + 1;
       feedback->command.linear.z = i + 2;
-      // Update sequence
-      // sequence.push_back(sequence[i] + sequence[i - 1]);
-      // Publish feedback
       goal_handle->publish_feedback(feedback);
       RCLCPP_INFO(this->get_logger(), "Publish Feedback");
 
