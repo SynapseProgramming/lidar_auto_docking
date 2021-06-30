@@ -28,12 +28,21 @@ find_package(sensor_msgs REQUIRED)
 find_package(Eigen3 REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
+find_package(nav_msgs REQUIRED)
 
 
 add_executable(perception_test src/perception_test.cpp src/perception.cpp src/laser_processor.cpp src/linear_pose_filter_2d.cpp src/icp_2d.cpp src/tf2listener.cpp)
 ament_target_dependencies(perception_test geometry_msgs tf2 sensor_msgs rclcpp Eigen3 angles tf2_ros tf2_geometry_msgs)
 
 
+
+
+add_executable(controller_test src/controller.cpp src/tf2listener.cpp )
+ament_target_dependencies(controller_test nav_msgs geometry_msgs tf2 sensor_msgs rclcpp Eigen3 angles tf2_ros tf2_geometry_msgs )
+target_include_directories( controller_test
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>)
 
 
 add_executable(sharedptr_test src/sharedptr_test.cpp )
@@ -81,6 +90,7 @@ install(TARGETS
 #  laser_processor_test
 perception_test
 sharedptr_test
+controller_test
 transforml_test
   DESTINATION lib/${PROJECT_NAME})
 
