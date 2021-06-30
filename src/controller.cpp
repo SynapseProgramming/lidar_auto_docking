@@ -28,7 +28,7 @@
 BaseController::BaseController(ros::NodeHandle& nh)
 {
   // Create publishers
-  path_pub_ = nh.advertise<nav_msgs::Path>("path", 10);
+  path_pub_ = nh.advertise<nav_msgs::msg::Path>("path", 10);
   cmd_vel_pub_ = nh.advertise<geometry_msgs::msg::Twist>("cmd_vel", 10);
 
   // TODO(enhancement): these should be loaded from ROS params
@@ -40,35 +40,40 @@ BaseController::BaseController(ros::NodeHandle& nh)
   beta_ = 0.2;
   lambda_ = 2.0;
 }
+*/
 
-bool BaseController::approach(const geometry_msgs::PoseStamped& target)
-{
+bool BaseController::approach(const geometry_msgs::msg::PoseStamped& target) {
   // Transform pose by -dist_ in the X direction of the dock
-  geometry_msgs::PoseStamped pose = target;
+  geometry_msgs::msg::PoseStamped pose = target;
   {
-    tf::Quaternion q;
-    tf::quaternionMsgToTF(pose.pose.orientation, q);
-    double theta = angles::normalize_angle(tf::getYaw(q));
+    // tf::Quaternion q;
+    // tf::quaternionMsgToTF(pose.pose.orientation, q);
+    double theta = angles::normalize_angle(tf2::getYaw(pose.pose.orientation));
     // If the target has an invalid orientation then don't approach it.
-    if (!std::isfinite(theta))
-    {
-      ROS_ERROR_STREAM_NAMED("controller", "Invalid approach target for
-docking."); stop(); return true;
+    if (!std::isfinite(theta)) {
+      // ROS_ERROR_STREAM_NAMED("controller", "Invalid approach target
+      // for docking.");
+      RCLCPP_ERROR(rclcpp::get_logger("rclcpp"),
+                   "Invalid approach target for docking");
+      stop();
+      return true;
     }
     pose.pose.position.x += cos(theta) * -dist_;
     pose.pose.position.y += sin(theta) * -dist_;
   }
 
   // Transform target into base frame
-  try
-  {
-    pose.header.stamp = ros::Time(0);
+  try {
+    pose.header.stamp = rclcpp::Time(0);
     listener_.transformPose("base_link", pose, pose);
-  }
-  catch (tf::TransformException const &ex)
-  {
-    ROS_WARN_STREAM_THROTTLE(1.0, "Couldn't get transform from dock to
-base_link"); stop(); return false;
+  } catch (const tf2::TransformException& ex) {
+    //        ROS_WARN_STREAM_THROTTLE(1.0, "Couldn't get transform from dock to
+    //  base_link");
+    RCLCPP_ERROR(rclcpp::get_logger("rclcpp"),
+                 "Couldn't get transform from dock to base_link");
+
+    stop();
+    return false;
   }
 
   // Distance to goal
@@ -76,20 +81,19 @@ base_link"); stop(); return false;
                        pose.pose.position.y * pose.pose.position.y);
 
   // Once we get close, reduce d_
-  if (r < 0.3)
-  {
-    // This part is trying to bring the target point into the goal but right now
-it just jumps from
-    // some virtual pose to the actual pose. We want to bring it in more
-gradually. dist_ = 0.0;
+  if (r < 0.3) {
+    // This part is trying to bring the target point into the goal but
+    //  right now it just jumps from
+    // some virtual pose to the actual pose. We want to bring it in
+    // more gradually.
+    dist_ = 0.0;
 
     // dist_ = 1.6*r - 0.08;
     // if (dist_ < 0.0) dist_ = 0.0;
   }
 
   // If within distance tolerance, return true
-  if (r < 0.01)
-  {
+  if (r < 0.01) {
     // stop();
     return true;
   }
@@ -98,50 +102,51 @@ gradually. dist_ = 0.0;
   double delta = std::atan2(-pose.pose.position.y, pose.pose.position.x);
 
   // Determine orientation of goal frame relative to r_
-  tf::Quaternion q;
-  tf::quaternionMsgToTF(pose.pose.orientation, q);
-  double theta = angles::normalize_angle(tf::getYaw(q) + delta);
+  // tf::Quaternion q;
+  // tf::quaternionMsgToTF(pose.pose.orientation, q);
+  double theta =
+      angles::normalize_angle(tf2::getYaw(pose.pose.orientation) + delta);
 
   // Compute the virtual control
   double a = atan(-k1_ * theta);
   // Compute curvature (k)
-  double k = -1.0/r * (k2_ * (delta - a) + (1 +
-(k1_/1+((k1_*theta)*(k1_*theta))))*sin(delta));
+  double k = -1.0 / r *
+             (k2_ * (delta - a) +
+              (1 + (k1_ / 1 + ((k1_ * theta) * (k1_ * theta)))) * sin(delta));
 
   // Compute max_velocity based on curvature
   double v = max_velocity_ / (1 + beta_ * std::pow(fabs(k), lambda_));
-  // Limit max velocity based on approaching target (avoids overshoot)
-  if (r < 0.75)
-  {
+  // Limit max velocity based on approaching target (avoids
+  // overshoot)
+
+  if (r < 0.75) {
     v = std::max(min_velocity_, std::min(std::min(r, max_velocity_), v));
-  }
-  else
-  {
+  } else {
     v = std::min(max_velocity_, std::max(min_velocity_, v));
   }
 
   // Compute angular velocity
   double w = k * v;
   // Bound angular velocity
-  double bounded_w = std::min(max_angular_velocity_,
-std::max(-max_angular_velocity_, w));
-  // Make sure that if we reduce w, we reduce v so that kurvature is still
-followed if (w != 0.0)
-  {
-    v *= (bounded_w/w);
+  double bounded_w =
+      std::min(max_angular_velocity_, std::max(-max_angular_velocity_, w));
+  // Make sure that if we reduce w, we reduce v so that kurvature is
+  // still followed
+  if (w != 0.0) {
+    v *= (bounded_w / w);
   }
 
   // Send command to base
   command_.linear.x = v;
   command_.angular.z = bounded_w;
-  cmd_vel_pub_.publish(command_);
+  cmd_vel_pub_->publish(command_);
 
   // Create debugging view of path
-  nav_msgs::Path plan;
-  plan.header.stamp = ros::Time::now();
+  nav_msgs::msg::Path plan;
+  plan.header.stamp = rclcpp::Clock().now();
   plan.header.frame_id = "base_link";
   // Add origin
-  geometry_msgs::PoseStamped path_pose;
+  geometry_msgs::msg::PoseStamped path_pose;
   path_pose.header.frame_id = "base_link";
   path_pose.pose.orientation.w = 1.0;
   plan.poses.push_back(path_pose);
@@ -151,13 +156,12 @@ followed if (w != 0.0)
     path_pose.pose.position.x += 0.1 * command_.linear.x * cos(yaw);
     path_pose.pose.position.y += 0.1 * command_.linear.x * sin(yaw);
     yaw += 0.1 * command_.angular.z;
-    path_pose.pose.orientation.z = sin(theta/2.0);
-    path_pose.pose.orientation.w = cos(theta/2.0);
+    path_pose.pose.orientation.z = sin(theta / 2.0);
+    path_pose.pose.orientation.w = cos(theta / 2.0);
 
     double dx = path_pose.pose.position.x - pose.pose.position.x;
     double dy = path_pose.pose.position.y - pose.pose.position.y;
-    if ((dx * dx + dy * dy) < 0.005)
-    {
+    if ((dx * dx + dy * dy) < 0.005) {
       break;
     }
 
@@ -166,11 +170,11 @@ followed if (w != 0.0)
   // Push goal pose onto path
   plan.poses.push_back(pose);
   // Publish path
-  path_pub_.publish(plan);
+  path_pub_->publish(plan);
 
   return false;
 }
-*/
+
 bool BaseController::backup(double distance, double rotate_distance) {
   // If the inputs are invalid then don't backup.
   if (!std::isfinite(distance) || !std::isfinite(rotate_distance)) {

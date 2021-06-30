@@ -36,7 +36,7 @@ class BaseController {
    * by Park and Kuipers, ICRA 2011
    * @returns true if base has reached goal.
    */
-  // bool approach(const geometry_msgs::PoseStamped& target);
+  bool approach(const geometry_msgs::msg::PoseStamped& target);
 
   /**
    * @brief Back off dock, then rotate. Robot is first reversed by the
