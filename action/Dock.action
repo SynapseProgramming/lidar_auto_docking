@@ -1,0 +1,20 @@
+# Inital pose of the dock, usually map referenced
+# If the header is empty, or quaternion = (0 0 0 0), then
+#   the intial dock pose will be straight ahead of the robot
+geometry_msgs/PoseStamped dock_pose
+
+# Specify an (optional) name for the dock
+string dock_id
+
+---
+# Are we docked and charging?
+bool docked
+
+# Name of the dock, if known
+string dock_id
+---
+# Feedback is the detected pose of the dock.
+geometry_msgs/PoseStamped dock_pose
+
+# Plus the control output
+geometry_msgs/Twist command
