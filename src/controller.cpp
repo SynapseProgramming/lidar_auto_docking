@@ -24,23 +24,22 @@
 #include <list>
 #include <vector>
 
-/*
-BaseController::BaseController(ros::NodeHandle& nh)
-{
+BaseController::BaseController(std::shared_ptr<rclcpp::Node> node_ptr)
+    : listener_(node_ptr->get_clock()) {
   // Create publishers
-  path_pub_ = nh.advertise<nav_msgs::msg::Path>("path", 10);
-  cmd_vel_pub_ = nh.advertise<geometry_msgs::msg::Twist>("cmd_vel", 10);
+  path_pub_ = node_ptr->create_publisher<nav_msgs::msg::Path>("path", 10);
+  cmd_vel_pub_ =
+      node_ptr->create_publisher<geometry_msgs::msg::Twist>("cmd_vel", 10);
 
   // TODO(enhancement): these should be loaded from ROS params
   k1_ = 3;
   k2_ = 2;
   min_velocity_ = 0.06;
   max_velocity_ = 0.06;
-  max_angular_velocity_ = 2.0;
+  max_angular_velocity_ = 1.0;
   beta_ = 0.2;
   lambda_ = 2.0;
 }
-*/
 
 bool BaseController::approach(const geometry_msgs::msg::PoseStamped& target) {
   // Transform pose by -dist_ in the X direction of the dock

@@ -25,10 +25,11 @@
 #include <nav_msgs/msg/path.hpp>
 
 #include "lidar_auto_docking/tf2listener.h"
+#include "rclcpp/rclcpp.hpp"
 
 class BaseController {
  public:
-  // explicit BaseController(ros::NodeHandle& nh);
+  explicit BaseController(std::shared_ptr<rclcpp::Node> node_ptr);
 
   /**
    * @brief Implements something loosely based on "A Smooth Control Law for
