@@ -48,7 +48,7 @@ class BaseController {
   /**
    * @brief Get the last command sent
    */
-  // bool getCommand(geometry_msgs::Twist& command);
+  bool getCommand(geometry_msgs::msg::Twist& command);
 
   /** @brief send stop command to robot base */
   void stop();

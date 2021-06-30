@@ -29,7 +29,7 @@ BaseController::BaseController(ros::NodeHandle& nh)
 {
   // Create publishers
   path_pub_ = nh.advertise<nav_msgs::Path>("path", 10);
-  cmd_vel_pub_ = nh.advertise<geometry_msgs::Twist>("cmd_vel", 10);
+  cmd_vel_pub_ = nh.advertise<geometry_msgs::msg::Twist>("cmd_vel", 10);
 
   // TODO(enhancement): these should be loaded from ROS params
   k1_ = 3;
@@ -261,13 +261,12 @@ fast. command_.angular.z = std::max(-1.0, -(fabs(error)*1.3+0.1));
   cmd_vel_pub_.publish(command_);
   return false;
 }
-
-bool BaseController::getCommand(geometry_msgs::Twist& command)
-{
+*/
+bool BaseController::getCommand(geometry_msgs::msg::Twist& command) {
   command = command_;
   return true;
 }
-*/
+
 void BaseController::stop() {
   command_ = geometry_msgs::msg::Twist();
   cmd_vel_pub_->publish(command_);
