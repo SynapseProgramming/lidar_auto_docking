@@ -29,10 +29,12 @@ find_package(Eigen3 REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(nav_msgs REQUIRED)
+find_package(rclcpp_action REQUIRED)
 find_package(rosidl_default_generators REQUIRED)
 
 rosidl_generate_interfaces(${PROJECT_NAME}
   "action/Dock.action"
+   DEPENDENCIES geometry_msgs
 )
 
 add_executable(perception_test src/perception_test.cpp src/perception.cpp src/laser_processor.cpp src/linear_pose_filter_2d.cpp src/icp_2d.cpp src/tf2listener.cpp)
@@ -61,6 +63,14 @@ target_include_directories( transforml_test
 
 
 
+add_executable(auto_dock_test src/autodock.cpp)
+ament_target_dependencies(auto_dock_test nav_msgs geometry_msgs tf2 sensor_msgs rclcpp rclcpp_action Eigen3 angles tf2_ros tf2_geometry_msgs )
+target_include_directories( auto_dock_test
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>)
+rosidl_target_interfaces(auto_dock_test ${PROJECT_NAME} "rosidl_typesupport_cpp")
+
 
 
 
@@ -77,6 +87,11 @@ install(
   DESTINATION include
 )
 
+install(
+  DIRECTORY
+  action
+  DESTINATION share/${PROJECT_NAME}
+)
 
  #allow target to access header files defined in include
 target_include_directories( perception_test
@@ -92,6 +107,7 @@ install(TARGETS
 #icp_2d_test
 #  linear_pose_filter_2d_test
 #  laser_processor_test
+auto_dock_test
 perception_test
 sharedptr_test
 controller_test
