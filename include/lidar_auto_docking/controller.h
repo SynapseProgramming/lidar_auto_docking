@@ -51,7 +51,8 @@ class BaseController {
   // bool getCommand(geometry_msgs::Twist& command);
 
   /** @brief send stop command to robot base */
-  // void stop();
+  void stop();
+
  private:
   rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr cmd_vel_pub_;
   rclcpp::Publisher<nav_msgs::msg::Path>::SharedPtr path_pub_;

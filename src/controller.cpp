@@ -267,11 +267,10 @@ bool BaseController::getCommand(geometry_msgs::Twist& command)
   command = command_;
   return true;
 }
-
-void BaseController::stop()
-{
-  command_ = geometry_msgs::Twist();
-  cmd_vel_pub_.publish(command_);
+*/
+void BaseController::stop() {
+  command_ = geometry_msgs::msg::Twist();
+  cmd_vel_pub_->publish(command_);
 
   // Reset the backup controller
   ready_ = false;
@@ -279,6 +278,5 @@ void BaseController::stop()
   // Reset the approach controller
   dist_ = 0.4;
 }
-*/
 
 int main() { return 0; }
