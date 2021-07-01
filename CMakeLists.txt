@@ -17,6 +17,7 @@ endif()
 
 # find dependencies
 find_package(ament_cmake REQUIRED)
+find_package(ament_cmake_python REQUIRED)
 # uncomment the following section in order to fill in
 # further dependencies manually.
 find_package(geometry_msgs REQUIRED)
@@ -27,6 +28,7 @@ find_package(angles REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(Eigen3 REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(rclpy REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(nav_msgs REQUIRED)
 find_package(rclcpp_action REQUIRED)
@@ -81,6 +83,13 @@ rosidl_target_interfaces(auto_dock_test ${PROJECT_NAME} "rosidl_typesupport_cpp"
 #ament_target_dependencies(laser_processor_test geometry_msgs tf2 sensor_msgs)
 #ament_target_dependencies(laser_processor_test geometry_msgs tf2 angles)
 
+
+ament_python_install_package(${PROJECT_NAME})
+# Install Python executables
+install(PROGRAMS
+  scripts/test_script.py
+  DESTINATION lib/${PROJECT_NAME}
+)
 
 install(
   DIRECTORY include/
