@@ -11,6 +11,7 @@
 #include "lidar_auto_docking/action/dock.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp_action/rclcpp_action.hpp"
+using namespace std::chrono_literals;
 
 class DockingServer : public rclcpp::Node {
  public:
@@ -19,7 +20,7 @@ class DockingServer : public rclcpp::Node {
 
   explicit DockingServer(
       const rclcpp::NodeOptions& options = rclcpp::NodeOptions())
-      : Node("docking_server", options) {
+      : Node("docking_server", options), NUM_OF_RETRIES_(5) {
     using namespace std::placeholders;
     // initialise the action server object
 
@@ -67,39 +68,68 @@ class DockingServer : public rclcpp::Node {
     return rclcpp_action::CancelResponse::ACCEPT;
   }
 
+  // this function initialises the dock timeout.
+  void initDockTimeout() {
+    // get current time and fill up the header
+    rclcpp::Time time_now = rclcpp::Clock().now();
+    // TODO: Change duration to 120 once it is stable.
+    deadline_docking_ = time_now + rclcpp::Duration(5s);
+    num_of_retries_ = NUM_OF_RETRIES_;
+  }
+
+  bool isDockingTimedOut() {
+    // Have we exceeded our deadline or tries?
+    rclcpp::Time time_now = rclcpp::Clock().now();
+    if (time_now > deadline_docking_ || !num_of_retries_) {
+      return true;
+    }
+    return false;
+  }
+
+  // main function which is called when a goal is received
   void execute(const std::shared_ptr<GoalHandleDock> goal_handle) {
     RCLCPP_INFO(this->get_logger(), "Executing goal");
 
-    rclcpp::Rate loop_rate(1);
+    rclcpp::Rate loop_rate(5);
     const auto goal = goal_handle->get_goal();
     auto feedback = std::make_shared<Dock::Feedback>();
     auto result = std::make_shared<Dock::Result>();
-    // for our implementation, we would just count up for dock_pose and command.
+    // start perception
+    perception_->start(goal->dock_pose);
 
-    // count up from 1 to 10
-    for (int i = 1; i <= 10 && rclcpp::ok(); ++i) {
-      // Check if there is a cancel request
-      if (goal_handle->is_canceling()) {
-        result->docked = false;
-        result->dock_id = "HEHEE";
-        // return the current result
-        goal_handle->canceled(result);
-        RCLCPP_INFO(this->get_logger(), "Goal Canceled");
-        return;
-      }
-      // TODO: add in result as numerical base
-      feedback->dock_pose.pose.position.x = i + goal->dock_pose.pose.position.x;
-      feedback->dock_pose.pose.position.y = i + 1;
-      feedback->dock_pose.pose.position.z = i + 2;
-      feedback->command.linear.x = i;
-      feedback->command.linear.y = i + 1;
-      feedback->command.linear.z = i + 2;
-      goal_handle->publish_feedback(feedback);
-      RCLCPP_INFO(this->get_logger(), "Publish Feedback");
-
+    // TODO: TEST TIMEOUT FUNCTION
+    initDockTimeout();
+    while (!isDockingTimedOut()) {
+      std::cout << "Docking not timed out yet!\n";
       loop_rate.sleep();
     }
+    std::cout << "DOCKING TIMED OUT!\n";
+    /*
+        // count up from 1 to 10
+        for (int i = 1; i <= 10 && rclcpp::ok(); ++i) {
+          // Check if there is a cancel request
+          if (goal_handle->is_canceling()) {
+            result->docked = false;
+            result->dock_id = "HEHEE";
+            // return the current result
+            goal_handle->canceled(result);
+            RCLCPP_INFO(this->get_logger(), "Goal Canceled");
+            return;
+          }
+          // TODO: add in result as numerical base
+          feedback->dock_pose.pose.position.x = i +
+       goal->dock_pose.pose.position.x; feedback->dock_pose.pose.position.y
+       = i
+       + 1; feedback->dock_pose.pose.position.z = i + 2;
+          feedback->command.linear.x = i;
+          feedback->command.linear.y = i + 1;
+          feedback->command.linear.z = i + 2;
+          goal_handle->publish_feedback(feedback);
+          RCLCPP_INFO(this->get_logger(), "Publish Feedback");
 
+          loop_rate.sleep();
+        }
+    */
     // Check if goal is done
     if (rclcpp::ok()) {
       // result->sequence = sequence;
@@ -159,6 +189,7 @@ int main(int argc, char** argv) {
   rclcpp::init(argc, argv);
 
   auto action_server = std::make_shared<DockingServer>();
+  action_server->init_objects();
 
   rclcpp::spin(action_server);
 
