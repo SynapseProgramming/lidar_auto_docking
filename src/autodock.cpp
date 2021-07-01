@@ -1,3 +1,4 @@
+#include <lidar_auto_docking/controller.h>
 #include <lidar_auto_docking/perception.h>
 
 #include <functional>
@@ -35,6 +36,7 @@ class DockingServer : public rclcpp::Node {
   void init_objects() {
     std::shared_ptr<rclcpp::Node> new_ptr = shared_ptr_from_this();
     perception_ = std::make_shared<DockPerception>(new_ptr);
+    controller_ = std::make_shared<BaseController>(new_ptr);
   }
 
   // shared_ptr_from_this would return a shared pointer of the current class
@@ -118,6 +120,7 @@ class DockingServer : public rclcpp::Node {
   }
 
   std::shared_ptr<DockPerception> perception_;
+  std::shared_ptr<BaseController> controller_;
   // determine if charging
   bool charging_;
 
