@@ -23,7 +23,10 @@ class DockingServer : public rclcpp::Node {
       const rclcpp::NodeOptions& options = rclcpp::NodeOptions())
       : Node("docking_server", options),
         NUM_OF_RETRIES_(5),
-        DOCKED_DISTANCE_THRESHOLD_(0.30) {
+        DOCKED_DISTANCE_THRESHOLD_(0.30),
+        abort_distance_(0.32),
+        abort_angle_(0.090),
+        abort_threshold_(0.04) {
     using namespace std::placeholders;
     // initialise the action server object
 
