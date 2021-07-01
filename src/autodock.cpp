@@ -119,6 +119,13 @@ class DockingServer : public rclcpp::Node {
         .detach();
   }
 
+  // Configuration Constants.
+  int NUM_OF_RETRIES_;  // Number of times the robot gets to attempt
+  double DOCK_CONNECTOR_CLEARANCE_DISTANCE_;  // The amount to back off in order
+                                              // to clear the dock connector.
+  double DOCKED_DISTANCE_THRESHOLD_;  // Threshold distance that indicates that
+                                      // the robot might be docked
+
   std::shared_ptr<DockPerception> perception_;
   std::shared_ptr<BaseController> controller_;
   // determine if charging
@@ -139,8 +146,8 @@ class DockingServer : public rclcpp::Node {
                          // failing. This variable will count down.
   bool cancel_docking_;  // Signal that docking has failed and the action server
                          // should abort the goal.
-  // ros::Time deadline_docking_;       // Time when the docking times out.
-  // ros::Time deadline_not_charging_;  // Time when robot gives up on the
+  rclcpp::Time deadline_docking_;       // Time when the docking times out.
+  rclcpp::Time deadline_not_charging_;  // Time when robot gives up on the
   // charge
   // state and retries docking.
   bool charging_timeout_set_;  // Flag to indicate if the deadline_not_charging
