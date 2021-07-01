@@ -1,3 +1,4 @@
+#include <angles/angles.h>
 #include <lidar_auto_docking/controller.h>
 #include <lidar_auto_docking/perception.h>
 
@@ -144,6 +145,21 @@ class DockingServer : public rclcpp::Node {
       }
     }
 
+    RCLCPP_INFO(this->get_logger(), "Pre-orienting the bot!");
+    double dock_yaw = angles::normalize_angle(
+        tf2::getYaw(dock_pose_base_link.pose.orientation));
+    if (!std::isfinite(dock_yaw)) {
+      RCLCPP_ERROR(this->get_logger(), "Dock yaw is invalid.");
+      std::cout << "The invalid yaw value is: " << dock_yaw << std::endl;
+      cancel_docking_ = true;
+    } else if (rclcpp::ok() && continueDocking(result, goal_handle)) {
+      // Set backup limit to be the initial dock range.
+      backup_limit_ =
+          std::sqrt(std::pow(dock_pose_base_link.pose.position.x, 2) +
+                    std::pow(dock_pose_base_link.pose.position.y, 2));
+      // Shorten up the range a bit.
+      backup_limit_ *= 0.9;
+    }
     /*
         // count up from 1 to 10
         for (int i = 1; i <= 10 && rclcpp::ok(); ++i) {
