@@ -18,10 +18,12 @@ class DockingServer : public rclcpp::Node {
  public:
   using Dock = lidar_auto_docking::action::Dock;
   using GoalHandleDock = rclcpp_action::ServerGoalHandle<Dock>;
-
+  // TODO: ADD IN RECOFIGURABLE PARAMETERS FOR DOCKED DISTANCE THRESHOLD
   explicit DockingServer(
       const rclcpp::NodeOptions& options = rclcpp::NodeOptions())
-      : Node("docking_server", options), NUM_OF_RETRIES_(5) {
+      : Node("docking_server", options),
+        NUM_OF_RETRIES_(5),
+        DOCKED_DISTANCE_THRESHOLD_(0.55) {
     using namespace std::placeholders;
     // initialise the action server object
 
@@ -248,10 +250,39 @@ class DockingServer : public rclcpp::Node {
           // Decrement the number of retries.
           num_of_retries_--;
         } else {
-          // TODO: port over isApproachBad
+          if (isApproachBad(correction_angle_)) {
+            // Not on target, abort, abort, abort!
+            controller_->stop();
+            aborting_ = true;
+          } else {
+            // do stuff here
+            geometry_msgs::msg::PoseStamped dock_x_distance;
+            perception_->getPose(dock_x_distance, "base_link");
+
+            std::cout << "Distance to dock: " << dock_x_distance.pose.position.x
+                      << std::endl;
+            // remember to replace 0.55 with a reconfigurable parameter
+            if (dock_x_distance.pose.position.x <= DOCKED_DISTANCE_THRESHOLD_) {
+              charging_ = true;
+            } else {
+              charging_ = false;
+            }
+            // Update control
+            controller_->approach(feedback->dock_pose);
+            // Are we on the dock? Check charging timeout.
+            // TODO: port over checkDockChargingConditions(maybe)
+            // checkDockChargingConditions();
+          }
         }
+        // feedback
+        controller_->getCommand(feedback->command);
+        goal_handle->publish_feedback(feedback);
       }
+      loop_rate.sleep();
     }
+    // stop all movements once we are done docking
+    controller_->stop();
+    perception_->stop();
 
     /*
         // count up from 1 to 10
@@ -344,8 +375,7 @@ class DockingServer : public rclcpp::Node {
   // state and retries docking.
   bool charging_timeout_set_;  // Flag to indicate if the
                                // deadline_not_charging has been set.
-
-};  // class DockingServer
+};                             // class DockingServer
 
 int main(int argc, char** argv) {
   rclcpp::init(argc, argv);
