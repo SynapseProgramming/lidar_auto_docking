@@ -45,7 +45,7 @@ class MinimalActionClient(Node):
         self._action_client.wait_for_server()
 
         goal_msg = Dock.Goal()
-        goal_msg.dock_pose.pose.position.x = float(10)
+        goal_msg.dock_pose.pose.position.x = float(20)
         # fill up the rest later
         self.get_logger().info("Sending goal request...")
 

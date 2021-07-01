@@ -62,8 +62,8 @@ class DockingServer : public rclcpp::Node {
     auto result = std::make_shared<Dock::Result>();
     // for our implementation, we would just count up for dock_pose and command.
 
-    // count up from 1 to 20
-    for (int i = 1; i <= 20 && rclcpp::ok(); ++i) {
+    // count up from 1 to 10
+    for (int i = 1; i <= 10 && rclcpp::ok(); ++i) {
       // Check if there is a cancel request
       if (goal_handle->is_canceling()) {
         result->docked = false;
@@ -74,7 +74,7 @@ class DockingServer : public rclcpp::Node {
         return;
       }
       // TODO: add in result as numerical base
-      feedback->dock_pose.pose.position.x = i;
+      feedback->dock_pose.pose.position.x = i + goal->dock_pose.pose.position.x;
       feedback->dock_pose.pose.position.y = i + 1;
       feedback->dock_pose.pose.position.z = i + 2;
       feedback->command.linear.x = i;
