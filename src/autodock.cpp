@@ -11,9 +11,7 @@
 
 class DockingServer : public rclcpp::Node {
  public:
-  //  using Fibonacci = example_interfaces::action::Fibonacci;
   using Dock = lidar_auto_docking::action::Dock;
-  //  using GoalHandleFibonacci = rclcpp_action::ServerGoalHandle<Fibonacci>;
   using GoalHandleDock = rclcpp_action::ServerGoalHandle<Dock>;
 
   explicit DockingServer(
@@ -22,6 +20,7 @@ class DockingServer : public rclcpp::Node {
     using namespace std::placeholders;
     // initialise the action server object
 
+    // the string is the action topic
     this->action_server_ = rclcpp_action::create_server<Dock>(
         this->get_node_base_interface(), this->get_node_clock_interface(),
         this->get_node_logging_interface(),
