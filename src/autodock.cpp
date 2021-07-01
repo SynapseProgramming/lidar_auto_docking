@@ -105,14 +105,10 @@ class DockingServer : public rclcpp::Node {
       return false;
     }
 
-    /*
-    // Something is stopping us.
-    else if (dock_.isPreemptRequested()) {
-      dock_.setPreempted(result);
-      ROS_WARN("Docking failure: preempted");
+    else if (goal_handle->is_canceling()) {
       return false;
     }
-*/
+
     return true;
   }
 
@@ -141,7 +137,6 @@ class DockingServer : public rclcpp::Node {
     RCLCPP_INFO(this->get_logger(), "Finding Dock");
 
     while (!perception_->getPose(dock_pose_base_link, "base_link")) {
-      // TODO: PORT OVER continueDocking function first
       if (!continueDocking(result, goal_handle)) {
         RCLCPP_ERROR(this->get_logger(),
                      "Docking failed: Initial dock not found.");
