@@ -36,6 +36,7 @@ class MinimalActionClient(Node):
             self.get_logger().info("Goal succeeded!")
         else:
             self.get_logger().info("Goal failed with status: {0}".format(status))
+            self.get_logger().info(str(result.docked))
 
         # Shutdown after receiving a result
         rclpy.shutdown()

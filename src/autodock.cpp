@@ -72,7 +72,7 @@ class DockingServer : public rclcpp::Node {
   void initDockTimeout() {
     // get current time and fill up the header
     rclcpp::Time time_now = rclcpp::Clock().now();
-    // TODO: Change duration to 120 once it is stable.
+    // TODO: change the timeout back to 120
     deadline_docking_ = time_now + rclcpp::Duration(5s);
     num_of_retries_ = NUM_OF_RETRIES_;
   }
@@ -86,24 +86,69 @@ class DockingServer : public rclcpp::Node {
     return false;
   }
 
+  bool continueDocking(std::shared_ptr<Dock::Result> result,
+                       const std::shared_ptr<GoalHandleDock> goal_handle) {
+    // If charging, stop and return success.
+
+    if (charging_) {
+      result->docked = true;
+      goal_handle->succeed(result);
+      RCLCPP_INFO(this->get_logger(), "DOCK REACHED!");
+      return false;
+    }
+
+    // Timeout on time or retries.
+    else if (isDockingTimedOut() || cancel_docking_) {
+      result->docked = false;
+      // return the current result
+      RCLCPP_INFO(this->get_logger(), "Docking Cancelled");
+      return false;
+    }
+
+    /*
+    // Something is stopping us.
+    else if (dock_.isPreemptRequested()) {
+      dock_.setPreempted(result);
+      ROS_WARN("Docking failure: preempted");
+      return false;
+    }
+*/
+    return true;
+  }
+
   // main function which is called when a goal is received
   void execute(const std::shared_ptr<GoalHandleDock> goal_handle) {
     RCLCPP_INFO(this->get_logger(), "Executing goal");
 
-    rclcpp::Rate loop_rate(5);
+    rclcpp::Rate loop_rate(50);
     const auto goal = goal_handle->get_goal();
     auto feedback = std::make_shared<Dock::Feedback>();
     auto result = std::make_shared<Dock::Result>();
+
+    // Reset flags.
+    result->docked = false;
+    aborting_ = false;
+    charging_timeout_set_ = false;
+    cancel_docking_ = false;
+    charging_ = false;
+
     // start perception
     perception_->start(goal->dock_pose);
-
-    // TODO: TEST TIMEOUT FUNCTION
+    // start the timeout counter
     initDockTimeout();
-    while (!isDockingTimedOut()) {
-      std::cout << "Docking not timed out yet!\n";
-      loop_rate.sleep();
+    // get the first dock pose wrt base link.
+    geometry_msgs::msg::PoseStamped dock_pose_base_link;
+    RCLCPP_INFO(this->get_logger(), "Finding Dock");
+
+    while (!perception_->getPose(dock_pose_base_link, "base_link")) {
+      // TODO: PORT OVER continueDocking function first
+      if (!continueDocking(result, goal_handle)) {
+        RCLCPP_ERROR(this->get_logger(),
+                     "Docking failed: Initial dock not found.");
+        break;
+      }
     }
-    std::cout << "DOCKING TIMED OUT!\n";
+
     /*
         // count up from 1 to 10
         for (int i = 1; i <= 10 && rclcpp::ok(); ++i) {
@@ -130,21 +175,34 @@ class DockingServer : public rclcpp::Node {
           loop_rate.sleep();
         }
     */
+    /*
+        if (goal_handle->is_canceling()) {
+          result->docked = false;
+          result->dock_id = "HEHEE";
+          // return the current result
+          goal_handle->canceled(result);
+          RCLCPP_INFO(this->get_logger(), "Goal Canceled");
+          return;
+        }
+    */
     // Check if goal is done
-    if (rclcpp::ok()) {
-      // result->sequence = sequence;
-      result->docked = true;
-      result->dock_id = "YAY";
-      // return succeeded
-      goal_handle->succeed(result);
-      RCLCPP_INFO(this->get_logger(), "Goal Succeeded");
-    }
+    /* NOTE: if this function is not returned, then it would default to a
+       failure.
+        if (rclcpp::ok()) {
+          // result->sequence = sequence;
+          result->docked = true;
+          result->dock_id = "YAY";
+          // return succeeded
+          goal_handle->succeed(result);
+          RCLCPP_INFO(this->get_logger(), "Goal Succeeded");
+        }
+        */
   }
 
   void handle_accepted(const std::shared_ptr<GoalHandleDock> goal_handle) {
     using namespace std::placeholders;
-    // this needs to return quickly to avoid blocking the executor, so spin up a
-    // new thread
+    // this needs to return quickly to avoid blocking the executor, so spin up
+    // a new thread
     std::thread{std::bind(&DockingServer::execute, this, _1), goal_handle}
         .detach();
   }
@@ -153,8 +211,8 @@ class DockingServer : public rclcpp::Node {
   int NUM_OF_RETRIES_;  // Number of times the robot gets to attempt
   double DOCK_CONNECTOR_CLEARANCE_DISTANCE_;  // The amount to back off in order
                                               // to clear the dock connector.
-  double DOCKED_DISTANCE_THRESHOLD_;  // Threshold distance that indicates that
-                                      // the robot might be docked
+  double DOCKED_DISTANCE_THRESHOLD_;  // Threshold distance that indicates
+                                      // that the robot might be docked
 
   std::shared_ptr<DockPerception> perception_;
   std::shared_ptr<BaseController> controller_;
@@ -174,14 +232,14 @@ class DockingServer : public rclcpp::Node {
                    // abort.
   int num_of_retries_;   // The number of times the robot gets to abort before
                          // failing. This variable will count down.
-  bool cancel_docking_;  // Signal that docking has failed and the action server
-                         // should abort the goal.
+  bool cancel_docking_;  // Signal that docking has failed and the action
+                         // server should abort the goal.
   rclcpp::Time deadline_docking_;       // Time when the docking times out.
   rclcpp::Time deadline_not_charging_;  // Time when robot gives up on the
   // charge
   // state and retries docking.
-  bool charging_timeout_set_;  // Flag to indicate if the deadline_not_charging
-                               // has been set.
+  bool charging_timeout_set_;  // Flag to indicate if the
+                               // deadline_not_charging has been set.
 
 };  // class DockingServer
 
