@@ -113,6 +113,51 @@ class DockingServer : public rclcpp::Node {
     return true;
   }
 
+  bool backupDistance() {
+    // Initialized to 1.0 meter as our basic backup amount.
+    double distance = 1.0;
+
+    // Distance should be proportional to the amount of yaw correction.
+    // The constants are purely arbitrary because they seemed good at the time.
+    // distance *= 3.5*fabs(correction_angle_);
+    distance *= 1.5 * fabs(correction_angle_);
+    // We should backup more the more times we try. This function should range
+    // from 1 to 2. num_of_retries is initially equal to NUM_OF_RETRIES and
+    // decrements as the robot retries.
+    double retry_constant =
+        2 - static_cast<float>(num_of_retries_) / NUM_OF_RETRIES_;
+    retry_constant = std::max(1.0, std::min(2.0, retry_constant));
+    distance *= retry_constant;
+
+    // Cap the backup limit to 1 meter, just in case.
+    backup_limit_ = std::min(1.0, backup_limit_);
+    // Threshold distance.
+    distance = std::max(0.2, std::min(backup_limit_, distance));
+
+    return distance;
+  }
+
+  // method to reverse the robot when the abort flag is set.
+  void executeBackupSequence(rclcpp::Rate& r) {
+    RCLCPP_ERROR(this->get_logger(), "Poor Approach! Backing up!");
+    // Get off of the dock. Try to straighten out.
+    while (!controller_->backup(DOCK_CONNECTOR_CLEARANCE_DISTANCE_,
+                                correction_angle_)) {
+      if (isDockingTimedOut()) {
+        return;
+      }
+      r.sleep();  // Sleep the rate control object.
+    }
+    // Move to recovery pose.
+    // TODO: port over backupDistance
+    while (!controller_->backup(backupDistance(), 0.0)) {
+      if (isDockingTimedOut()) {
+        return;
+      }
+      r.sleep();
+    }
+  }
+
   // main function which is called when a goal is received
   void execute(const std::shared_ptr<GoalHandleDock> goal_handle) {
     RCLCPP_INFO(this->get_logger(), "Executing goal");
@@ -159,7 +204,27 @@ class DockingServer : public rclcpp::Node {
                     std::pow(dock_pose_base_link.pose.position.y, 2));
       // Shorten up the range a bit.
       backup_limit_ *= 0.9;
+
+      // Preorient the robot towards the dock.
+      while (!controller_->backup(0.0, dock_yaw) &&
+             continueDocking(result, goal_handle) && rclcpp::ok()) {
+        loop_rate.sleep();  // Sleep the rate control object.
+      }
     }
+    // Make sure controller is ready
+    controller_->stop();
+
+    // main control which brings the bot to the dock
+    while (rclcpp::ok() && continueDocking(result, goal_handle)) {
+      // Update perception
+      if (perception_->getPose(feedback->dock_pose)) {
+        if (aborting_) {
+          // do other stuff
+          // TODO: port over executeBackupSequence
+        }
+      }
+    }
+
     /*
         // count up from 1 to 10
         for (int i = 1; i <= 10 && rclcpp::ok(); ++i) {
