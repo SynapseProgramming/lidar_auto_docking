@@ -1,3 +1,5 @@
+#include <lidar_auto_docking/perception.h>
+
 #include <functional>
 #include <geometry_msgs/msg/pose_stamped.hpp>
 #include <geometry_msgs/msg/twist.hpp>
@@ -28,6 +30,16 @@ class DockingServer : public rclcpp::Node {
         std::bind(&DockingServer::handle_goal, this, _1, _2),
         std::bind(&DockingServer::handle_cancel, this, _1),
         std::bind(&DockingServer::handle_accepted, this, _1));
+  }
+
+  void init_objects() {
+    std::shared_ptr<rclcpp::Node> new_ptr = shared_ptr_from_this();
+    perception_ = std::make_shared<DockPerception>(new_ptr);
+  }
+
+  // shared_ptr_from_this would return a shared pointer of the current class
+  std::shared_ptr<rclcpp::Node> shared_ptr_from_this() {
+    return shared_from_this();
   }
 
  private:
@@ -104,6 +116,33 @@ class DockingServer : public rclcpp::Node {
     std::thread{std::bind(&DockingServer::execute, this, _1), goal_handle}
         .detach();
   }
+
+  std::shared_ptr<DockPerception> perception_;
+  // determine if charging
+  bool charging_;
+
+  // Failure detection
+  double abort_distance_;    // Distance below which to check abort criteria.
+  double abort_threshold_;   // Y-offset that triggers abort.
+  double abort_angle_;       // Angle offset that triggers abort.
+  double correction_angle_;  // Yaw correction angle the robot should use to
+                             // line up with the dock.
+  double
+      backup_limit_;  // Maximum distance the robot will backup when trying to
+                      // retry. Based on range of initial dock pose estimate.
+  bool aborting_;  // If the robot realizes it won't be sucessful, it needs to
+                   // abort.
+  int num_of_retries_;   // The number of times the robot gets to abort before
+                         // failing. This variable will count down.
+  bool cancel_docking_;  // Signal that docking has failed and the action server
+                         // should abort the goal.
+  // ros::Time deadline_docking_;       // Time when the docking times out.
+  // ros::Time deadline_not_charging_;  // Time when robot gives up on the
+  // charge
+  // state and retries docking.
+  bool charging_timeout_set_;  // Flag to indicate if the deadline_not_charging
+                               // has been set.
+
 };  // class DockingServer
 
 int main(int argc, char** argv) {

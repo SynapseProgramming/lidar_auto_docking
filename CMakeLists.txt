@@ -45,12 +45,12 @@ ament_target_dependencies(perception_test geometry_msgs tf2 sensor_msgs rclcpp E
 
 
 
-add_executable(controller_test src/controller.cpp src/tf2listener.cpp )
-ament_target_dependencies(controller_test nav_msgs geometry_msgs tf2 sensor_msgs rclcpp Eigen3 angles tf2_ros tf2_geometry_msgs )
-target_include_directories( controller_test
-  PUBLIC
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-    $<INSTALL_INTERFACE:include>)
+#add_executable(controller_test src/controller.cpp src/tf2listener.cpp )
+#ament_target_dependencies(controller_test nav_msgs geometry_msgs tf2 sensor_msgs rclcpp Eigen3 angles tf2_ros tf2_geometry_msgs )
+#target_include_directories( controller_test
+#  PUBLIC
+#    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+#    $<INSTALL_INTERFACE:include>)
 
 
 add_executable(sharedptr_test src/sharedptr_test.cpp )
@@ -65,13 +65,13 @@ target_include_directories( transforml_test
 
 
 
-add_executable(auto_dock_test src/autodock.cpp)
-ament_target_dependencies(auto_dock_test nav_msgs geometry_msgs tf2 sensor_msgs rclcpp rclcpp_action Eigen3 angles tf2_ros tf2_geometry_msgs )
-target_include_directories( auto_dock_test
+add_executable(auto_dock src/autodock.cpp src/controller.cpp src/perception.cpp src/laser_processor.cpp src/linear_pose_filter_2d.cpp src/icp_2d.cpp src/tf2listener.cpp)
+ament_target_dependencies(auto_dock nav_msgs geometry_msgs tf2 sensor_msgs rclcpp rclcpp_action Eigen3 angles tf2_ros tf2_geometry_msgs )
+target_include_directories( auto_dock
   PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include>)
-rosidl_target_interfaces(auto_dock_test ${PROJECT_NAME} "rosidl_typesupport_cpp")
+rosidl_target_interfaces(auto_dock ${PROJECT_NAME} "rosidl_typesupport_cpp")
 
 
 
@@ -116,10 +116,10 @@ install(TARGETS
 #icp_2d_test
 #  linear_pose_filter_2d_test
 #  laser_processor_test
-auto_dock_test
+auto_dock
 perception_test
 sharedptr_test
-controller_test
+#controller_test
 transforml_test
   DESTINATION lib/${PROJECT_NAME})
 
