@@ -44,9 +44,15 @@ class MinimalActionClient(Node):
     def send_goal(self):
         self.get_logger().info("Waiting for action server...")
         self._action_client.wait_for_server()
+        # wrt base_linkx: 1.9967 y: -0.205733 z: -0.0032999 w: 0.99999
 
+        # wrt odomx: 1.92998 y: -0.215421 z: -0.00808216 w: 0.999967
         goal_msg = Dock.Goal()
-        goal_msg.dock_pose.pose.position.x = float(20)
+        goal_msg.dock_pose.pose.position.x = float(1.92998)
+        goal_msg.dock_pose.pose.position.y = float(-0.215421)
+        goal_msg.dock_pose.pose.orientation.z = float(-0.008)
+        goal_msg.dock_pose.pose.orientation.w = float(0.999999)
+        goal_msg.dock_pose.header.frame_id = "odom"
         # fill up the rest later
         self.get_logger().info("Sending goal request...")
 

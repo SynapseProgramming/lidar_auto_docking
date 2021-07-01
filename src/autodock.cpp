@@ -23,7 +23,7 @@ class DockingServer : public rclcpp::Node {
       const rclcpp::NodeOptions& options = rclcpp::NodeOptions())
       : Node("docking_server", options),
         NUM_OF_RETRIES_(5),
-        DOCKED_DISTANCE_THRESHOLD_(0.55) {
+        DOCKED_DISTANCE_THRESHOLD_(0.30) {
     using namespace std::placeholders;
     // initialise the action server object
 
@@ -75,8 +75,7 @@ class DockingServer : public rclcpp::Node {
   void initDockTimeout() {
     // get current time and fill up the header
     rclcpp::Time time_now = rclcpp::Clock().now();
-    // TODO: change the timeout back to 120
-    deadline_docking_ = time_now + rclcpp::Duration(5s);
+    deadline_docking_ = time_now + rclcpp::Duration(120s);
     num_of_retries_ = NUM_OF_RETRIES_;
   }
 
