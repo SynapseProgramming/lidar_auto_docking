@@ -282,55 +282,6 @@ class DockingServer : public rclcpp::Node {
     // stop all movements once we are done docking
     controller_->stop();
     perception_->stop();
-
-    /*
-        // count up from 1 to 10
-        for (int i = 1; i <= 10 && rclcpp::ok(); ++i) {
-          // Check if there is a cancel request
-          if (goal_handle->is_canceling()) {
-            result->docked = false;
-            result->dock_id = "HEHEE";
-            // return the current result
-            goal_handle->canceled(result);
-            RCLCPP_INFO(this->get_logger(), "Goal Canceled");
-            return;
-          }
-          // TODO: add in result as numerical base
-          feedback->dock_pose.pose.position.x = i +
-       goal->dock_pose.pose.position.x; feedback->dock_pose.pose.position.y
-       = i
-       + 1; feedback->dock_pose.pose.position.z = i + 2;
-          feedback->command.linear.x = i;
-          feedback->command.linear.y = i + 1;
-          feedback->command.linear.z = i + 2;
-          goal_handle->publish_feedback(feedback);
-          RCLCPP_INFO(this->get_logger(), "Publish Feedback");
-
-          loop_rate.sleep();
-        }
-    */
-    /*
-        if (goal_handle->is_canceling()) {
-          result->docked = false;
-          result->dock_id = "HEHEE";
-          // return the current result
-          goal_handle->canceled(result);
-          RCLCPP_INFO(this->get_logger(), "Goal Canceled");
-          return;
-        }
-    */
-    // Check if goal is done
-    /* NOTE: if this function is not returned, then it would default to a
-       failure.
-        if (rclcpp::ok()) {
-          // result->sequence = sequence;
-          result->docked = true;
-          result->dock_id = "YAY";
-          // return succeeded
-          goal_handle->succeed(result);
-          RCLCPP_INFO(this->get_logger(), "Goal Succeeded");
-        }
-        */
   }
 
   void handle_accepted(const std::shared_ptr<GoalHandleDock> goal_handle) {
