@@ -149,13 +149,35 @@ class DockingServer : public rclcpp::Node {
       r.sleep();  // Sleep the rate control object.
     }
     // Move to recovery pose.
-    // TODO: port over backupDistance
     while (!controller_->backup(backupDistance(), 0.0)) {
       if (isDockingTimedOut()) {
         return;
       }
       r.sleep();
     }
+  }
+
+  bool isApproachBad(double& dock_yaw) {
+    // Grab the dock pose in the base_link so we can evaluate it wrt the robot.
+    geometry_msgs::msg::PoseStamped dock_pose_base_link;
+    perception_->getPose(dock_pose_base_link, "base_link");
+
+    dock_yaw = angles::normalize_angle(
+        tf2::getYaw(dock_pose_base_link.pose.orientation));
+
+    // If we are close to the dock but not quite docked, check other approach
+    // parameters.
+    if (dock_pose_base_link.pose.position.x < abort_distance_ &&
+        dock_pose_base_link.pose.position.x > DOCKED_DISTANCE_THRESHOLD_) {
+      // Check to see if we are too far side-to-side or at a bad angle.
+      if (fabs(dock_pose_base_link.pose.position.y) > abort_threshold_ ||
+          fabs(dock_yaw) > abort_angle_) {
+        // Things are bad, abort.
+        return true;
+      }
+    }
+    // Everything is ok.
+    return false;
   }
 
   // main function which is called when a goal is received
@@ -219,8 +241,14 @@ class DockingServer : public rclcpp::Node {
       // Update perception
       if (perception_->getPose(feedback->dock_pose)) {
         if (aborting_) {
-          // do other stuff
-          // TODO: port over executeBackupSequence
+          // backup
+          executeBackupSequence(loop_rate);
+          // Reset abort flag.
+          aborting_ = false;
+          // Decrement the number of retries.
+          num_of_retries_--;
+        } else {
+          // TODO: port over isApproachBad
         }
       }
     }
