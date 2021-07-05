@@ -1,30 +1,6 @@
 #include <lidar_auto_docking/autodock.h>
 
 using namespace std::chrono_literals;
-/*
-// TODO: ADD IN RECOFIGURABLE PARAMETERS FOR DOCKED DISTANCE THRESHOLD
-explicit DockingServer::DockingServer(
-    const rclcpp::NodeOptions& options = rclcpp::NodeOptions())
-    : Node("docking_server", options),
-      NUM_OF_RETRIES_(5),
-      DOCKED_DISTANCE_THRESHOLD_(0.30),
-      abort_distance_(0.32),
-      abort_angle_(0.090),
-      abort_threshold_(0.04) {
-  using namespace std::placeholders;
-  // initialise the action server object
-*/
-/*
-  // the string is the action topic
-  this->action_server_ = rclcpp_action::create_server<Dock>(
-      this->get_node_base_interface(), this->get_node_clock_interface(),
-      this->get_node_logging_interface(),
-  this->get_node_waitables_interface(), "Dock",
-  std::bind(&DockingServer::handle_goal, this, _1, _2),
-      std::bind(&DockingServer::handle_cancel, this, _1),
-    std::bind(&DockingServer::handle_accepted, this, _1));
-    */
-//}
 
 void DockingServer::init_objects() {
   std::shared_ptr<rclcpp::Node> new_ptr = shared_ptr_from_this();
