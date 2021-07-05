@@ -37,10 +37,7 @@ std::shared_ptr<rclcpp::Node> DockingServer::shared_ptr_from_this() {
   return shared_from_this();
 }
 
-/*
-rclcpp_action::Server<Dock>::SharedPtr action_server_;
-
-rclcpp_action::GoalResponse handle_goal(
+rclcpp_action::GoalResponse DockingServer::handle_goal(
     const rclcpp_action::GoalUUID& uuid,
     std::shared_ptr<const Dock::Goal> goal) {
   RCLCPP_INFO(this->get_logger(), "Received goal request!");
@@ -53,7 +50,7 @@ rclcpp_action::GoalResponse handle_goal(
   return rclcpp_action::GoalResponse::ACCEPT_AND_EXECUTE;
 }
 
-rclcpp_action::CancelResponse handle_cancel(
+rclcpp_action::CancelResponse DockingServer::handle_cancel(
     const std::shared_ptr<GoalHandleDock> goal_handle) {
   RCLCPP_INFO(this->get_logger(), "Received request to cancel goal");
   (void)goal_handle;
@@ -61,14 +58,14 @@ rclcpp_action::CancelResponse handle_cancel(
 }
 
 // this function initialises the dock timeout.
-void initDockTimeout() {
+void DockingServer::initDockTimeout() {
   // get current time and fill up the header
   rclcpp::Time time_now = rclcpp::Clock().now();
   deadline_docking_ = time_now + rclcpp::Duration(120s);
   num_of_retries_ = NUM_OF_RETRIES_;
 }
 
-bool isDockingTimedOut() {
+bool DockingServer::isDockingTimedOut() {
   // Have we exceeded our deadline or tries?
   rclcpp::Time time_now = rclcpp::Clock().now();
   if (time_now > deadline_docking_ || !num_of_retries_) {
@@ -77,8 +74,9 @@ bool isDockingTimedOut() {
   return false;
 }
 
-bool continueDocking(std::shared_ptr<Dock::Result> result,
-                     const std::shared_ptr<GoalHandleDock> goal_handle) {
+bool DockingServer::continueDocking(
+    std::shared_ptr<Dock::Result> result,
+    const std::shared_ptr<GoalHandleDock> goal_handle) {
   // If charging, stop and return success.
 
   if (charging_) {
@@ -103,7 +101,7 @@ bool continueDocking(std::shared_ptr<Dock::Result> result,
   return true;
 }
 
-bool backupDistance() {
+bool DockingServer::backupDistance() {
   // Initialized to 1.0 meter as our basic backup amount.
   double distance = 1.0;
 
@@ -128,7 +126,7 @@ bool backupDistance() {
 }
 
 // method to reverse the robot when the abort flag is set.
-void executeBackupSequence(rclcpp::Rate& r) {
+void DockingServer::executeBackupSequence(rclcpp::Rate& r) {
   RCLCPP_ERROR(this->get_logger(), "Poor Approach! Backing up!");
   // Get off of the dock. Try to straighten out.
   while (!controller_->backup(DOCK_CONNECTOR_CLEARANCE_DISTANCE_,
@@ -147,7 +145,7 @@ void executeBackupSequence(rclcpp::Rate& r) {
   }
 }
 
-bool isApproachBad(double& dock_yaw) {
+bool DockingServer::isApproachBad(double& dock_yaw) {
   // Grab the dock pose in the base_link so we can evaluate it wrt the robot.
   geometry_msgs::msg::PoseStamped dock_pose_base_link;
   perception_->getPose(dock_pose_base_link, "base_link");
@@ -171,7 +169,7 @@ bool isApproachBad(double& dock_yaw) {
 }
 
 // main function which is called when a goal is received
-void execute(const std::shared_ptr<GoalHandleDock> goal_handle) {
+void DockingServer::execute(const std::shared_ptr<GoalHandleDock> goal_handle) {
   RCLCPP_INFO(this->get_logger(), "Executing goal");
 
   rclcpp::Rate loop_rate(50);
@@ -272,14 +270,15 @@ void execute(const std::shared_ptr<GoalHandleDock> goal_handle) {
   perception_->stop();
 }
 
-void handle_accepted(const std::shared_ptr<GoalHandleDock> goal_handle) {
+void DockingServer::handle_accepted(
+    const std::shared_ptr<GoalHandleDock> goal_handle) {
   using namespace std::placeholders;
   // this needs to return quickly to avoid blocking the executor, so spin up
   // a new thread
   std::thread{std::bind(&DockingServer::execute, this, _1), goal_handle}
       .detach();
 }
-*/
+
 int main(int argc, char** argv) {
   rclcpp::init(argc, argv);
 
