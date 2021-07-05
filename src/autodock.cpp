@@ -277,7 +277,6 @@ rclcpp_action::CancelResponse UndockingServer::handle_cancel(
   return rclcpp_action::CancelResponse::ACCEPT;
 }
 
-/*
 void UndockingServer::handle_accepted(
     const std::shared_ptr<GoalHandleUndock> goal_handle) {
   using namespace std::placeholders;
@@ -287,7 +286,7 @@ void UndockingServer::handle_accepted(
       .detach();
 }
 
-void DockingServer::execute(
+void UndockingServer::execute(
     const std::shared_ptr<GoalHandleUndock> goal_handle) {
   RCLCPP_INFO(this->get_logger(), "Executing goal");
 
@@ -296,7 +295,7 @@ void DockingServer::execute(
   auto feedback = std::make_shared<Undock::Feedback>();
   auto result = std::make_shared<Undock::Result>();
 }
-*/
+
 //////////////////////////////main function////////////////////
 
 int main(int argc, char** argv) {
