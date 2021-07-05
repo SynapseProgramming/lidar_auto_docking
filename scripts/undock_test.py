@@ -37,7 +37,7 @@ class UndockClient(Node):
             print(str(result.undocked))
         else:
             self.get_logger().info("Goal failed with status: {0}".format(status))
-            self.get_logger().info(str(result.docked))
+            self.get_logger().info(str(result.undocked))
 
         # Shutdown after receiving a result
         rclpy.shutdown()
