@@ -37,6 +37,7 @@ find_package(rosidl_default_generators REQUIRED)
 rosidl_generate_interfaces(${PROJECT_NAME}
   "action/Dock.action"
   "action/Undock.action"
+  "msg/Initdock.msg"
    DEPENDENCIES geometry_msgs
 )
 
@@ -47,7 +48,7 @@ target_include_directories( dock_coordinates
  PUBLIC
    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
    $<INSTALL_INTERFACE:include>)
-
+rosidl_target_interfaces(dock_coordinates ${PROJECT_NAME} "rosidl_typesupport_cpp")
 
 
 

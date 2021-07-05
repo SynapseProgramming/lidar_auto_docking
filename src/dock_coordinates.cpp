@@ -7,6 +7,7 @@
 #include <iostream>
 #include <rclcpp/rclcpp.hpp>
 
+#include "lidar_auto_docking/msg/initdock.hpp"
 #include "lidar_auto_docking/tf2listener.h"
 
 using namespace std::chrono_literals;
