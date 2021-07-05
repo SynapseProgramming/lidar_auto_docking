@@ -22,7 +22,6 @@ class DockingServer : public rclcpp::Node {
  public:
   using Dock = lidar_auto_docking::action::Dock;
   using GoalHandleDock = rclcpp_action::ServerGoalHandle<Dock>;
-  // TODO: ADD IN RECOFIGURABLE PARAMETERS FOR DOCKED DISTANCE THRESHOLD
   explicit DockingServer(
       const rclcpp::NodeOptions& options = rclcpp::NodeOptions())
       : Node("docking_server", options) {
@@ -160,7 +159,6 @@ class UndockingServer : public rclcpp::Node {
  public:
   using Undock = lidar_auto_docking::action::Undock;
   using GoalHandleUndock = rclcpp_action::ServerGoalHandle<Undock>;
-  // TODO: ADD IN RECOFIGURABLE PARAMETERS FOR DOCKED DISTANCE THRESHOLD
   explicit UndockingServer(
       const rclcpp::NodeOptions& options = rclcpp::NodeOptions())
       : Node("undocking_server", options) {
