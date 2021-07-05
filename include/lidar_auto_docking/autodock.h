@@ -57,19 +57,6 @@ class DockingServer : public rclcpp::Node {
         std::bind(&DockingServer::handle_goal, this, _1, _2),
         std::bind(&DockingServer::handle_cancel, this, _1),
         std::bind(&DockingServer::handle_accepted, this, _1));
-    print_parameters();
-  }
-
-  // debug function for viewing values
-  void print_parameters() {
-    std::cout << "retries: " << NUM_OF_RETRIES_ << "\n";
-    std::cout << "abort_distance: " << abort_distance_ << "\n";
-    std::cout << "abort_angle: " << abort_angle_ << "\n";
-    std::cout << "y_abort_threshold: " << abort_threshold_ << "\n";
-    std::cout << "docked_distance_threshold: " << DOCKED_DISTANCE_THRESHOLD_
-              << "\n";
-    std::cout << "connector_clearance_distance: "
-              << DOCK_CONNECTOR_CLEARANCE_DISTANCE_ << "\n";
   }
 
   // init_objects function creates instances of helper classes.
@@ -192,12 +179,6 @@ class UndockingServer : public rclcpp::Node {
         std::bind(&UndockingServer::handle_goal, this, _1, _2),
         std::bind(&UndockingServer::handle_cancel, this, _1),
         std::bind(&UndockingServer::handle_accepted, this, _1));
-    print_param();
-  }
-
-  void print_param() {
-    std::cout << "connector_clearance_distance(undocking server): "
-              << DOCK_CONNECTOR_CLEARANCE_DISTANCE_ << "\n";
   }
 
   // init_objects function creates instances of helper classes.
