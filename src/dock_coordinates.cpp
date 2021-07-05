@@ -7,11 +7,14 @@
 #include <iostream>
 #include <rclcpp/rclcpp.hpp>
 
+#include "lidar_auto_docking/tf2listener.h"
+
 using namespace std::chrono_literals;
 
 class DockCoordinates : public rclcpp::Node {
  public:
-  DockCoordinates() : Node("perception_test"), rate(10) {
+  DockCoordinates()
+      : Node("perception_test"), tf2_listen(this->get_clock()), rate(10) {
     tbr = std::make_shared<tf2_ros::TransformBroadcaster>(this);
   }
 
@@ -29,6 +32,18 @@ class DockCoordinates : public rclcpp::Node {
   }
 
   void main_test() {
+    // we will assume that the dock is placed 1m in front of the robot
+    tf2_listen.waitTransform("map", "base_link");
+    geometry_msgs::msg::TransformStamped robot_pose;
+    robot_pose = tf2_listen.getTransform("map", "base_link");
+    auto translation = robot_pose.transform.translation;
+    auto rotation = robot_pose.transform.rotation;
+    // we will set the dock to be 1m in front of the robot
+    init_dock_pose.pose.position.x = translation.x + 1;
+    init_dock_pose.pose.position.y = translation.y;
+    init_dock_pose.pose.position.z = translation.z;
+    init_dock_pose.pose.orientation = rotation;
+    init_dock_pose.header.frame_id = "map";
     perception_ptr->start(init_dock_pose);
     timer_ = this->create_wall_timer(20ms, [this]() {
       // if no dock is found yet, call start function with init_dock_pose to let
@@ -73,6 +88,8 @@ class DockCoordinates : public rclcpp::Node {
  private:
   std::shared_ptr<DockPerception> perception_ptr;
   std::shared_ptr<tf2_ros::TransformBroadcaster> tbr;
+  tf2_listener tf2_listen;
+
   rclcpp::Time time_now;
   geometry_msgs::msg::TransformStamped transformStamped;
   geometry_msgs::msg::PoseStamped dock_pose;
