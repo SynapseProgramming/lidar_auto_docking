@@ -145,7 +145,7 @@ class DockingServer : public rclcpp::Node {
 class UndockingServer : public rclcpp::Node {
  public:
   using Undock = lidar_auto_docking::action::Undock;
-  using GoalHandleDock = rclcpp_action::ServerGoalHandle<Undock>;
+  using GoalHandleUndock = rclcpp_action::ServerGoalHandle<Undock>;
   // TODO: ADD IN RECOFIGURABLE PARAMETERS FOR DOCKED DISTANCE THRESHOLD
   explicit UndockingServer(
       const rclcpp::NodeOptions& options = rclcpp::NodeOptions())
@@ -153,19 +153,34 @@ class UndockingServer : public rclcpp::Node {
         DOCK_CONNECTOR_CLEARANCE_DISTANCE_(0.4) {
     using namespace std::placeholders;
     // initialise the action server object
+    // the string is the action topic
     /*
-        // the string is the action topic
-        this->action_server_ = rclcpp_action::create_server<Dock>(
-            this->get_node_base_interface(), this->get_node_clock_interface(),
-            this->get_node_logging_interface(),
-            this->get_node_waitables_interface(), "Dock",
-            std::bind(&DockingServer::handle_goal, this, _1, _2),
-            std::bind(&DockingServer::handle_cancel, this, _1),
-            std::bind(&DockingServer::handle_accepted, this, _1));
-          */
+    this->undock_action_server_ = rclcpp_action::create_server<Unock>(
+        this->get_node_base_interface(), this->get_node_clock_interface(),
+        this->get_node_logging_interface(),
+        this->get_node_waitables_interface(), "Undock",
+        std::bind(&UndockingServer::handle_goal, this, _1, _2),
+        std::bind(&UndockingServer::handle_cancel, this, _1),
+        std::bind(&UndockingServer::handle_accepted, this, _1));
+      */
   }
 
  private:
+  rclcpp_action::Server<Undock>::SharedPtr undock_action_server_;
+  /*
+    rclcpp_action::GoalResponse handle_goal(
+        const rclcpp_action::GoalUUID& uuid,
+        std::shared_ptr<const Undock::Goal> goal);
+
+    rclcpp_action::CancelResponse handle_cancel(
+        const std::shared_ptr<GoalHandleUndock> goal_handle);
+
+    // function which is called to spin a new thread to run execute function
+    void handle_accepted(const std::shared_ptr<GoalHandleUndock> goal_handle);
+
+    // main function which is called when a goal is received
+    void execute(const std::shared_ptr<GoalHandleUndock> goal_handle);
+  */
   double DOCK_CONNECTOR_CLEARANCE_DISTANCE_;  // The amount to back off in order
                                               // to clear the dock
 };

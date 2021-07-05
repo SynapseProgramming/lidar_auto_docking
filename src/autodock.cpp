@@ -255,6 +255,49 @@ void DockingServer::handle_accepted(
       .detach();
 }
 
+//////////////////////////////////Udocking Server///////////////////////
+/*
+rclcpp_action::GoalResponse UndockingServer::handle_goal(
+    const rclcpp_action::GoalUUID& uuid,
+    std::shared_ptr<const Undock::Goal> goal) {
+  RCLCPP_INFO(this->get_logger(), "Received goal request!");
+  (void)uuid;
+  // Let's reject sequences that are over 9000
+  // if (goal->order > 9000) {
+  //  return rclcpp_action::GoalResponse::REJECT;
+  //}
+  // TODO: maybe code in a function to reject some invalid dock goal
+  return rclcpp_action::GoalResponse::ACCEPT_AND_EXECUTE;
+}
+
+rclcpp_action::CancelResponse UndockingServer::handle_cancel(
+    const std::shared_ptr<GoalHandleUndock> goal_handle) {
+  RCLCPP_INFO(this->get_logger(), "Received request to cancel goal");
+  (void)goal_handle;
+  return rclcpp_action::CancelResponse::ACCEPT;
+}
+
+void UndockingServer::handle_accepted(
+    const std::shared_ptr<GoalHandleUndock> goal_handle) {
+  using namespace std::placeholders;
+  // this needs to return quickly to avoid blocking the executor, so spin up
+  // a new thread
+  std::thread{std::bind(&UndockingServer::execute, this, _1), goal_handle}
+      .detach();
+}
+
+void DockingServer::execute(
+    const std::shared_ptr<GoalHandleUndock> goal_handle) {
+  RCLCPP_INFO(this->get_logger(), "Executing goal");
+
+  rclcpp::Rate loop_rate(50);
+  const auto goal = goal_handle->get_goal();
+  auto feedback = std::make_shared<Undock::Feedback>();
+  auto result = std::make_shared<Undock::Result>();
+}
+*/
+//////////////////////////////main function////////////////////
+
 int main(int argc, char** argv) {
   rclcpp::init(argc, argv);
 
