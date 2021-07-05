@@ -167,20 +167,20 @@ class UndockingServer : public rclcpp::Node {
 
  private:
   rclcpp_action::Server<Undock>::SharedPtr undock_action_server_;
+
+  rclcpp_action::GoalResponse handle_goal(
+      const rclcpp_action::GoalUUID& uuid,
+      std::shared_ptr<const Undock::Goal> goal);
   /*
-    rclcpp_action::GoalResponse handle_goal(
-        const rclcpp_action::GoalUUID& uuid,
-        std::shared_ptr<const Undock::Goal> goal);
+      rclcpp_action::CancelResponse handle_cancel(
+          const std::shared_ptr<GoalHandleUndock> goal_handle);
 
-    rclcpp_action::CancelResponse handle_cancel(
-        const std::shared_ptr<GoalHandleUndock> goal_handle);
+      // function which is called to spin a new thread to run execute function
+      void handle_accepted(const std::shared_ptr<GoalHandleUndock> goal_handle);
 
-    // function which is called to spin a new thread to run execute function
-    void handle_accepted(const std::shared_ptr<GoalHandleUndock> goal_handle);
-
-    // main function which is called when a goal is received
-    void execute(const std::shared_ptr<GoalHandleUndock> goal_handle);
-  */
+      // main function which is called when a goal is received
+      void execute(const std::shared_ptr<GoalHandleUndock> goal_handle);
+    */
   double DOCK_CONNECTOR_CLEARANCE_DISTANCE_;  // The amount to back off in order
                                               // to clear the dock
 };

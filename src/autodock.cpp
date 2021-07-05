@@ -256,7 +256,7 @@ void DockingServer::handle_accepted(
 }
 
 //////////////////////////////////Udocking Server///////////////////////
-/*
+
 rclcpp_action::GoalResponse UndockingServer::handle_goal(
     const rclcpp_action::GoalUUID& uuid,
     std::shared_ptr<const Undock::Goal> goal) {
@@ -270,6 +270,7 @@ rclcpp_action::GoalResponse UndockingServer::handle_goal(
   return rclcpp_action::GoalResponse::ACCEPT_AND_EXECUTE;
 }
 
+/*
 rclcpp_action::CancelResponse UndockingServer::handle_cancel(
     const std::shared_ptr<GoalHandleUndock> goal_handle) {
   RCLCPP_INFO(this->get_logger(), "Received request to cancel goal");
