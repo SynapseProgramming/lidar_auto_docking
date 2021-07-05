@@ -75,7 +75,7 @@ bool DockingServer::continueDocking(
   return true;
 }
 
-bool DockingServer::backupDistance() {
+double DockingServer::backupDistance() {
   // Initialized to 1.0 meter as our basic backup amount.
   double distance = 1.0;
 

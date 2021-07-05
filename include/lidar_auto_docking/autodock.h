@@ -102,7 +102,7 @@ class DockingServer : public rclcpp::Node {
    * parameterized instead?
    * @return Distance for robot to backup in meters.
    */
-  bool backupDistance();
+  double backupDistance();
 
   // method to reverse the robot when the abort flag is set.
   void executeBackupSequence(rclcpp::Rate& r);
