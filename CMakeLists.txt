@@ -40,8 +40,13 @@ rosidl_generate_interfaces(${PROJECT_NAME}
    DEPENDENCIES geometry_msgs
 )
 
-add_executable(perception_test src/perception_test.cpp src/perception.cpp src/laser_processor.cpp src/linear_pose_filter_2d.cpp src/icp_2d.cpp src/tf2listener.cpp)
-ament_target_dependencies(perception_test geometry_msgs tf2 sensor_msgs rclcpp Eigen3 angles tf2_ros tf2_geometry_msgs)
+add_executable(dock_coordinates src/dock_coordinates.cpp src/perception.cpp src/laser_processor.cpp src/linear_pose_filter_2d.cpp src/icp_2d.cpp src/tf2listener.cpp)
+ament_target_dependencies(dock_coordinates geometry_msgs tf2 sensor_msgs rclcpp Eigen3 angles tf2_ros tf2_geometry_msgs)
+#allow target to access header files defined in include
+target_include_directories( dock_coordinates
+ PUBLIC
+   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+   $<INSTALL_INTERFACE:include>)
 
 
 
@@ -102,15 +107,10 @@ install(
   DIRECTORY
   action
   config
-  launch 
+  launch
   DESTINATION share/${PROJECT_NAME}
 )
 
- #allow target to access header files defined in include
-target_include_directories( perception_test
-  PUBLIC
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-    $<INSTALL_INTERFACE:include>)
 
 
 
@@ -121,7 +121,7 @@ install(TARGETS
 #  linear_pose_filter_2d_test
 #  laser_processor_test
 auto_dock
-perception_test
+dock_coordinates
 sharedptr_test
 #controller_test
 transforml_test

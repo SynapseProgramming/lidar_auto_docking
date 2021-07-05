@@ -9,9 +9,9 @@
 
 using namespace std::chrono_literals;
 
-class MinimalPublisher : public rclcpp::Node {
+class DockCoordinates : public rclcpp::Node {
  public:
-  MinimalPublisher() : Node("perception_test"), rate(10) {
+  DockCoordinates() : Node("perception_test"), rate(10) {
     tbr = std::make_shared<tf2_ros::TransformBroadcaster>(this);
   }
 
@@ -86,8 +86,8 @@ class MinimalPublisher : public rclcpp::Node {
 
 int main(int argc, char* argv[]) {
   rclcpp::init(argc, argv);
-  std::shared_ptr<MinimalPublisher> min_ptr =
-      std::make_shared<MinimalPublisher>();
+  std::shared_ptr<DockCoordinates> min_ptr =
+      std::make_shared<DockCoordinates>();
 
   min_ptr->init_objects();
   min_ptr->main_test();
