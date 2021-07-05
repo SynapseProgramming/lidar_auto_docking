@@ -36,6 +36,7 @@ find_package(rosidl_default_generators REQUIRED)
 
 rosidl_generate_interfaces(${PROJECT_NAME}
   "action/Dock.action"
+  "action/Undock.action"
    DEPENDENCIES geometry_msgs
 )
 
@@ -88,6 +89,7 @@ ament_python_install_package(${PROJECT_NAME})
 # Install Python executables
 install(PROGRAMS
   scripts/dock_test.py
+  scripts/undock_test.py
   DESTINATION lib/${PROJECT_NAME}
 )
 
@@ -99,6 +101,8 @@ install(
 install(
   DIRECTORY
   action
+  config
+  launch 
   DESTINATION share/${PROJECT_NAME}
 )
 
