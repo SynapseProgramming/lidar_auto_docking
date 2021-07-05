@@ -25,15 +25,30 @@ class DockingServer : public rclcpp::Node {
   // TODO: ADD IN RECOFIGURABLE PARAMETERS FOR DOCKED DISTANCE THRESHOLD
   explicit DockingServer(
       const rclcpp::NodeOptions& options = rclcpp::NodeOptions())
-      : Node("docking_server", options),
-        NUM_OF_RETRIES_(5),
-        DOCKED_DISTANCE_THRESHOLD_(0.30),
-        abort_distance_(0.32),
-        abort_angle_(0.090),
-        abort_threshold_(0.04) {
+      : Node("docking_server", options) {
     using namespace std::placeholders;
-    // initialise the action server object
+    // get parameters from yaml file
 
+    this->declare_parameter<int>("retries", 5);
+    this->get_parameter("retries", NUM_OF_RETRIES_);
+
+    this->declare_parameter<double>("abort_distance", 0.32);
+    this->get_parameter("abort_distance", abort_distance_);
+
+    this->declare_parameter<double>("abort_angle", 0.090);
+    this->get_parameter("abort_angle", abort_angle_);
+
+    this->declare_parameter<double>("y_abort_threshold", 0.04);
+    this->get_parameter("y_abort_threshold", abort_threshold_);
+
+    this->declare_parameter<double>("connector_clearance_distance", 0.4);
+    this->get_parameter("connector_clearance_distance",
+                        DOCK_CONNECTOR_CLEARANCE_DISTANCE_);
+
+    this->declare_parameter<double>("docked_distance_threshold", 0.30);
+    this->get_parameter("docked_distance_threshold",
+                        DOCKED_DISTANCE_THRESHOLD_);
+    // initialise the action server object
     // the string is the action topic
     this->action_server_ = rclcpp_action::create_server<Dock>(
         this->get_node_base_interface(), this->get_node_clock_interface(),
@@ -42,6 +57,19 @@ class DockingServer : public rclcpp::Node {
         std::bind(&DockingServer::handle_goal, this, _1, _2),
         std::bind(&DockingServer::handle_cancel, this, _1),
         std::bind(&DockingServer::handle_accepted, this, _1));
+    print_parameters();
+  }
+
+  // debug function for viewing values
+  void print_parameters() {
+    std::cout << "retries: " << NUM_OF_RETRIES_ << "\n";
+    std::cout << "abort_distance: " << abort_distance_ << "\n";
+    std::cout << "abort_angle: " << abort_angle_ << "\n";
+    std::cout << "y_abort_threshold: " << abort_threshold_ << "\n";
+    std::cout << "docked_distance_threshold: " << DOCKED_DISTANCE_THRESHOLD_
+              << "\n";
+    std::cout << "connector_clearance_distance: "
+              << DOCK_CONNECTOR_CLEARANCE_DISTANCE_ << "\n";
   }
 
   // init_objects function creates instances of helper classes.
