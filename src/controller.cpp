@@ -224,10 +224,10 @@ bool BaseController::backup(double distance, double rotate_distance) {
       return true;
     } else if (rotate_distance > 0.0) {  // for rotation, take the  minimum
                                          // value as the angular turning
-      command_.angular.z = std::min(1.0, fabs(error) * 1.3 + 0.1);
+      command_.angular.z = std::min(0.6, fabs(error) * 1.3 + 0.1);
     } else {
       //  command_.angular.z = std::max(-2.0, -fabs(error)*2.0); original.
-      command_.angular.z = std::max(-1.0, -(fabs(error) * 1.3 + 0.1));
+      command_.angular.z = std::max(-0.6, -(fabs(error) * 1.3 + 0.1));
     }
   } else {
     // Check if have backed up enough
