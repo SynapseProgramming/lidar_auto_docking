@@ -294,6 +294,11 @@ void UndockingServer::execute(
   const auto goal = goal_handle->get_goal();
   auto feedback = std::make_shared<Undock::Feedback>();
   auto result = std::make_shared<Undock::Result>();
+
+  std::cout << "received! " << goal->rotate_in_place << "\n";
+  result->undocked = true;
+  goal_handle->succeed(result);
+  RCLCPP_INFO(this->get_logger(), "undocked robot");
 }
 
 void UndockingServer::init_objects() {
@@ -315,7 +320,7 @@ int main(int argc, char** argv) {
   docking_server->init_objects();
 
   auto undocking_server = std::make_shared<UndockingServer>();
-  // docking_server->init_objects();
+  undocking_server->init_objects();
 
   executor.add_node(docking_server);
   executor.add_node(undocking_server);
