@@ -294,11 +294,43 @@ void UndockingServer::execute(
   const auto goal = goal_handle->get_goal();
   auto feedback = std::make_shared<Undock::Feedback>();
   auto result = std::make_shared<Undock::Result>();
+  result->undocked = false;
 
-  std::cout << "received! " << goal->rotate_in_place << "\n";
-  result->undocked = true;
-  goal_handle->succeed(result);
-  RCLCPP_INFO(this->get_logger(), "undocked robot");
+  // Distances to backup/turn
+  double backup = DOCK_CONNECTOR_CLEARANCE_DISTANCE_;
+  double turn = goal->rotate_in_place ? 3.1 : 0.0;
+  // get current time and fill up the header
+  rclcpp::Time time_now = rclcpp::Clock().now();
+  rclcpp::Time timeout = time_now + rclcpp::Duration(50s);
+  // ensure that the robot is not moving
+  controller_->stop();
+  while (rclcpp::ok()) {
+    // TODO: add in pre-empt function
+
+    // Update control
+    if (controller_->backup(backup, turn)) {
+      // Odom says we have undocked
+
+      RCLCPP_INFO(this->get_logger(), "Undock Successful!");
+      result->undocked = true;
+      controller_->stop();
+      goal_handle->succeed(result);
+      RCLCPP_INFO(this->get_logger(), "undocked robot");
+      return;
+    }
+
+    // Timeout
+    if (rclcpp::Clock().now() > timeout) {
+      controller_->stop();
+      RCLCPP_INFO(this->get_logger(), "Undock Unsuccessful!");
+      return;
+    }
+
+    // feedback
+    controller_->getCommand(feedback->command);
+    goal_handle->publish_feedback(feedback);
+    loop_rate.sleep();
+  }
 }
 
 void UndockingServer::init_objects() {
