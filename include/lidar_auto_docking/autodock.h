@@ -154,15 +154,14 @@ class UndockingServer : public rclcpp::Node {
     using namespace std::placeholders;
     // initialise the action server object
     // the string is the action topic
-    /*
-    this->undock_action_server_ = rclcpp_action::create_server<Unock>(
+
+    this->undock_action_server_ = rclcpp_action::create_server<Undock>(
         this->get_node_base_interface(), this->get_node_clock_interface(),
         this->get_node_logging_interface(),
         this->get_node_waitables_interface(), "Undock",
         std::bind(&UndockingServer::handle_goal, this, _1, _2),
         std::bind(&UndockingServer::handle_cancel, this, _1),
         std::bind(&UndockingServer::handle_accepted, this, _1));
-      */
   }
 
  private:
