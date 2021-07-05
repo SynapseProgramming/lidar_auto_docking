@@ -101,6 +101,8 @@ install(
 install(
   DIRECTORY
   action
+  config
+  launch 
   DESTINATION share/${PROJECT_NAME}
 )
 

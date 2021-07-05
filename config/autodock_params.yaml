@@ -1,0 +1,8 @@
+docking_server:
+  ros__parameters:
+    retries: 69
+    abort_distance: 0.33
+    abort_angle: 0.10
+    y_abort_threshold: 0.05
+    connector_clearance_distance: 0.41
+    docked_distance_threshold: 0.31
