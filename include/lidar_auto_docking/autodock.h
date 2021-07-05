@@ -176,12 +176,15 @@ class UndockingServer : public rclcpp::Node {
   // TODO: ADD IN RECOFIGURABLE PARAMETERS FOR DOCKED DISTANCE THRESHOLD
   explicit UndockingServer(
       const rclcpp::NodeOptions& options = rclcpp::NodeOptions())
-      : Node("Undocking_server", options),
-        DOCK_CONNECTOR_CLEARANCE_DISTANCE_(0.4) {
+      : Node("undocking_server", options) {
     using namespace std::placeholders;
+
+    this->declare_parameter<double>("connector_clearance_distance", 0.4);
+    this->get_parameter("connector_clearance_distance",
+                        DOCK_CONNECTOR_CLEARANCE_DISTANCE_);
+
     // initialise the action server object
     // the string is the action topic
-
     this->undock_action_server_ = rclcpp_action::create_server<Undock>(
         this->get_node_base_interface(), this->get_node_clock_interface(),
         this->get_node_logging_interface(),
@@ -189,6 +192,12 @@ class UndockingServer : public rclcpp::Node {
         std::bind(&UndockingServer::handle_goal, this, _1, _2),
         std::bind(&UndockingServer::handle_cancel, this, _1),
         std::bind(&UndockingServer::handle_accepted, this, _1));
+    print_param();
+  }
+
+  void print_param() {
+    std::cout << "connector_clearance_distance(undocking server): "
+              << DOCK_CONNECTOR_CLEARANCE_DISTANCE_ << "\n";
   }
 
   // init_objects function creates instances of helper classes.

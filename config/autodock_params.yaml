@@ -12,3 +12,8 @@ docking_server:
     connector_clearance_distance: 0.41
     # Threshold distance that indicates that the robot is docked. (m)
     docked_distance_threshold: 0.31
+
+undocking_server:
+  ros__parameters:
+  # The distance to back-off in order to clear the dock connector
+    connector_clearance_distance: 0.42
