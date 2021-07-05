@@ -14,8 +14,7 @@ using namespace std::chrono_literals;
 
 class DockCoordinates : public rclcpp::Node {
  public:
-  DockCoordinates()
-      : Node("perception_test"), tf2_listen(this->get_clock()), rate(10) {
+  DockCoordinates() : Node("dock_coordinates"), tf2_listen(this->get_clock()) {
     tbr = std::make_shared<tf2_ros::TransformBroadcaster>(this);
   }
 
@@ -99,7 +98,6 @@ class DockCoordinates : public rclcpp::Node {
   geometry_msgs::msg::PoseStamped init_dock_pose;
   bool found_dockk = false;
   rclcpp::TimerBase::SharedPtr timer_;
-  rclcpp::Rate rate;
 };
 
 int main(int argc, char* argv[]) {
