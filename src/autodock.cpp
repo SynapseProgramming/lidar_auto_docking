@@ -18,11 +18,9 @@ rclcpp_action::GoalResponse DockingServer::handle_goal(
     std::shared_ptr<const Dock::Goal> goal) {
   RCLCPP_INFO(this->get_logger(), "Received goal request!");
   (void)uuid;
-  // Let's reject sequences that are over 9000
-  // if (goal->order > 9000) {
-  //  return rclcpp_action::GoalResponse::REJECT;
-  //}
-  // TODO: maybe code in a function to reject some invalid dock goal
+  if (goal->dock_id != "") {
+    RCLCPP_INFO(this->get_logger(), "received dock name!");
+  }
   return rclcpp_action::GoalResponse::ACCEPT_AND_EXECUTE;
 }
 
@@ -262,11 +260,9 @@ rclcpp_action::GoalResponse UndockingServer::handle_goal(
     std::shared_ptr<const Undock::Goal> goal) {
   RCLCPP_INFO(this->get_logger(), "Received goal request!");
   (void)uuid;
-  // Let's reject sequences that are over 9000
-  // if (goal->order > 9000) {
-  //  return rclcpp_action::GoalResponse::REJECT;
-  //}
-  // TODO: maybe code in a function to reject some invalid dock goal
+  if (goal->rotate_in_place == false) {
+    RCLCPP_INFO(this->get_logger(), "Not going to rotate!");
+  }
   return rclcpp_action::GoalResponse::ACCEPT_AND_EXECUTE;
 }
 
