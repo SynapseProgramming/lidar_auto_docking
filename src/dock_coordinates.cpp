@@ -16,6 +16,8 @@ class DockCoordinates : public rclcpp::Node {
  public:
   DockCoordinates() : Node("dock_coordinates"), tf2_listen(this->get_clock()) {
     tbr = std::make_shared<tf2_ros::TransformBroadcaster>(this);
+    publisher_ = this->create_publisher<lidar_auto_docking::msg::Initdock>(
+        "init_dock", 10);
   }
 
   // the init_objects function would return a shared_ptr to this class. It will
@@ -61,7 +63,13 @@ class DockCoordinates : public rclcpp::Node {
                   << " y: " << this->dock_pose.pose.position.y;
         std::cout << " z: " << this->dock_pose.pose.orientation.z
                   << " w: " << this->dock_pose.pose.orientation.w << "\n";
-
+        // publish the transformations of the dock
+        auto dock_pose_msg = lidar_auto_docking::msg::Initdock();
+        dock_pose_msg.x = this->dock_pose.pose.position.x;
+        dock_pose_msg.y = this->dock_pose.pose.position.y;
+        dock_pose_msg.z = this->dock_pose.pose.orientation.z;
+        dock_pose_msg.w = this->dock_pose.pose.orientation.w;
+        publisher_->publish(dock_pose_msg);
         // Also, send the transform for visualisation
         this->time_now = rclcpp::Clock().now();
 
@@ -88,13 +96,12 @@ class DockCoordinates : public rclcpp::Node {
  private:
   std::shared_ptr<DockPerception> perception_ptr;
   std::shared_ptr<tf2_ros::TransformBroadcaster> tbr;
+  rclcpp::Publisher<lidar_auto_docking::msg::Initdock>::SharedPtr publisher_;
   tf2_listener tf2_listen;
 
   rclcpp::Time time_now;
   geometry_msgs::msg::TransformStamped transformStamped;
   geometry_msgs::msg::PoseStamped dock_pose;
-  // init_dock_pose has an empty quaternion. This would force perception to
-  // assume that the dock 1m directly ahead of the robot.
   geometry_msgs::msg::PoseStamped init_dock_pose;
   bool found_dockk = false;
   rclcpp::TimerBase::SharedPtr timer_;
