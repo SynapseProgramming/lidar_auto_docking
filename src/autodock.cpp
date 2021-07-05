@@ -270,7 +270,6 @@ rclcpp_action::GoalResponse UndockingServer::handle_goal(
   return rclcpp_action::GoalResponse::ACCEPT_AND_EXECUTE;
 }
 
-/*
 rclcpp_action::CancelResponse UndockingServer::handle_cancel(
     const std::shared_ptr<GoalHandleUndock> goal_handle) {
   RCLCPP_INFO(this->get_logger(), "Received request to cancel goal");
@@ -278,6 +277,7 @@ rclcpp_action::CancelResponse UndockingServer::handle_cancel(
   return rclcpp_action::CancelResponse::ACCEPT;
 }
 
+/*
 void UndockingServer::handle_accepted(
     const std::shared_ptr<GoalHandleUndock> goal_handle) {
   using namespace std::placeholders;
