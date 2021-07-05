@@ -33,7 +33,7 @@ class DockCoordinates : public rclcpp::Node {
     timer_ = this->create_wall_timer(20ms, [this]() {
       // if no dock is found yet, call start function with init_dock_pose to let
       // perception assume the dock is 1m ahead of the bot.
-      if (this->perception_ptr->getPose(this->dock_pose, "odom") == false &&
+      if (this->perception_ptr->getPose(this->dock_pose, "map") == false &&
           this->found_dockk == false) {
         std::cout << "still finding dock!\n";
 
@@ -41,7 +41,7 @@ class DockCoordinates : public rclcpp::Node {
 
       } else {
         this->found_dockk = true;
-        std::cout << "wrt odom";
+        std::cout << "wrt map ";
         std::cout << "x: " << this->dock_pose.pose.position.x
                   << " y: " << this->dock_pose.pose.position.y;
         std::cout << " z: " << this->dock_pose.pose.orientation.z
@@ -51,7 +51,7 @@ class DockCoordinates : public rclcpp::Node {
         this->time_now = rclcpp::Clock().now();
 
         this->transformStamped.header.stamp = this->time_now;
-        this->transformStamped.header.frame_id = "odom";
+        this->transformStamped.header.frame_id = "map";
         this->transformStamped.child_frame_id = "dock";
         this->transformStamped.transform.translation.x =
             this->dock_pose.pose.position.x;
