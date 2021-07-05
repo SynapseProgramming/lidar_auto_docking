@@ -164,7 +164,14 @@ class UndockingServer : public rclcpp::Node {
         std::bind(&UndockingServer::handle_accepted, this, _1));
   }
 
+  // init_objects function creates instances of helper classes.
+  void init_objects();
+
+  // shared_ptr_from_this would return a shared pointer of the current class
+  std::shared_ptr<rclcpp::Node> shared_ptr_from_this();
+
  private:
+  std::shared_ptr<BaseController> controller_;
   rclcpp_action::Server<Undock>::SharedPtr undock_action_server_;
 
   rclcpp_action::GoalResponse handle_goal(

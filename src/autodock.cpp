@@ -296,6 +296,16 @@ void UndockingServer::execute(
   auto result = std::make_shared<Undock::Result>();
 }
 
+void UndockingServer::init_objects() {
+  std::shared_ptr<rclcpp::Node> new_ptr = shared_ptr_from_this();
+  controller_ = std::make_shared<BaseController>(new_ptr);
+}
+
+// shared_ptr_from_this would return a shared pointer of the current class
+std::shared_ptr<rclcpp::Node> UndockingServer::shared_ptr_from_this() {
+  return shared_from_this();
+}
+
 //////////////////////////////main function////////////////////
 
 int main(int argc, char** argv) {
