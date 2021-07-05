@@ -1,0 +1,12 @@
+# This action will always pull backwards off the dock
+# Optionally, we can also turn around 180 degrees
+bool rotate_in_place
+---
+# Have we undocked?
+bool undocked
+---
+# Feedback is the detected pose of the dock.
+geometry_msgs/PoseStamped dock_pose
+
+# Plus the control output
+geometry_msgs/Twist command

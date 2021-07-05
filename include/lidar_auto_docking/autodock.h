@@ -13,6 +13,7 @@
 #include <thread>
 
 #include "lidar_auto_docking/action/dock.hpp"
+#include "lidar_auto_docking/action/undock.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp_action/rclcpp_action.hpp"
 using namespace std::chrono_literals;
@@ -59,6 +60,9 @@ class DockingServer : public rclcpp::Node {
   rclcpp_action::CancelResponse handle_cancel(
       const std::shared_ptr<GoalHandleDock> goal_handle);
 
+  // function which is called to spin a new thread to run execute function
+  void handle_accepted(const std::shared_ptr<GoalHandleDock> goal_handle);
+
   /**
    * @brief Method sets the docking deadline and number of retries.
    */
@@ -103,9 +107,6 @@ class DockingServer : public rclcpp::Node {
   // main function which is called when a goal is received
   void execute(const std::shared_ptr<GoalHandleDock> goal_handle);
 
-  // function which is called to spin a new thread to run execute function
-  void handle_accepted(const std::shared_ptr<GoalHandleDock> goal_handle);
-
   // Configuration Constants.
   int NUM_OF_RETRIES_;  // Number of times the robot gets to attempt
   double DOCK_CONNECTOR_CLEARANCE_DISTANCE_;  // The amount to back off in order
@@ -140,5 +141,33 @@ class DockingServer : public rclcpp::Node {
   bool charging_timeout_set_;  // Flag to indicate if the
                                // deadline_not_charging has been set.
 };                             // class DockingServer
+
+class UndockingServer : public rclcpp::Node {
+ public:
+  using Undock = lidar_auto_docking::action::Undock;
+  using GoalHandleDock = rclcpp_action::ServerGoalHandle<Undock>;
+  // TODO: ADD IN RECOFIGURABLE PARAMETERS FOR DOCKED DISTANCE THRESHOLD
+  explicit UndockingServer(
+      const rclcpp::NodeOptions& options = rclcpp::NodeOptions())
+      : Node("Undocking_server", options),
+        DOCK_CONNECTOR_CLEARANCE_DISTANCE_(0.4) {
+    using namespace std::placeholders;
+    // initialise the action server object
+    /*
+        // the string is the action topic
+        this->action_server_ = rclcpp_action::create_server<Dock>(
+            this->get_node_base_interface(), this->get_node_clock_interface(),
+            this->get_node_logging_interface(),
+            this->get_node_waitables_interface(), "Dock",
+            std::bind(&DockingServer::handle_goal, this, _1, _2),
+            std::bind(&DockingServer::handle_cancel, this, _1),
+            std::bind(&DockingServer::handle_accepted, this, _1));
+          */
+  }
+
+ private:
+  double DOCK_CONNECTOR_CLEARANCE_DISTANCE_;  // The amount to back off in order
+                                              // to clear the dock
+};
 
 #endif
