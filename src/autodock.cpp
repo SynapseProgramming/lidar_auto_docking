@@ -300,12 +300,17 @@ void UndockingServer::execute(
 
 int main(int argc, char** argv) {
   rclcpp::init(argc, argv);
+  rclcpp::executors::MultiThreadedExecutor executor;
+  auto docking_server = std::make_shared<DockingServer>();
+  docking_server->init_objects();
 
-  auto action_server = std::make_shared<DockingServer>();
-  action_server->init_objects();
+  auto undocking_server = std::make_shared<UndockingServer>();
+  // docking_server->init_objects();
 
-  rclcpp::spin(action_server);
-
+  executor.add_node(docking_server);
+  executor.add_node(undocking_server);
+  // rclcpp::spin(action_server);
+  executor.spin();
   rclcpp::shutdown();
   return 0;
 }
