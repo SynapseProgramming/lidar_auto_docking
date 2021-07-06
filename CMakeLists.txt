@@ -109,6 +109,7 @@ install(
   DIRECTORY
   action
   config
+  msg
   launch
   DESTINATION share/${PROJECT_NAME}
 )
