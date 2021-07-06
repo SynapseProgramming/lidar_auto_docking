@@ -96,6 +96,7 @@ ament_python_install_package(${PROJECT_NAME})
 install(PROGRAMS
   scripts/dock_test.py
   scripts/undock_test.py
+  scripts/dock_saver.py
   DESTINATION lib/${PROJECT_NAME}
 )
 
