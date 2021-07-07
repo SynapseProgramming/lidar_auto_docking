@@ -26,6 +26,10 @@ class gui(object):
         )
         self.send_goal_button_.place(x=posx, y=posy)
 
+    def update_tk(self):
+        self.top_.update_idletasks()
+        self.top_.update()
+
 
 class dock_pose_subscriber(Node):
     def __init__(self):
@@ -48,23 +52,24 @@ class dock_pose_subscriber(Node):
 
     def listener_callback(self, msg):
         # we should update our tkinter gui with the current dock coordinates here
-        self.get_logger().info('x: "%s"' % str(msg.x))
-        self.get_logger().info('y: "%s"' % str(msg.y))
-        self.get_logger().info('z: "%s"' % str(msg.z))
-        self.get_logger().info('w: "%s"' % str(msg.w))
+        # self.get_logger().info('x: "%s"' % str(msg.x))
+        # self.get_logger().info('y: "%s"' % str(msg.y))
+        # self.get_logger().info('z: "%s"' % str(msg.z))
+        # self.get_logger().info('w: "%s"' % str(msg.w))
         self.x_pos = msg.x
         self.z_pos = msg.z
         self.y_pos = msg.y
         self.w_pos = msg.w
-        print("CALLBACK RUNNING")
+        # refresh tkinter
+        self.obj_gui_.update_tk()
 
 
 def main(args=None):
     rclpy.init(args=args)
 
     minimal_subscriber = dock_pose_subscriber()
-    tkinter.mainloop()
     rclpy.spin(minimal_subscriber)
+    # tkinter.mainloop()
 
     minimal_subscriber.destroy_node()
     rclpy.shutdown()
