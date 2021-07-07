@@ -58,11 +58,6 @@ class DockCoordinates : public rclcpp::Node {
 
       } else {
         this->found_dockk = true;
-        std::cout << "wrt map ";
-        std::cout << "x: " << this->dock_pose.pose.position.x
-                  << " y: " << this->dock_pose.pose.position.y;
-        std::cout << " z: " << this->dock_pose.pose.orientation.z
-                  << " w: " << this->dock_pose.pose.orientation.w << "\n";
         // publish the transformations of the dock
         auto dock_pose_msg = lidar_auto_docking::msg::Initdock();
         dock_pose_msg.x = this->dock_pose.pose.position.x;

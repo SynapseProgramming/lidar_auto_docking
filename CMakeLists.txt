@@ -97,6 +97,8 @@ install(PROGRAMS
   scripts/dock_test.py
   scripts/undock_test.py
   scripts/dock_saver.py
+  scripts/write_init_dock.py
+  scripts/read_init_dock.py
   DESTINATION lib/${PROJECT_NAME}
 )
 
@@ -111,6 +113,7 @@ install(
   config
   msg
   launch
+  initial_dock_pose
   DESTINATION share/${PROJECT_NAME}
 )
 
