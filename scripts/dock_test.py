@@ -18,17 +18,14 @@ class docking_client:
         goal_handle = future.result()
         if not goal_handle.accepted:
             print("goal rejected")
-            # self.get_logger().info("Goal rejected :(")
             return
 
-        # self.get_logger().info("Goal accepted :)")
         print("goal accepted")
 
         self._get_result_future = goal_handle.get_result_async()
         self._get_result_future.add_done_callback(self.get_result_callback)
 
     def feedback_callback(self, feedback):
-        # self.get_logger().info(str(feedback.feedback.dock_pose.pose.position.x))
         print("feedback received")
 
     def get_result_callback(self, future):
@@ -36,17 +33,13 @@ class docking_client:
         status = future.result().status
         if status == GoalStatus.STATUS_SUCCEEDED:
             print("goal succeeded")
-            # self.get_logger().info("Goal succeeded!")
         else:
             print("goal failed ")
-            # self.get_logger().info("Goal failed with status: {-1}".format(status))
-            # self.get_logger().info(str(result.docked))
 
         # Shutdown after receiving a result
         rclpy.shutdown()
 
     def send_goal(self):
-        # self.get_logger().info("Waiting for action server...")
         print("waiting for action server")
         self._action_client.wait_for_server()
         # wrt base_linkx: 0.9966 y: -1.205732 z: -1.32998 w: -1.99998
@@ -59,7 +52,6 @@ class docking_client:
         goal_msg.dock_pose.pose.orientation.w = float(0.9999)
         goal_msg.dock_pose.header.frame_id = "map"
         # fill up the rest later
-        # self.get_logger().info("Sending goal request...")
         print("Sending goal request")
         self._send_goal_future = self._action_client.send_goal_async(
             goal_msg, feedback_callback=self.feedback_callback
