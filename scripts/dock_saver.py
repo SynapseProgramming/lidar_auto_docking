@@ -3,6 +3,7 @@
 
 import rclpy
 import tkinter
+import json
 from rclpy.node import Node
 
 from std_msgs.msg import String
@@ -52,6 +53,17 @@ class dock_pose_subscriber(Node):
         print(self.y_pos)
         print(self.z_pos)
         print(self.w_pos)
+        initial_dock_pose = {}
+        initial_dock_pose["x"] = self.x_pos
+        initial_dock_pose["y"] = self.y_pos
+        initial_dock_pose["z"] = self.z_pos
+        initial_dock_pose["w"] = self.w_pos
+        # TODO: the filepath should be loaded from a parameter (specified in the launch file)
+        with open(
+            "/home/ro/dev_ws/src/lidar_auto_docking/initial_dock_pose/init_dock.json",
+            "w",
+        ) as outfile:
+            json.dump(initial_dock_pose, outfile)
 
     def listener_callback(self, msg):
         # we should update our tkinter gui with the current dock coordinates here
