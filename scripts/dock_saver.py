@@ -3,6 +3,7 @@
 
 import rclpy
 import tkinter
+from tkinter import messagebox
 import json
 from rclpy.node import Node
 
@@ -30,6 +31,9 @@ class gui(object):
     def update_tk(self):
         self.top_.update_idletasks()
         self.top_.update()
+
+    def show_message(self, msg):
+        messagebox.showinfo(title="Save Status", message=msg)
 
 
 class dock_pose_subscriber(Node):
@@ -64,6 +68,7 @@ class dock_pose_subscriber(Node):
             "w",
         ) as outfile:
             json.dump(initial_dock_pose, outfile)
+        self.obj_gui_.show_message("Dock Coordinates have been saved!")
 
     def listener_callback(self, msg):
         # we should update our tkinter gui with the current dock coordinates here
