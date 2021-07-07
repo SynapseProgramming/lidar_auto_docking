@@ -50,7 +50,7 @@ class dock_pose_subscriber(Node):
         print(self.dock_file_path)
         self.obj_gui_ = gui()
         self.obj_gui_.create_button(
-            posx=100,
+            posx=250,
             posy=300,
             button_name="save_dock_pose",
             button_colour="green",
