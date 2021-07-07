@@ -49,13 +49,12 @@ class dock_pose_subscriber(Node):
 
     def save_dock_callback(self):
         print(self.x_pos)
+        print(self.y_pos)
+        print(self.z_pos)
+        print(self.w_pos)
 
     def listener_callback(self, msg):
         # we should update our tkinter gui with the current dock coordinates here
-        # self.get_logger().info('x: "%s"' % str(msg.x))
-        # self.get_logger().info('y: "%s"' % str(msg.y))
-        # self.get_logger().info('z: "%s"' % str(msg.z))
-        # self.get_logger().info('w: "%s"' % str(msg.w))
         self.x_pos = msg.x
         self.z_pos = msg.z
         self.y_pos = msg.y
@@ -69,7 +68,6 @@ def main(args=None):
 
     minimal_subscriber = dock_pose_subscriber()
     rclpy.spin(minimal_subscriber)
-    # tkinter.mainloop()
 
     minimal_subscriber.destroy_node()
     rclpy.shutdown()
