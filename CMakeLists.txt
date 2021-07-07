@@ -97,6 +97,7 @@ install(PROGRAMS
   scripts/dock_test.py
   scripts/undock_test.py
   scripts/dock_saver.py
+  scripts/write_init_dock.py
   DESTINATION lib/${PROJECT_NAME}
 )
 
