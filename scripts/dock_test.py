@@ -33,9 +33,6 @@ class docking_client:
         else:
             print("goal failed ")
 
-        # Shutdown after receiving a result
-        rclpy.shutdown()
-
     def send_goal(self, dock_pose):
         print("waiting for action server")
         self._action_client.wait_for_server()
@@ -77,6 +74,9 @@ def main(args=None):
     action_client.send_goal()
 
     rclpy.spin(action_client)
+
+    action_client.destroy_node()
+    rclpy.shutdown()
 
 
 if __name__ == "__main__":
