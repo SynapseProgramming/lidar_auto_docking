@@ -2,10 +2,29 @@
 ...
 
 import rclpy
+import tkinter
 from rclpy.node import Node
 
 from std_msgs.msg import String
 from lidar_auto_docking.msg import Initdock
+
+
+class gui(object):
+    def __init__(self):
+
+        self.top_ = tkinter.Tk()
+        self.top_.geometry("600x500")
+
+    def get_selected_goal(self):
+        return self.selected_goal_.get()
+
+    # callback_function is the address of the function to callback when the button is pressed.
+
+    def create_button(self, posx, posy, button_name, callback_function, button_colour):
+        self.send_goal_button_ = tkinter.Button(
+            self.top_, text=button_name, command=callback_function, bg=button_colour
+        )
+        self.send_goal_button_.place(x=posx, y=posy)
 
 
 class dock_pose_subscriber(Node):
@@ -15,24 +34,38 @@ class dock_pose_subscriber(Node):
             Initdock, "init_dock", self.listener_callback, 10
         )
         self.subscription  # prevent unused variable warning
+        self.obj_gui_ = gui()
+        self.obj_gui_.create_button(
+            posx=100,
+            posy=300,
+            button_name="save_dock_pose",
+            button_colour="green",
+            callback_function=self.save_dock_callback,
+        )
+
+    def save_dock_callback(self):
+        print(self.x_pos)
 
     def listener_callback(self, msg):
+        # we should update our tkinter gui with the current dock coordinates here
         self.get_logger().info('x: "%s"' % str(msg.x))
         self.get_logger().info('y: "%s"' % str(msg.y))
         self.get_logger().info('z: "%s"' % str(msg.z))
         self.get_logger().info('w: "%s"' % str(msg.w))
+        self.x_pos = msg.x
+        self.z_pos = msg.z
+        self.y_pos = msg.y
+        self.w_pos = msg.w
+        print("CALLBACK RUNNING")
 
 
 def main(args=None):
     rclpy.init(args=args)
 
     minimal_subscriber = dock_pose_subscriber()
-
+    tkinter.mainloop()
     rclpy.spin(minimal_subscriber)
 
-    # Destroy the node explicitly
-    # (optional - otherwise it will be done automatically
-    # when the garbage collector destroys the node object)
     minimal_subscriber.destroy_node()
     rclpy.shutdown()
 
