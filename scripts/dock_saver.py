@@ -43,6 +43,11 @@ class dock_pose_subscriber(Node):
             Initdock, "init_dock", self.listener_callback, 10
         )
         self.subscription  # prevent unused variable warning
+        self.declare_parameter("load_file_path")
+        self.dock_file_path = (
+            self.get_parameter("load_file_path").get_parameter_value().string_value
+        )
+        print(self.dock_file_path)
         self.obj_gui_ = gui()
         self.obj_gui_.create_button(
             posx=100,
@@ -62,9 +67,8 @@ class dock_pose_subscriber(Node):
         initial_dock_pose["y"] = self.y_pos
         initial_dock_pose["z"] = self.z_pos
         initial_dock_pose["w"] = self.w_pos
-        # TODO: the filepath should be loaded from a parameter (specified in the launch file)
         with open(
-            "/home/ro/dev_ws/src/lidar_auto_docking/initial_dock_pose/init_dock.json",
+            self.dock_file_path,
             "w",
         ) as outfile:
             json.dump(initial_dock_pose, outfile)
