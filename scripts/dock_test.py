@@ -39,17 +39,17 @@ class docking_client:
         # Shutdown after receiving a result
         rclpy.shutdown()
 
-    def send_goal(self):
+    def send_goal(self, dock_pose):
         print("waiting for action server")
         self._action_client.wait_for_server()
         # wrt base_linkx: 0.9966 y: -1.205732 z: -1.32998 w: -1.99998
 
         # wrt odomx: 0.92997 y: -1.215420 z: -1.808215 w: -1.999966
         goal_msg = Dock.Goal()
-        goal_msg.dock_pose.pose.position.x = float(-1.5467)
-        goal_msg.dock_pose.pose.position.y = float(-0.20825)
-        goal_msg.dock_pose.pose.orientation.z = float(0.005627)
-        goal_msg.dock_pose.pose.orientation.w = float(0.9999)
+        goal_msg.dock_pose.pose.position.x = dock_pose["x"]
+        goal_msg.dock_pose.pose.position.y = dock_pose["y"]
+        goal_msg.dock_pose.pose.orientation.z = dock_pose["z"]
+        goal_msg.dock_pose.pose.orientation.w = dock_pose["w"]
         goal_msg.dock_pose.header.frame_id = "map"
         # fill up the rest later
         print("Sending goal request")
@@ -64,9 +64,14 @@ class MinimalActionClient(Node):
     def __init__(self):
         super().__init__("minimal_action_client")
         self.docking_client_ = docking_client(ActionClient(self, Dock, "Dock"))
+        self.initial_dock_pose = {}
+        self.initial_dock_pose["x"] = -1.5467
+        self.initial_dock_pose["y"] = -0.20825
+        self.initial_dock_pose["z"] = 0.005627
+        self.initial_dock_pose["w"] = 0.9999
 
     def send_goal(self):
-        self.docking_client_.send_goal()
+        self.docking_client_.send_goal(self.initial_dock_pose)
 
 
 def main(args=None):
