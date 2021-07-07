@@ -15,6 +15,11 @@ def generate_launch_description():
         "initial_dock_pose",
         dock_pose_file,
     )
+    run_dock_coordinates = Node(
+        package="lidar_auto_docking",
+        executable="dock_coordinates",
+        name="dock_coordinates",
+    )
     run_dock_saver = Node(
         package="lidar_auto_docking",
         executable="dock_saver.py",
@@ -26,5 +31,6 @@ def generate_launch_description():
 
     ld = LaunchDescription()
     ld.add_action(run_dock_saver)
+    ld.add_action(run_dock_coordinates)
 
     return ld
