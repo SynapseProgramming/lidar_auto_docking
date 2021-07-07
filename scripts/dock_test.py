@@ -25,9 +25,6 @@ class docking_client:
         self._get_result_future = goal_handle.get_result_async()
         self._get_result_future.add_done_callback(self.get_result_callback)
 
-    def feedback_callback(self, feedback):
-        print("feedback received")
-
     def get_result_callback(self, future):
         result = future.result().result
         status = future.result().status
@@ -53,9 +50,7 @@ class docking_client:
         goal_msg.dock_pose.header.frame_id = "map"
         # fill up the rest later
         print("Sending goal request")
-        self._send_goal_future = self._action_client.send_goal_async(
-            goal_msg, feedback_callback=self.feedback_callback
-        )
+        self._send_goal_future = self._action_client.send_goal_async(goal_msg)
 
         self._send_goal_future.add_done_callback(self.goal_response_callback)
 
