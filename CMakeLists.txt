@@ -95,7 +95,7 @@ ament_python_install_package(${PROJECT_NAME})
 # Install Python executables
 install(PROGRAMS
   scripts/dock_robot.py
-  scripts/undock_test.py
+  scripts/undock_robot.py
   scripts/dock_saver.py
   scripts/write_init_dock.py
   scripts/read_init_dock.py
