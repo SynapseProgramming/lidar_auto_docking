@@ -18,11 +18,9 @@ class undocking_client:
         goal_handle = future.result()
         if not goal_handle.accepted:
             print("Goal Rejected")
-            # self.get_logger().info("Goal rejected :(")
             return
 
         print("Goal accepted")
-        # self.get_logger().info("Goal accepted :)")
 
         self._get_result_future = goal_handle.get_result_async()
         self._get_result_future.add_done_callback(self.get_result_callback)
@@ -32,25 +30,17 @@ class undocking_client:
         status = future.result().status
         if status == GoalStatus.STATUS_SUCCEEDED:
             print("Goal Succeeded!")
-            # self.get_logger().info("Goal succeeded!")
             print(str(result.undocked))
         else:
             print("Goal Failed!")
-            # self.get_logger().info("Goal failed with status: {0}".format(status))
-            # self.get_logger().info(str(result.undocked))
-
-        # Shutdown after receiving a result
-        rclpy.shutdown()
 
     def send_goal(self):
         print("Waiting for action server")
-        # self.get_logger().info("Waiting for action server...")
         self._action_client.wait_for_server()
         goal_msg = Undock.Goal()
         goal_msg.rotate_in_place = True
         # fill up the rest later
         print("Sending goal request")
-        # self.get_logger().info("Sending goal request...")
 
         self._send_goal_future = self._action_client.send_goal_async(goal_msg)
 
