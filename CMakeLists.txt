@@ -88,7 +88,6 @@ install(PROGRAMS
   scripts/dock_robot.py
   scripts/undock_robot.py
   scripts/dock_saver.py
-  scripts/read_init_dock.py
   DESTINATION lib/${PROJECT_NAME}
 )
 
