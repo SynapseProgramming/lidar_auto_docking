@@ -94,7 +94,7 @@ rosidl_target_interfaces(auto_dock ${PROJECT_NAME} "rosidl_typesupport_cpp")
 ament_python_install_package(${PROJECT_NAME})
 # Install Python executables
 install(PROGRAMS
-  scripts/dock_test.py
+  scripts/dock_robot.py
   scripts/undock_test.py
   scripts/dock_saver.py
   scripts/write_init_dock.py

@@ -25,10 +25,10 @@ def generate_launch_description():
         dock_pose_file,
     )
 
-    run_dock_saver = Node(
+    run_autodock_client = Node(
         package="lidar_auto_docking",
-        executable="dock_test.py",
-        name="dock_client",
+        executable="dock_robot.py",
+        name="dock_bot",
         emulate_tty=True,
         parameters=[{"load_file_path": load_file_path}],
         output="screen",
@@ -41,5 +41,5 @@ def generate_launch_description():
         output="screen",
     )
     ld.add_action(run_autodock)
-    ld.add_action(run_dock_saver)
+    ld.add_action(run_autodock_client)
     return ld
