@@ -56,6 +56,7 @@ class dock_pose_subscriber(Node):
         # If the transform is unavailable the timer callback will wait for it.
         self._output_timer = self.create_timer(0.1, self.on_timer)
         self.obj_gui_ = gui()
+        self.x_pos = 0.0
         self.obj_gui_.create_button(
             posx=250,
             posy=300,
@@ -65,8 +66,8 @@ class dock_pose_subscriber(Node):
         )
 
     async def on_timer(self):
-        from_frame = "map"
-        to_frame = "base_link"
+        from_frame = "base_link"
+        to_frame = "map"
 
         self.get_logger().info(
             "Waiting for transform from {} to {}".format(from_frame, to_frame)
@@ -77,10 +78,14 @@ class dock_pose_subscriber(Node):
 
         try:
             # Suspends callback until transform becomes available
-            self.transform = await self._tf_buffer.lookup_transform_async(
+            self.robot_pose = await self._tf_buffer.lookup_transform_async(
                 to_frame, from_frame, when
             )
-            self.get_logger().info("Got {}".format(repr(self.transform)))
+            # self.get_logger().info("Got {}".format(repr(self.transform)))
+            self.bot_x = self.robot_pose.transform.translation.x
+            # print("bot_x: " + str(self.robot_pose.transform.translation.x))
+            self.dock_x_diff = abs(self.bot_x - self.x_pos)
+            print("distance to dock: " + str(self.dock_x_diff))
         except LookupException as e:
             self.get_logger().error("failed to get transform {}".format(repr(e)))
 
