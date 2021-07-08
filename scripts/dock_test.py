@@ -37,10 +37,11 @@ class docking_client:
     def send_goal(self, dock_pose):
         print("waiting for action server")
         self._action_client.wait_for_server()
-        # wrt base_linkx: 0.9966 y: -1.205732 z: -1.32998 w: -1.99998
-
-        # wrt odomx: 0.92997 y: -1.215420 z: -1.808215 w: -1.999966
         goal_msg = Dock.Goal()
+        print(dock_pose["x"])
+        print(dock_pose["y"])
+        print(dock_pose["z"])
+        print(dock_pose["w"])
         goal_msg.dock_pose.pose.position.x = dock_pose["x"]
         goal_msg.dock_pose.pose.position.y = dock_pose["y"]
         goal_msg.dock_pose.pose.orientation.z = dock_pose["z"]
@@ -61,13 +62,9 @@ class dock(Node):
         self.dock_file_path = (
             self.get_parameter("load_file_path").get_parameter_value().string_value
         )
-        print(self.dock_file_path)
-
-        self.initial_dock_pose = {}
-        self.initial_dock_pose["x"] = -1.5467
-        self.initial_dock_pose["y"] = -0.20825
-        self.initial_dock_pose["z"] = 0.005627
-        self.initial_dock_pose["w"] = 0.9999
+        # load in dock coordinates
+        with open(self.dock_file_path) as outfile:
+            self.initial_dock_pose = json.load(outfile)
 
     def send_goal(self):
         self.docking_client_.send_goal(self.initial_dock_pose)
