@@ -6,6 +6,7 @@ from action_msgs.msg import GoalStatus
 from lidar_auto_docking.action import Dock
 
 import rclpy
+import json
 from rclpy.action import ActionClient
 from rclpy.node import Node
 
@@ -52,10 +53,16 @@ class docking_client:
         self._send_goal_future.add_done_callback(self.goal_response_callback)
 
 
-class MinimalActionClient(Node):
+class dock(Node):
     def __init__(self):
         super().__init__("minimal_action_client")
         self.docking_client_ = docking_client(ActionClient(self, Dock, "Dock"))
+        self.declare_parameter("load_file_path")
+        self.dock_file_path = (
+            self.get_parameter("load_file_path").get_parameter_value().string_value
+        )
+        print(self.dock_file_path)
+
         self.initial_dock_pose = {}
         self.initial_dock_pose["x"] = -1.5467
         self.initial_dock_pose["y"] = -0.20825
@@ -69,7 +76,7 @@ class MinimalActionClient(Node):
 def main(args=None):
     rclpy.init(args=args)
 
-    action_client = MinimalActionClient()
+    action_client = dock()
 
     action_client.send_goal()
 
