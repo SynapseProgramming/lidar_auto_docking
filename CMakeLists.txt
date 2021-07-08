@@ -61,13 +61,6 @@ rosidl_target_interfaces(dock_coordinates ${PROJECT_NAME} "rosidl_typesupport_cp
 
 
 
-add_executable(transforml_test src/tf2listener_test.cpp src/tf2listener.cpp )
-ament_target_dependencies(transforml_test tf2 rclcpp tf2_ros geometry_msgs tf2_geometry_msgs)
-target_include_directories( transforml_test
-  PUBLIC
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-    $<INSTALL_INTERFACE:include>)
-
 
 
 add_executable(auto_dock src/autodock.cpp src/controller.cpp src/perception.cpp src/laser_processor.cpp src/linear_pose_filter_2d.cpp src/icp_2d.cpp src/tf2listener.cpp)
@@ -127,7 +120,6 @@ install(TARGETS
 auto_dock
 dock_coordinates
 #controller_test
-transforml_test
   DESTINATION lib/${PROJECT_NAME})
 
 
