@@ -74,10 +74,6 @@ class dock_pose_subscriber(Node):
         from_frame = "base_link"
         to_frame = "map"
 
-        self.get_logger().info(
-            "Waiting for transform from {} to {}".format(from_frame, to_frame)
-        )
-
         # Get latest available
         when = rclpy.time.Time()
 
@@ -88,9 +84,7 @@ class dock_pose_subscriber(Node):
             )
             # self.get_logger().info("Got {}".format(repr(self.transform)))
             self.bot_x = self.robot_pose.transform.translation.x
-            # print("bot_x: " + str(self.robot_pose.transform.translation.x))
             self.dock_x_diff = abs(self.bot_x - self.x_pos)
-            # print("distance to dock: " + str(self.dock_x_diff))
             self.obj_gui_.show_variable(
                 posx=250, posy=250, msg="Distance to dock: " + str(self.dock_x_diff)
             )
