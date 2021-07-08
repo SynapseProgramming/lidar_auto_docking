@@ -135,11 +135,6 @@ bool DockPerception::getPose(geometry_msgs::msg::PoseStamped& pose,
   tf2::fromMsg(dock_.pose.orientation, q);
   if (!isValid(q)) {
     std::cout << "Dock orientation invalid.\n";
-    //  ROS_DEBUG_STREAM_NAMED("perception", "Quaternion magnitude is "
-    //                                         << q.length() << " Quaternion is
-    //                                         ["
-    //                                       << q.x() << ", " << q.y() << ", "
-    //                                     << q.z() << ", " << q.w() << "]");
     return false;
   }
 
@@ -182,10 +177,6 @@ void DockPerception::callback(
         dock_.pose.orientation.y = 0.0;
         dock_.pose.orientation.z = 0.0;
         dock_.pose.orientation.w = 0.0;
-        //  ROS_DEBUG_NAMED("dock_perception", "Set initial pose to (%f, %f,
-        //  %f)",
-        //                dock_.pose.position.x, dock_.pose.position.y,
-        //              icp_2d::thetaFromQuaternion(dock_.pose.orientation));
         break;
       }
     }
@@ -228,9 +219,6 @@ void DockPerception::callback(
       candidates.push(c);
     }
   }
-  // TODO: ADD DEBUG STREAM
-  // ROS_DEBUG_STREAM_NAMED("dock_perception",
-  //                     "Extracted " << candidates.size() << " clusters");
 
   // Extract ICP pose/fit on best clusters
   DockCandidatePtr best;

@@ -45,13 +45,9 @@ bool BaseController::approach(const geometry_msgs::msg::PoseStamped& target) {
   // Transform pose by -dist_ in the X direction of the dock
   geometry_msgs::msg::PoseStamped pose = target;
   {
-    // tf::Quaternion q;
-    // tf::quaternionMsgToTF(pose.pose.orientation, q);
     double theta = angles::normalize_angle(tf2::getYaw(pose.pose.orientation));
     // If the target has an invalid orientation then don't approach it.
     if (!std::isfinite(theta)) {
-      // ROS_ERROR_STREAM_NAMED("controller", "Invalid approach target
-      // for docking.");
       RCLCPP_ERROR(rclcpp::get_logger("rclcpp"),
                    "Invalid approach target for docking");
       stop();
@@ -66,8 +62,6 @@ bool BaseController::approach(const geometry_msgs::msg::PoseStamped& target) {
     pose.header.stamp = rclcpp::Time(0);
     listener_.transformPose("base_link", pose, pose);
   } catch (const tf2::TransformException& ex) {
-    //        ROS_WARN_STREAM_THROTTLE(1.0, "Couldn't get transform from dock to
-    //  base_link");
     RCLCPP_ERROR(rclcpp::get_logger("rclcpp"),
                  "Couldn't get transform from dock to base_link");
 
@@ -101,8 +95,6 @@ bool BaseController::approach(const geometry_msgs::msg::PoseStamped& target) {
   double delta = std::atan2(-pose.pose.position.y, pose.pose.position.x);
 
   // Determine orientation of goal frame relative to r_
-  // tf::Quaternion q;
-  // tf::quaternionMsgToTF(pose.pose.orientation, q);
   double theta =
       angles::normalize_angle(tf2::getYaw(pose.pose.orientation) + delta);
 
@@ -209,11 +201,6 @@ bool BaseController::backup(double distance, double rotate_distance) {
 
   if (turning_) {
     // Get yaw angles
-    // tf::Quaternion q1, q2;
-    // tf::quaternionMsgToTF(start_.pose.orientation, q1);
-    // tf2::fromMsg(start_.pose.orientation, q1);
-    // tf::quaternionMsgToTF(pose.pose.orientation, q2);
-    // tf2::fromMsg(pose.pose.orientation, q2);
     double theta =
         angles::normalize_angle(tf2::getYaw(pose.pose.orientation) -
                                 tf2::getYaw(start_.pose.orientation));
@@ -226,7 +213,6 @@ bool BaseController::backup(double distance, double rotate_distance) {
                                          // value as the angular turning
       command_.angular.z = std::min(0.6, fabs(error) * 1.3 + 0.1);
     } else {
-      //  command_.angular.z = std::max(-2.0, -fabs(error)*2.0); original.
       command_.angular.z = std::max(-0.6, -(fabs(error) * 1.3 + 0.1));
     }
   } else {

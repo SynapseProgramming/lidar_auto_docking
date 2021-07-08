@@ -77,8 +77,6 @@ class DockPerception {
    * @returns Fitness score (>0 if successful)
    */
   double fit(const DockCandidatePtr& candidate, geometry_msgs::msg::Pose& pose);
-  // DockCandidatePtr defined as
-  // typedef std::shared_ptr<DockCandidate> DockCandidatePtr;
   /**
    * @brief Method to check if the quaternion is valid.
    * @param q Quaternion to check.
@@ -92,7 +90,6 @@ class DockPerception {
   bool running_;  // Should we be trying to find the dock
   bool debug_;    // Should we output debugging info
 
-  // defined as std::shared_ptr<LinearPoseFilter2D> LinearPoseFilter2DPtr;
   LinearPoseFilter2DPtr
       dock_pose_filter_;  /// Low pass filter object for filtering dock poses.
   // TF frame to track dock within
@@ -100,7 +97,6 @@ class DockPerception {
   // Best estimate of where the dock is
   geometry_msgs::msg::PoseStamped dock_;
   // Mutex on dock_
-  // boost::mutex dock_mutex_;
   std::mutex dock_mutex_;
   // If true, then dock_ is based on actual sensor data
   bool found_dock_;
