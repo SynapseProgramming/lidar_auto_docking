@@ -352,7 +352,6 @@ int main(int argc, char** argv) {
 
   executor.add_node(docking_server);
   executor.add_node(undocking_server);
-  // rclcpp::spin(action_server);
   executor.spin();
   rclcpp::shutdown();
   return 0;
