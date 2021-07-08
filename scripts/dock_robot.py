@@ -38,10 +38,6 @@ class docking_client:
         print("waiting for action server")
         self._action_client.wait_for_server()
         goal_msg = Dock.Goal()
-        print(dock_pose["x"])
-        print(dock_pose["y"])
-        print(dock_pose["z"])
-        print(dock_pose["w"])
         goal_msg.dock_pose.pose.position.x = dock_pose["x"]
         goal_msg.dock_pose.pose.position.y = dock_pose["y"]
         goal_msg.dock_pose.pose.orientation.z = dock_pose["z"]
