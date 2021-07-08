@@ -39,6 +39,7 @@ def generate_launch_description():
         executable="auto_dock",
         parameters=[config],
         output="screen",
+        remappings=[("/cmd_vel", "/autodock/cmd_vel")],
     )
     ld.add_action(run_autodock)
     ld.add_action(run_autodock_client)
