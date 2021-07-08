@@ -22,7 +22,7 @@ jobs:
     - name: Run Tests
       uses: ros-tooling/action-ros-ci@v0.2
       with:
-        package-name: ros2labview_examples
+        package-name: lidar_auto_docking
         target-ros2-distro: foxy
 
     - name: Upload Logs
