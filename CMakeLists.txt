@@ -52,17 +52,6 @@ rosidl_target_interfaces(dock_coordinates ${PROJECT_NAME} "rosidl_typesupport_cp
 
 
 
-#add_executable(controller_test src/controller.cpp src/tf2listener.cpp )
-#ament_target_dependencies(controller_test nav_msgs geometry_msgs tf2 sensor_msgs rclcpp Eigen3 angles tf2_ros tf2_geometry_msgs )
-#target_include_directories( controller_test
-#  PUBLIC
-#    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-#    $<INSTALL_INTERFACE:include>)
-
-
-
-
-
 add_executable(auto_dock src/autodock.cpp src/controller.cpp src/perception.cpp src/laser_processor.cpp src/linear_pose_filter_2d.cpp src/icp_2d.cpp src/tf2listener.cpp)
 ament_target_dependencies(auto_dock nav_msgs geometry_msgs tf2 sensor_msgs rclcpp rclcpp_action Eigen3 angles tf2_ros tf2_geometry_msgs )
 target_include_directories( auto_dock
@@ -70,16 +59,6 @@ target_include_directories( auto_dock
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include>)
 rosidl_target_interfaces(auto_dock ${PROJECT_NAME} "rosidl_typesupport_cpp")
-
-
-
-
-# link header files definition to cpp definition
-#add_executable(icp_2d_test src/icp_2d.cpp)
-
-#ament_target_dependencies(icp_2d_test geometry_msgs Eigen3)
-#ament_target_dependencies(laser_processor_test geometry_msgs tf2 sensor_msgs)
-#ament_target_dependencies(laser_processor_test geometry_msgs tf2 angles)
 
 
 ament_python_install_package(${PROJECT_NAME})
@@ -112,12 +91,8 @@ install(
 
 
 install(TARGETS
-#icp_2d_test
-#  linear_pose_filter_2d_test
-#  laser_processor_test
 auto_dock
 dock_coordinates
-#controller_test
   DESTINATION lib/${PROJECT_NAME})
 
 

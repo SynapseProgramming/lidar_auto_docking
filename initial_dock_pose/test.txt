@@ -1,0 +1,1 @@
+This file exists to enable the initial_dock_pose folder to be sent to github
