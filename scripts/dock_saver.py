@@ -90,8 +90,10 @@ class dock_pose_subscriber(Node):
             self.bot_x = self.robot_pose.transform.translation.x
             # print("bot_x: " + str(self.robot_pose.transform.translation.x))
             self.dock_x_diff = abs(self.bot_x - self.x_pos)
-            print("distance to dock: " + str(self.dock_x_diff))
-            self.obj_gui_.show_variable(posx=300, posy=400, msg=self.dock_x_diff)
+            # print("distance to dock: " + str(self.dock_x_diff))
+            self.obj_gui_.show_variable(
+                posx=250, posy=250, msg="Distance to dock: " + str(self.dock_x_diff)
+            )
         except LookupException as e:
             self.get_logger().error("failed to get transform {}".format(repr(e)))
 
