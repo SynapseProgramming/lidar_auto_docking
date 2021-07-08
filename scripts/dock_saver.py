@@ -9,6 +9,9 @@ from rclpy.node import Node
 
 from std_msgs.msg import String
 from lidar_auto_docking.msg import Initdock
+from tf2_ros import LookupException
+from tf2_ros.buffer import Buffer
+from tf2_ros.transform_listener import TransformListener
 
 
 class gui(object):
@@ -47,7 +50,6 @@ class dock_pose_subscriber(Node):
         self.dock_file_path = (
             self.get_parameter("load_file_path").get_parameter_value().string_value
         )
-        print(self.dock_file_path)
         self.obj_gui_ = gui()
         self.obj_gui_.create_button(
             posx=250,
