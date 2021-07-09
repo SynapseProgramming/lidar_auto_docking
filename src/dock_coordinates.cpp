@@ -9,6 +9,7 @@
 
 #include "lidar_auto_docking/msg/initdock.hpp"
 #include "lidar_auto_docking/tf2listener.h"
+#include "sensor_msgs/msg/joy.hpp"
 
 using namespace std::chrono_literals;
 
@@ -18,6 +19,20 @@ class DockCoordinates : public rclcpp::Node {
     tbr = std::make_shared<tf2_ros::TransformBroadcaster>(this);
     publisher_ = this->create_publisher<lidar_auto_docking::msg::Initdock>(
         "init_dock", 10);
+
+    joy_sub_ = this->create_subscription<sensor_msgs::msg::Joy>(
+        "joy", 10, [this](const sensor_msgs::msg::Joy::SharedPtr msg) {
+          std::vector<int> pressed_buttons = msg->buttons;
+          // second element [1] for B
+          // TODO: Add in dynamic reconfigure for the reset button
+          if (pressed_buttons[3]) {
+            RCLCPP_INFO(this->get_logger(), "Resetting initial dock estimate");
+            this->found_dockk = false;
+            this->perception_ptr->stop();
+            update_init_dock(init_dock_pose);
+            perception_ptr->start(init_dock_pose);
+          }
+        });
   }
 
   // the init_objects function would return a shared_ptr to this class. It will
@@ -101,6 +116,7 @@ class DockCoordinates : public rclcpp::Node {
   std::shared_ptr<DockPerception> perception_ptr;
   std::shared_ptr<tf2_ros::TransformBroadcaster> tbr;
   rclcpp::Publisher<lidar_auto_docking::msg::Initdock>::SharedPtr publisher_;
+  rclcpp::Subscription<sensor_msgs::msg::Joy>::SharedPtr joy_sub_;
   tf2_listener tf2_listen;
 
   rclcpp::Time time_now;
