@@ -50,19 +50,6 @@ class DockCoordinates : public rclcpp::Node {
     fake_dock.pose.position.x = 1;
     // we will transform fake_dock wrt map
     tf2_listen.transformPose("map", fake_dock, idp);
-
-    /*
-        geometry_msgs::msg::TransformStamped robot_pose;
-        robot_pose = tf2_listen.getTransform("map", "base_link");
-        auto translation = robot_pose.transform.translation;
-        auto rotation = robot_pose.transform.rotation;
-        // we will assume that the dock is placed 1m in front of the robot
-        idp.pose.position.x = translation.x + 1;
-        idp.pose.position.y = translation.y;
-        idp.pose.position.z = translation.z;
-        idp.pose.orientation = rotation;
-      idp.header.frame_id = "map";
-      */
   }
 
   void main_test() {
