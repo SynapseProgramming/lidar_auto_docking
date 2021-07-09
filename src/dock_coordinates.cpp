@@ -55,7 +55,6 @@ class DockCoordinates : public rclcpp::Node {
   void main_test() {
     update_init_dock(init_dock_pose);
     perception_ptr->start(init_dock_pose);
-    print_idp(init_dock_pose);
     timer_ = this->create_wall_timer(20ms, [this]() {
       // if no dock is found yet, call start function with init_dock_pose to let
       // perception assume the dock is 1m ahead of the bot.
@@ -67,9 +66,6 @@ class DockCoordinates : public rclcpp::Node {
 
       } else {
         this->found_dockk = true;
-        //(TODO) these two statements are test statements. remove later
-        this->update_init_dock(this->init_dock_pose);
-        this->print_idp(this->init_dock_pose);
 
         // publish the transformations of the dock
         auto dock_pose_msg = lidar_auto_docking::msg::Initdock();
