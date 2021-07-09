@@ -10,6 +10,7 @@ from rclpy.node import Node
 
 from std_msgs.msg import String
 from lidar_auto_docking.msg import Initdock
+import math
 from tf2_ros import LookupException
 from tf2_ros.buffer import Buffer
 from tf2_ros.transform_listener import TransformListener
@@ -62,6 +63,7 @@ class dock_pose_subscriber(Node):
         self._output_timer = self.create_timer(0.1, self.on_timer)
         self.obj_gui_ = gui()
         self.x_pos = 0.0
+        self.y_pos = 0.0
         self.obj_gui_.create_button(
             posx=250,
             posy=300,
@@ -82,11 +84,16 @@ class dock_pose_subscriber(Node):
             self.robot_pose = await self._tf_buffer.lookup_transform_async(
                 to_frame, from_frame, when
             )
-            # self.get_logger().info("Got {}".format(repr(self.transform)))
             self.bot_x = self.robot_pose.transform.translation.x
+            self.bot_y = self.robot_pose.transform.translation.y
             self.dock_x_diff = abs(self.bot_x - self.x_pos)
+            self.dock_y_diff = abs(self.bot_y - self.y_pos)
+            self.dist_to_dock = math.sqrt(
+                self.dock_x_diff * self.dock_x_diff
+                + self.dock_y_diff * self.dock_y_diff
+            )
             self.obj_gui_.show_variable(
-                posx=250, posy=250, msg="Distance to dock: " + str(self.dock_x_diff)
+                posx=250, posy=250, msg="Distance to dock: " + str(self.dist_to_dock)
             )
         except LookupException as e:
             self.get_logger().error("failed to get transform {}".format(repr(e)))
