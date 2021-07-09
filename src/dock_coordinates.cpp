@@ -32,32 +32,49 @@ class DockCoordinates : public rclcpp::Node {
   std::shared_ptr<rclcpp::Node> shared_ptr_from_this() {
     return shared_from_this();
   }
+  // debugging function to print out the initial dock pose
+  void print_idp(geometry_msgs::msg::PoseStamped idp) {
+    std::cout << "init x: " << idp.pose.position.x << "\n";
+    std::cout << "init y: " << idp.pose.position.y << "\n";
+    std::cout << "init z: " << idp.pose.orientation.z << "\n";
+    std::cout << "init w: " << idp.pose.orientation.w << "\n";
+  }
 
-  void main_test() {
-    // we will assume that the dock is placed 1m in front of the robot
+  // this function would update the initial dock pose to be 1m from robot.
+  // wrt map frame.
+  void update_init_dock(geometry_msgs::msg::PoseStamped& idp) {
     tf2_listen.waitTransform("map", "base_link");
     geometry_msgs::msg::TransformStamped robot_pose;
     robot_pose = tf2_listen.getTransform("map", "base_link");
     auto translation = robot_pose.transform.translation;
     auto rotation = robot_pose.transform.rotation;
-    // we will set the dock to be 1m in front of the robot
-    init_dock_pose.pose.position.x = translation.x + 1;
-    init_dock_pose.pose.position.y = translation.y;
-    init_dock_pose.pose.position.z = translation.z;
-    init_dock_pose.pose.orientation = rotation;
-    init_dock_pose.header.frame_id = "map";
+    // we will assume that the dock is placed 1m in front of the robot
+    idp.pose.position.x = translation.x + 1;
+    idp.pose.position.y = translation.y;
+    idp.pose.position.z = translation.z;
+    idp.pose.orientation = rotation;
+    idp.header.frame_id = "map";
+  }
+
+  void main_test() {
+    update_init_dock(init_dock_pose);
     perception_ptr->start(init_dock_pose);
+    print_idp(init_dock_pose);
     timer_ = this->create_wall_timer(20ms, [this]() {
       // if no dock is found yet, call start function with init_dock_pose to let
       // perception assume the dock is 1m ahead of the bot.
       if (this->perception_ptr->getPose(this->dock_pose, "map") == false &&
           this->found_dockk == false) {
         std::cout << "still finding dock!\n";
-
+        this->update_init_dock(this->init_dock_pose);
         this->perception_ptr->start(this->init_dock_pose);
 
       } else {
         this->found_dockk = true;
+        //(TODO) these two statements are test statements. remove later
+        this->update_init_dock(this->init_dock_pose);
+        this->print_idp(this->init_dock_pose);
+
         // publish the transformations of the dock
         auto dock_pose_msg = lidar_auto_docking::msg::Initdock();
         dock_pose_msg.x = this->dock_pose.pose.position.x;
