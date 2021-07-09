@@ -19,6 +19,7 @@ def generate_launch_description():
         package="lidar_auto_docking",
         executable="dock_coordinates",
         name="dock_coordinates",
+        parameters=[{"reset_goal_button": 1}],
     )
     run_dock_saver = Node(
         package="lidar_auto_docking",

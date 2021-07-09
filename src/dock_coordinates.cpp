@@ -19,13 +19,13 @@ class DockCoordinates : public rclcpp::Node {
     tbr = std::make_shared<tf2_ros::TransformBroadcaster>(this);
     publisher_ = this->create_publisher<lidar_auto_docking::msg::Initdock>(
         "init_dock", 10);
-
+    this->declare_parameter<int>("reset_goal_button", 3);
+    this->get_parameter("reset_goal_button", reset_goal_button);
     joy_sub_ = this->create_subscription<sensor_msgs::msg::Joy>(
         "joy", 10, [this](const sensor_msgs::msg::Joy::SharedPtr msg) {
           std::vector<int> pressed_buttons = msg->buttons;
-          // second element [1] for B
-          // TODO: Add in dynamic reconfigure for the reset button
-          if (pressed_buttons[3]) {
+
+          if (pressed_buttons[reset_goal_button]) {
             RCLCPP_INFO(this->get_logger(), "Resetting initial dock estimate");
             this->found_dockk = false;
             this->perception_ptr->stop();
@@ -113,6 +113,7 @@ class DockCoordinates : public rclcpp::Node {
   }
 
  private:
+  int reset_goal_button;
   std::shared_ptr<DockPerception> perception_ptr;
   std::shared_ptr<tf2_ros::TransformBroadcaster> tbr;
   rclcpp::Publisher<lidar_auto_docking::msg::Initdock>::SharedPtr publisher_;
