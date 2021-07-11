@@ -3,14 +3,14 @@
 
 
 from action_msgs.msg import GoalStatus
-from lidar_auto_docking.action import Undock
+from nav2_msgs.action import NavigateToPose
 
 import rclpy
 from rclpy.action import ActionClient
 from rclpy.node import Node
 
 
-class undocking_client:
+class goto_pose:
     def __init__(self, action_client):
         self._action_client = action_client
 
@@ -31,15 +31,14 @@ class undocking_client:
         status = future.result().status
         if status == GoalStatus.STATUS_SUCCEEDED:
             print("Goal Succeeded!")
-            print(str(result.undocked))
         else:
             print("Goal Failed!")
 
     def send_goal(self):
         print("Waiting for action server")
         self._action_client.wait_for_server()
-        goal_msg = Undock.Goal()
-        goal_msg.rotate_in_place = True
+        goal_msg = NavigateToPose.Goal()
+        # fill up the goal request later
         # fill up the rest later
         print("Sending goal request")
 
@@ -50,11 +49,13 @@ class undocking_client:
 
 class UndockClient(Node):
     def __init__(self):
-        super().__init__("undock_client")
-        self.undocking_client_ = undocking_client(ActionClient(self, Undock, "Undock"))
+        super().__init__("nav2_client")
+        self.goto_pose_ = goto_pose(
+            ActionClient(self, NavigateToPose, "navigate_to_pose")
+        )
 
     def send_goal(self):
-        self.undocking_client_.send_goal()
+        self.goto_pose_.send_goal()
 
 
 def main(args=None):

@@ -31,6 +31,7 @@ find_package(rclcpp REQUIRED)
 find_package(rclpy REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(nav_msgs REQUIRED)
+find_package(nav2_msgs REQUIRED)
 find_package(rclcpp_action REQUIRED)
 find_package(rosidl_default_generators REQUIRED)
 
@@ -67,6 +68,7 @@ install(PROGRAMS
   scripts/dock_robot.py
   scripts/undock_robot.py
   scripts/dock_saver.py
+  scripts/nav2_dock.py
   DESTINATION lib/${PROJECT_NAME}
 )
 
