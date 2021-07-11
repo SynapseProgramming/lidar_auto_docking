@@ -53,9 +53,15 @@ class goto_pose:
 class UndockClient(Node):
     def __init__(self):
         super().__init__("nav2_client")
+        self.timer = self.create_timer(0.5, self.timed_callback)
+        self.count = 0
         self.goto_pose_ = goto_pose(
             ActionClient(self, NavigateToPose, "navigate_to_pose")
         )
+
+    def timed_callback(self):
+        print("timed callback received! " + str(self.count))
+        self.count += 1
 
     def send_goal(self):
         goal = {}
