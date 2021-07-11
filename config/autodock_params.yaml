@@ -3,7 +3,7 @@ docking_server:
     #Number of times the robot gets to attempt
     retries: 6
     # Distance below which to check abort criteria. should be slightly above docked_distance_threshold (m)
-    abort_distance: 0.33
+    abort_distance: 0.37
     # Angle offset that triggers abort (radians)
     abort_angle: 0.10
     # Y-offset that triggers abort. (m)
