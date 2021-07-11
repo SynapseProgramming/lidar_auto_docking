@@ -34,11 +34,14 @@ class goto_pose:
         else:
             print("Goal Failed!")
 
-    def send_goal(self):
+    def send_goal(self, goal_pose):
         print("Waiting for action server")
         self._action_client.wait_for_server()
         goal_msg = NavigateToPose.Goal()
-        # fill up the goal request later
+        goal_msg.pose.pose.position.x = goal_pose["x"]
+        goal_msg.pose.pose.position.y = goal_pose["y"]
+        goal_msg.pose.pose.orientation.z = goal_pose["z"]
+        goal_msg.pose.pose.orientation.w = goal_pose["w"]
         # fill up the rest later
         print("Sending goal request")
 
@@ -55,7 +58,12 @@ class UndockClient(Node):
         )
 
     def send_goal(self):
-        self.goto_pose_.send_goal()
+        goal = {}
+        goal["x"] = -1.5149
+        goal["y"] = 0.962
+        goal["z"] = -0.753
+        goal["w"] = 0.6577
+        self.goto_pose_.send_goal(goal)
 
 
 def main(args=None):
