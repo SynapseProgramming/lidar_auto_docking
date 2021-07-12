@@ -127,6 +127,7 @@ class goto_pose:
         self._action_client = action_client
         self.goal_status = False
         self.goal_accept_status = False
+        self.failure_flag = False
 
     def goal_response_callback(self, future):
         goal_handle = future.result()
@@ -151,6 +152,7 @@ class goto_pose:
         else:
             print("navigation failed!")
             self.goal_status = False
+            self.failure_flag = True
 
     def send_goal(self, goal_pose):
         print("Waiting for action server")
@@ -171,11 +173,13 @@ class goto_pose:
         status = {}
         status["gs"] = self.goal_status
         status["gas"] = self.goal_accept_status
+        status["f_flag"] = self.failure_flag
         return status
 
     def reset_status(self):
         self.goal_status = False
         self.goal_accept_status = False
+        self.failure_flag = False
 
 
 class MainLogic(Node):
@@ -211,8 +215,12 @@ class MainLogic(Node):
         dock_status = self.docking_client_.get_status()
         undock_status = self.undocking_client_.get_status()
 
+        # check failure flags
+        if nav2_status["f_flag"] == True:
+            print("Docking failure!")
+            self.dock_stat = 5
         # Docking command received. Navigate to initial goal pose first
-        if self.dock_cmd == 1 and self.dock_stat == 0:
+        elif self.dock_cmd == 1 and self.dock_stat == 0:
 
             self.goto_pose_.send_goal(self.initial_poses)
             self.dock_stat = 1
@@ -249,7 +257,7 @@ class MainLogic(Node):
             self.undocking_client_.reset_status()
             self.docking_client_.reset_status()
             self.goto_pose_.reset_status()
-
+        # TODO: add in a reset statement. state==5 and command=-1
         self.pub_dock_status(self.dock_stat)
 
     def pub_dock_status(self, stat):
