@@ -67,18 +67,9 @@ class UndockClient(Node):
     def __init__(self):
         super().__init__("undock_client")
         self.undocking_client_ = undocking_client(ActionClient(self, Undock, "Undock"))
-        self.timer = self.create_timer(0.5, self.timed_callback)
 
     def send_goal(self):
         self.undocking_client_.send_goal()
-
-    def timed_callback(self):
-        undock_status = self.undocking_client_.get_status()
-        print("goal status: " + str(undock_status["gs"]))
-        print("goal accept status: " + str(undock_status["gas"]))
-        if undock_status["gs"] == True and undock_status["gas"] == True:
-            print("Resetting goal status!")
-            self.undocking_client_.reset_status()
 
 
 def main(args=None):
