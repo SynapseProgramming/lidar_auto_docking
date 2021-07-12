@@ -70,7 +70,6 @@ class dock(Node):
     def __init__(self):
         super().__init__("minimal_action_client")
         self.docking_client_ = docking_client(ActionClient(self, Dock, "Dock"))
-        self.timer = self.create_timer(0.5, self.timed_callback)
         self.declare_parameter("load_file_path")
         self.dock_file_path = (
             self.get_parameter("load_file_path").get_parameter_value().string_value
@@ -81,14 +80,6 @@ class dock(Node):
 
     def send_goal(self):
         self.docking_client_.send_goal(self.initial_dock_pose)
-
-    def timed_callback(self):
-        dock_status = self.docking_client_.get_status()
-        print("goal status: " + str(dock_status["gs"]))
-        print("goal accept status: " + str(dock_status["gas"]))
-        if dock_status["gs"] == True and dock_status["gas"] == True:
-            print("Resetting goal status!")
-            self.docking_client_.reset_status()
 
 
 def main(args=None):
