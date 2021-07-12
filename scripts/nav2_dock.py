@@ -13,14 +13,18 @@ from rclpy.node import Node
 class goto_pose:
     def __init__(self, action_client):
         self._action_client = action_client
+        self.goal_status = False
+        self.goal_accept_status = False
 
     def goal_response_callback(self, future):
         goal_handle = future.result()
         if not goal_handle.accepted:
             print("Goal Rejected")
+            self.goal_accept_status = False
             return
 
         print("Goal accepted")
+        self.goal_accept_status = True
 
         self._get_result_future = goal_handle.get_result_async()
         self._get_result_future.add_done_callback(self.get_result_callback)
@@ -31,8 +35,10 @@ class goto_pose:
         status = future.result().status
         if status == GoalStatus.STATUS_SUCCEEDED:
             print("Goal Succeeded!")
+            self.goal_status = True
         else:
             print("Goal Failed!")
+            self.goal_status = False
 
     def send_goal(self, goal_pose):
         print("Waiting for action server")
@@ -49,6 +55,16 @@ class goto_pose:
 
         self._send_goal_future.add_done_callback(self.goal_response_callback)
 
+    def get_status(self):
+        status = {}
+        status["gs"] = self.goal_status
+        status["gas"] = self.goal_accept_status
+        return status
+
+    def reset_status(self):
+        self.goal_status = False
+        self.goal_accept_status = False
+
 
 class UndockClient(Node):
     def __init__(self):
@@ -60,8 +76,12 @@ class UndockClient(Node):
         )
 
     def timed_callback(self):
-        print("timed callback received! " + str(self.count))
-        self.count += 1
+        nav2_status = self.goto_pose_.get_status()
+        print("goal status: " + str(nav2_status["gs"]))
+        print("goal accept status: " + str(nav2_status["gas"]))
+        if nav2_status["gs"] == True and nav2_status["gas"] == True:
+            print("Resetting goal status!")
+            self.goto_pose_.reset_status()
 
     def send_goal(self):
         goal = {}
