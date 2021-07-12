@@ -20,11 +20,11 @@ class goto_pose:
     def goal_response_callback(self, future):
         goal_handle = future.result()
         if not goal_handle.accepted:
-            print("Goal Rejected")
+            print("nav2 Goal Rejected")
             self.goal_accept_status = False
             return
 
-        print("Goal accepted")
+        print("nav2 Goal accepted")
         self.goal_accept_status = True
 
         self._get_result_future = goal_handle.get_result_async()
@@ -35,10 +35,10 @@ class goto_pose:
         result = future.result().result
         status = future.result().status
         if status == GoalStatus.STATUS_SUCCEEDED:
-            print("Goal Succeeded!")
+            print("navigation succeeded")
             self.goal_status = True
         else:
-            print("Goal Failed!")
+            print("navigation failed!")
             self.goal_status = False
 
     def send_goal(self, goal_pose):
@@ -85,14 +85,28 @@ class MainLogic(Node):
         self.dock_cmd = msg.data
 
     def timed_callback(self):
+        # update status of all classes
         nav2_status = self.goto_pose_.get_status()
-        print("dock_cmd: " + str(self.dock_cmd))
-        print("goal status: " + str(nav2_status["gs"]))
-        print("goal accept status: " + str(nav2_status["gas"]))
-        if nav2_status["gs"] == True and nav2_status["gas"] == True:
-            print("Resetting goal status!")
-            self.goto_pose_.reset_status()
-        self.dock_stat += 1
+
+        # TODO: load in the initial dock pose from a json file
+        # Docking command received. Navigate to initial goal pose first
+        if self.dock_cmd == 1 and self.dock_stat == 0:
+            goal = {}
+            goal["x"] = -1.5149
+            goal["y"] = 0.962
+            goal["z"] = -0.753
+            goal["w"] = 0.6577
+            self.goto_pose_.send_goal(goal)
+            self.dock_stat = 1
+        # Engage in docking sequence once the robot has reached the goal
+        elif (
+            self.dock_stat == 1
+            and nav2_status["gs"] == True
+            and nav2_status["gas"] == True
+        ):
+            print("docking robot!")
+            self.dock_stat = 2
+
         self.pub_dock_status(self.dock_stat)
 
     def pub_dock_status(self, stat):
