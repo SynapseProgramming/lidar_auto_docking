@@ -72,6 +72,7 @@ class docking_client:
         self._action_client = action_client
         self.goal_status = False
         self.goal_accept_status = False
+        self.failure_flag = False
 
     def goal_response_callback(self, future):
         goal_handle = future.result()
@@ -90,11 +91,12 @@ class docking_client:
         result = future.result().result
         status = future.result().status
         if status == GoalStatus.STATUS_SUCCEEDED:
-            print("goal succeeded")
+            print("docking succeeded")
             self.goal_status = True
         else:
-            print("goal failed ")
+            print("docking failed ")
             self.goal_status = False
+            self.failure_flag = True
 
     def send_goal(self, dock_pose):
         print("waiting for action server")
@@ -115,11 +117,13 @@ class docking_client:
         status = {}
         status["gs"] = self.goal_status
         status["gas"] = self.goal_accept_status
+        status["f_flag"] = self.failure_flag
         return status
 
     def reset_status(self):
         self.goal_status = False
         self.goal_accept_status = False
+        self.failure_flag = False
 
 
 class goto_pose:
@@ -216,7 +220,9 @@ class MainLogic(Node):
         undock_status = self.undocking_client_.get_status()
 
         # check failure flags
-        if nav2_status["f_flag"] == True and self.dock_stat != 5:
+        if (
+            nav2_status["f_flag"] == True or dock_status["f_flag"] == True
+        ) and self.dock_stat != 5:
             print("Docking failure!")
             self.dock_stat = 5
         # Docking command received. Navigate to initial goal pose first
