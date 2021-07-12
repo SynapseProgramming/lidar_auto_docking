@@ -19,6 +19,7 @@ class undocking_client:
         self._action_client = action_client
         self.goal_status = False
         self.goal_accept_status = False
+        self.failure_flag = False
 
     def goal_response_callback(self, future):
         goal_handle = future.result()
@@ -38,12 +39,13 @@ class undocking_client:
         result = future.result().result
         status = future.result().status
         if status == GoalStatus.STATUS_SUCCEEDED:
-            print("Goal Succeeded!")
+            print("Undocking Succeeded!")
             self.goal_status = True
             print(str(result.undocked))
         else:
-            print("Goal Failed!")
+            print("Undocking Failed!")
             self.goal_status = False
+            self.failure_flag = True
 
     def send_goal(self):
         print("Waiting for action server")
@@ -60,11 +62,13 @@ class undocking_client:
         status = {}
         status["gs"] = self.goal_status
         status["gas"] = self.goal_accept_status
+        status["f_flag"] = self.failure_flag
         return status
 
     def reset_status(self):
         self.goal_status = False
         self.goal_accept_status = False
+        self.failure_flag = False
 
 
 class docking_client:
@@ -221,7 +225,9 @@ class MainLogic(Node):
 
         # check failure flags
         if (
-            nav2_status["f_flag"] == True or dock_status["f_flag"] == True
+            nav2_status["f_flag"] == True
+            or dock_status["f_flag"] == True
+            or undock_status["f_flag"] == True
         ) and self.dock_stat != 5:
             print("Docking failure!")
             self.dock_stat = 5
