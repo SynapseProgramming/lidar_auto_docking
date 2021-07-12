@@ -216,7 +216,7 @@ class MainLogic(Node):
         undock_status = self.undocking_client_.get_status()
 
         # check failure flags
-        if nav2_status["f_flag"] == True:
+        if nav2_status["f_flag"] == True and self.dock_stat != 5:
             print("Docking failure!")
             self.dock_stat = 5
         # Docking command received. Navigate to initial goal pose first
@@ -257,7 +257,13 @@ class MainLogic(Node):
             self.undocking_client_.reset_status()
             self.docking_client_.reset_status()
             self.goto_pose_.reset_status()
-        # TODO: add in a reset statement. state==5 and command=-1
+        elif self.dock_stat == 5 and self.dock_cmd == -1:
+            print("Resetting docking state!")
+            self.dock_stat = 0
+            self.undocking_client_.reset_status()
+            self.docking_client_.reset_status()
+            self.goto_pose_.reset_status()
+
         self.pub_dock_status(self.dock_stat)
 
     def pub_dock_status(self, stat):
