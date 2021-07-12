@@ -3,6 +3,7 @@
 
 
 from action_msgs.msg import GoalStatus
+from std_msgs.msg import Int32
 from nav2_msgs.action import NavigateToPose
 
 import rclpy
@@ -66,17 +67,24 @@ class goto_pose:
         self.goal_accept_status = False
 
 
-class UndockClient(Node):
+class MainLogic(Node):
     def __init__(self):
-        super().__init__("nav2_client")
+        super().__init__("dock_logic")
+        self.dock_cmd = 0
         self.timer = self.create_timer(0.5, self.timed_callback)
-        self.count = 0
+        self.subscription = self.create_subscription(
+            Int32, "dock_cmd", self.update_cmd, 10
+        )
         self.goto_pose_ = goto_pose(
             ActionClient(self, NavigateToPose, "navigate_to_pose")
         )
 
+    def update_cmd(self, msg):
+        self.dock_cmd = msg.data
+
     def timed_callback(self):
         nav2_status = self.goto_pose_.get_status()
+        print("dock_cmd: " + str(self.dock_cmd))
         print("goal status: " + str(nav2_status["gs"]))
         print("goal accept status: " + str(nav2_status["gas"]))
         if nav2_status["gs"] == True and nav2_status["gas"] == True:
@@ -95,9 +103,9 @@ class UndockClient(Node):
 def main(args=None):
     rclpy.init(args=args)
 
-    action_client = UndockClient()
+    action_client = MainLogic()
 
-    action_client.send_goal()
+    # action_client.send_goal()
 
     rclpy.spin(action_client)
 
