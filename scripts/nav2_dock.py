@@ -156,10 +156,10 @@ class goto_pose:
         print("Waiting for action server")
         self._action_client.wait_for_server()
         goal_msg = NavigateToPose.Goal()
-        goal_msg.pose.pose.position.x = goal_pose["x"]
-        goal_msg.pose.pose.position.y = goal_pose["y"]
-        goal_msg.pose.pose.orientation.z = goal_pose["z"]
-        goal_msg.pose.pose.orientation.w = goal_pose["w"]
+        goal_msg.pose.pose.position.x = goal_pose["bx"]
+        goal_msg.pose.pose.position.y = goal_pose["by"]
+        goal_msg.pose.pose.orientation.z = goal_pose["bz"]
+        goal_msg.pose.pose.orientation.w = goal_pose["bw"]
         # fill up the rest later
         print("Sending goal request")
 
@@ -200,7 +200,7 @@ class MainLogic(Node):
         )
         # load in dock coordinates
         with open(self.dock_file_path) as outfile:
-            self.initial_dock_pose = json.load(outfile)
+            self.initial_poses = json.load(outfile)
 
     def update_cmd(self, msg):
         self.dock_cmd = msg.data
@@ -211,15 +211,10 @@ class MainLogic(Node):
         dock_status = self.docking_client_.get_status()
         undock_status = self.undocking_client_.get_status()
 
-        # TODO: load in the initial dock pose from a json file
         # Docking command received. Navigate to initial goal pose first
         if self.dock_cmd == 1 and self.dock_stat == 0:
-            goal = {}
-            goal["x"] = -2.04232
-            goal["y"] = -0.59822
-            goal["z"] = 0.01407
-            goal["w"] = 0.999
-            self.goto_pose_.send_goal(goal)
+
+            self.goto_pose_.send_goal(self.initial_poses)
             self.dock_stat = 1
         # Engage in docking sequence once the robot has reached the goal
         elif (
@@ -228,7 +223,7 @@ class MainLogic(Node):
             and nav2_status["gas"] == True
         ):
             print("docking robot!")
-            self.docking_client_.send_goal(self.initial_dock_pose)
+            self.docking_client_.send_goal(self.initial_poses)
             self.dock_stat = 2
         # once the robot has docked, we will wait for an input to undock.
         elif (
