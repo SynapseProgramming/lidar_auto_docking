@@ -262,21 +262,11 @@ class MainLogic(Node):
         msg.data = stat
         self.status_publisher.publish(msg)
 
-    def send_goal(self):
-        goal = {}
-        goal["x"] = -1.5149
-        goal["y"] = 0.962
-        goal["z"] = -0.753
-        goal["w"] = 0.6577
-        self.goto_pose_.send_goal(goal)
-
 
 def main(args=None):
     rclpy.init(args=args)
 
     action_client = MainLogic()
-
-    # action_client.send_goal()
 
     rclpy.spin(action_client)
 
