@@ -71,10 +71,12 @@ class MainLogic(Node):
     def __init__(self):
         super().__init__("dock_logic")
         self.dock_cmd = 0
+        self.dock_stat = 0
         self.timer = self.create_timer(0.5, self.timed_callback)
         self.subscription = self.create_subscription(
             Int32, "dock_cmd", self.update_cmd, 10
         )
+        self.status_publisher = self.create_publisher(Int32, "dock_status", 10)
         self.goto_pose_ = goto_pose(
             ActionClient(self, NavigateToPose, "navigate_to_pose")
         )
@@ -90,6 +92,13 @@ class MainLogic(Node):
         if nav2_status["gs"] == True and nav2_status["gas"] == True:
             print("Resetting goal status!")
             self.goto_pose_.reset_status()
+        self.dock_stat += 1
+        self.pub_dock_status(self.dock_stat)
+
+    def pub_dock_status(self, stat):
+        msg = Int32()
+        msg.data = stat
+        self.status_publisher.publish(msg)
 
     def send_goal(self):
         goal = {}
