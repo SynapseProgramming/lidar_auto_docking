@@ -67,7 +67,7 @@ class dock_pose_subscriber(Node):
         self.obj_gui_.create_button(
             posx=250,
             posy=300,
-            button_name="save_dock_pose",
+            button_name="save dock and bot pose",
             button_colour="green",
             callback_function=self.save_dock_callback,
         )
@@ -86,6 +86,8 @@ class dock_pose_subscriber(Node):
             )
             self.bot_x = self.robot_pose.transform.translation.x
             self.bot_y = self.robot_pose.transform.translation.y
+            self.bot_z = self.robot_pose.transform.rotation.z
+            self.bot_w = self.robot_pose.transform.rotation.w
             self.dock_x_diff = abs(self.bot_x - self.x_pos)
             self.dock_y_diff = abs(self.bot_y - self.y_pos)
             self.dist_to_dock = math.sqrt(
@@ -103,17 +105,22 @@ class dock_pose_subscriber(Node):
         print(self.y_pos)
         print(self.z_pos)
         print(self.w_pos)
-        initial_dock_pose = {}
-        initial_dock_pose["x"] = self.x_pos
-        initial_dock_pose["y"] = self.y_pos
-        initial_dock_pose["z"] = self.z_pos
-        initial_dock_pose["w"] = self.w_pos
+        output_dict = {}
+        output_dict["x"] = self.x_pos
+        output_dict["y"] = self.y_pos
+        output_dict["z"] = self.z_pos
+        output_dict["w"] = self.w_pos
+
+        output_dict["bx"] = self.bot_x
+        output_dict["by"] = self.bot_y
+        output_dict["bz"] = self.bot_z
+        output_dict["bw"] = self.bot_w
         with open(
             self.dock_file_path,
             "w",
         ) as outfile:
-            json.dump(initial_dock_pose, outfile)
-        self.obj_gui_.show_message("Dock Coordinates have been saved!")
+            json.dump(output_dict, outfile)
+        self.obj_gui_.show_message("Dock and robot Coordinates have been saved!")
 
     def listener_callback(self, msg):
         # we should update our tkinter gui with the current dock coordinates here
