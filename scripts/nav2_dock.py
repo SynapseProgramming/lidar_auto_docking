@@ -183,7 +183,7 @@ class MainLogic(Node):
         super().__init__("dock_logic")
         self.dock_cmd = 0
         self.dock_stat = 0
-        self.timer = self.create_timer(0.5, self.timed_callback)
+        self.timer = self.create_timer(0.1, self.timed_callback)
         self.subscription = self.create_subscription(
             Int32, "dock_cmd", self.update_cmd, 10
         )
