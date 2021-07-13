@@ -228,9 +228,9 @@ class MainLogic(Node):
             nav2_status["f_flag"] == True
             or dock_status["f_flag"] == True
             or undock_status["f_flag"] == True
-        ) and self.dock_stat != 5:
+        ) and self.dock_stat != -1:
             print("Docking failure!")
-            self.dock_stat = 5
+            self.dock_stat = -1
         # Docking command received. Navigate to initial goal pose first
         elif self.dock_cmd == 1 and self.dock_stat == 0:
 
@@ -269,7 +269,7 @@ class MainLogic(Node):
             self.undocking_client_.reset_status()
             self.docking_client_.reset_status()
             self.goto_pose_.reset_status()
-        elif self.dock_stat == 5 and self.dock_cmd == -1:
+        elif self.dock_stat == -1 and self.dock_cmd == -1:
             print("Resetting docking state!")
             self.dock_stat = 0
             self.undocking_client_.reset_status()
