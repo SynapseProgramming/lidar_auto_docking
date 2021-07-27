@@ -18,7 +18,7 @@
   <depend>tf2</depend>
   <depend>action_msgs</depend>
   <depend>tf2_ros</depend>
-  <depend>Eigen3</depend>
+  <depend>eigen</depend>
   <depend>nav_msgs</depend>
   <depend>angles</depend>
   <depend>sensor_msgs</depend>
