@@ -7,6 +7,7 @@ from std_msgs.msg import Int32
 from lidar_auto_docking.action import Dock
 from lidar_auto_docking.action import Undock
 from nav2_msgs.action import NavigateToPose
+from rclpy.qos import QoSProfile, QoSReliabilityPolicy, QoSHistoryPolicy
 
 import json
 import rclpy
@@ -196,8 +197,13 @@ class MainLogic(Node):
         self.dock_cmd = 0
         self.dock_stat = 0
         self.timer = self.create_timer(0.1, self.timed_callback)
+        self.qos_profile_ = QoSProfile(
+            reliability=QoSReliabilityPolicy.RMW_QOS_POLICY_RELIABILITY_BEST_EFFORT,
+            history=QoSHistoryPolicy.RMW_QOS_POLICY_HISTORY_KEEP_LAST,
+            depth=10,
+        )
         self.subscription = self.create_subscription(
-            Int32, "dock_cmd", self.update_cmd, 10
+            Int32, "dock_cmd", self.update_cmd, self.qos_profile_
         )
         self.status_publisher = self.create_publisher(Int32, "dock_status", 10)
         self.goto_pose_ = goto_pose(
