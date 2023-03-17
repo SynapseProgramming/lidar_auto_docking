@@ -52,7 +52,7 @@ class dock_pose_subscriber(Node):
             Initdock, "init_dock", self.listener_callback, 10
         )
         self.subscription  # prevent unused variable warning
-        self.declare_parameter("load_file_path")
+        self.declare_parameter("load_file_path","null")
         self.dock_file_path = (
             self.get_parameter("load_file_path").get_parameter_value().string_value
         )
