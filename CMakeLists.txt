@@ -32,34 +32,27 @@ find_package(rclpy REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(nav_msgs REQUIRED)
 find_package(nav2_msgs REQUIRED)
+find_package(lidar_auto_docking_messages REQUIRED)
 find_package(rclcpp_action REQUIRED)
-find_package(rosidl_default_generators REQUIRED)
 
-rosidl_generate_interfaces(${PROJECT_NAME}
-  "action/Dock.action"
-  "action/Undock.action"
-  "msg/Initdock.msg"
-   DEPENDENCIES geometry_msgs
-)
+
 
 add_executable(dock_coordinates src/dock_coordinates.cpp src/perception.cpp src/laser_processor.cpp src/linear_pose_filter_2d.cpp src/icp_2d.cpp src/tf2listener.cpp)
-ament_target_dependencies(dock_coordinates geometry_msgs tf2 sensor_msgs rclcpp Eigen3 angles tf2_ros tf2_geometry_msgs)
+ament_target_dependencies(dock_coordinates geometry_msgs tf2 sensor_msgs rclcpp Eigen3 angles tf2_ros tf2_geometry_msgs lidar_auto_docking_messages)
 #allow target to access header files defined in include
 target_include_directories( dock_coordinates
  PUBLIC
    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
    $<INSTALL_INTERFACE:include>)
-rosidl_target_interfaces(dock_coordinates ${PROJECT_NAME} "rosidl_typesupport_cpp")
 
 
 
 add_executable(auto_dock src/autodock.cpp src/controller.cpp src/perception.cpp src/laser_processor.cpp src/linear_pose_filter_2d.cpp src/icp_2d.cpp src/tf2listener.cpp)
-ament_target_dependencies(auto_dock nav_msgs geometry_msgs tf2 sensor_msgs rclcpp rclcpp_action Eigen3 angles tf2_ros tf2_geometry_msgs )
+ament_target_dependencies(auto_dock nav_msgs geometry_msgs tf2 sensor_msgs rclcpp rclcpp_action Eigen3 angles tf2_ros tf2_geometry_msgs lidar_auto_docking_messages)
 target_include_directories( auto_dock
   PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include>)
-rosidl_target_interfaces(auto_dock ${PROJECT_NAME} "rosidl_typesupport_cpp")
 
 
 ament_python_install_package(${PROJECT_NAME})
