@@ -3,7 +3,7 @@
 
 
 from action_msgs.msg import GoalStatus
-from lidar_auto_docking.action import Undock
+from lidar_auto_docking_messages.action import Undock
 
 import rclpy
 from rclpy.action import ActionClient

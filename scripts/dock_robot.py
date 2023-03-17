@@ -3,7 +3,7 @@
 
 
 from action_msgs.msg import GoalStatus
-from lidar_auto_docking.action import Dock
+from lidar_auto_docking_messages.action import Dock
 
 import rclpy
 import json

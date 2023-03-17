@@ -9,7 +9,7 @@ import json
 from rclpy.node import Node
 
 from std_msgs.msg import String
-from lidar_auto_docking.msg import Initdock
+from lidar_auto_docking_messages.msg import Initdock
 import math
 from tf2_ros import LookupException
 from tf2_ros.buffer import Buffer

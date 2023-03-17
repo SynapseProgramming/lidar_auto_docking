@@ -4,8 +4,8 @@
 
 from action_msgs.msg import GoalStatus
 from std_msgs.msg import Int32
-from lidar_auto_docking.action import Dock
-from lidar_auto_docking.action import Undock
+from lidar_auto_docking_messages.action import Dock
+from lidar_auto_docking_messages.action import Undock
 from nav2_msgs.action import NavigateToPose
 from rclpy.qos import QoSProfile, QoSReliabilityPolicy, QoSHistoryPolicy
 
