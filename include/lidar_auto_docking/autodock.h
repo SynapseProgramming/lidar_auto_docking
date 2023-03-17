@@ -12,15 +12,15 @@
 #include <string>
 #include <thread>
 
-#include "lidar_auto_docking/action/dock.hpp"
-#include "lidar_auto_docking/action/undock.hpp"
+#include "lidar_auto_docking_messages/action/dock.hpp"
+#include "lidar_auto_docking_messages/action/undock.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp_action/rclcpp_action.hpp"
 using namespace std::chrono_literals;
 
 class DockingServer : public rclcpp::Node {
  public:
-  using Dock = lidar_auto_docking::action::Dock;
+  using Dock = lidar_auto_docking_messages::action::Dock;
   using GoalHandleDock = rclcpp_action::ServerGoalHandle<Dock>;
   explicit DockingServer(
       const rclcpp::NodeOptions& options = rclcpp::NodeOptions())
@@ -157,8 +157,9 @@ class DockingServer : public rclcpp::Node {
 
 class UndockingServer : public rclcpp::Node {
  public:
-  using Undock = lidar_auto_docking::action::Undock;
+  using Undock = lidar_auto_docking_messages::action::Undock;
   using GoalHandleUndock = rclcpp_action::ServerGoalHandle<Undock>;
+
   explicit UndockingServer(
       const rclcpp::NodeOptions& options = rclcpp::NodeOptions())
       : Node("undocking_server", options) {
