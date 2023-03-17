@@ -72,9 +72,7 @@ install(
 
 install(
   DIRECTORY
-  action
   config
-  msg
   launch
   initial_dock_pose
   DESTINATION share/${PROJECT_NAME}
