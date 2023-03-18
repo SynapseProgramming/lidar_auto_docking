@@ -164,10 +164,12 @@ class goto_pose:
         print("Waiting for action server")
         self._action_client.wait_for_server()
         goal_msg = NavigateToPose.Goal()
+        goal_msg.pose.header.frame_id= 'map'
         goal_msg.pose.pose.position.x = goal_pose["bx"]
         goal_msg.pose.pose.position.y = goal_pose["by"]
         goal_msg.pose.pose.orientation.z = goal_pose["bz"]
         goal_msg.pose.pose.orientation.w = goal_pose["bw"]
+        
         # fill up the rest later
         print("Sending goal request")
 
