@@ -1,18 +1,15 @@
 #!/usr/bin/env python3
-...
-
-
-from action_msgs.msg import GoalStatus
-from std_msgs.msg import Int32
-from lidar_auto_docking_messages.action import Dock
-from lidar_auto_docking_messages.action import Undock
-from nav2_msgs.action import NavigateToPose
-from rclpy.qos import QoSProfile, QoSReliabilityPolicy, QoSHistoryPolicy
-
-import json
-import rclpy
-from rclpy.action import ActionClient
 from rclpy.node import Node
+from rclpy.action import ActionClient
+import rclpy
+import json
+from rclpy.qos import QoSProfile, QoSReliabilityPolicy, QoSHistoryPolicy
+from nav2_msgs.action import NavigateToPose
+from lidar_auto_docking_messages.action import Undock
+from lidar_auto_docking_messages.action import Dock
+from std_msgs.msg import Int32
+from action_msgs.msg import GoalStatus
+...
 
 
 class undocking_client:
@@ -198,8 +195,8 @@ class MainLogic(Node):
         self.dock_stat = 0
         self.timer = self.create_timer(0.1, self.timed_callback)
         self.qos_profile_ = QoSProfile(
-            reliability=QoSReliabilityPolicy.RMW_QOS_POLICY_RELIABILITY_BEST_EFFORT,
-            history=QoSHistoryPolicy.RMW_QOS_POLICY_HISTORY_KEEP_LAST,
+            reliability=QoSReliabilityPolicy.BEST_EFFORT,
+            history=QoSHistoryPolicy.KEEP_LAST,
             depth=10,
         )
         self.subscription = self.create_subscription(
@@ -210,11 +207,13 @@ class MainLogic(Node):
             ActionClient(self, NavigateToPose, "navigate_to_pose")
         )
         self.docking_client_ = docking_client(ActionClient(self, Dock, "Dock"))
-        self.declare_parameter("load_file_path")
+        self.declare_parameter("load_file_path", "null")
 
-        self.undocking_client_ = undocking_client(ActionClient(self, Undock, "Undock"))
+        self.undocking_client_ = undocking_client(
+            ActionClient(self, Undock, "Undock"))
         self.dock_file_path = (
-            self.get_parameter("load_file_path").get_parameter_value().string_value
+            self.get_parameter(
+                "load_file_path").get_parameter_value().string_value
         )
         # load in dock coordinates
         with open(self.dock_file_path) as outfile:
