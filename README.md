@@ -2,7 +2,8 @@
 The lidar_auto_docking package is a heavily refactored version of the fetch_open_auto_dock package. 
 The package would send appropriate cmd_vel messages to bring the robot to a dock with a trapezium-shaped landmark. 
 The distance between dock  and  base_link 
-is used to determine if the robot has reached the dock. 
+is used to determine if the robot has reached the dock. <br>
+There are two versions of this package. ROS2 Foxy on the (foxy-main) branch, ROS2 Humble on the (humble-main) branch. Do take note that the humble version of this package requires a separate package for messages, whereas the foxy version does not. 
 
 ## Prerequisites
 This package would require the nav2 stack  to be set-up on your robot.<br>
@@ -25,7 +26,11 @@ This package would require the nav2 stack  to be set-up on your robot.<br>
 1. /autodock/cmd_vel (topic used to send velocity commands to the robot.)
 
 ## Installation
- Firstly, git clone this package into your colcon workspace and then run colcon build. 
+ 1. git clone the following messages package into your src folder:
+ ```
+ git clone https://github.com/SynapseProgramming/lidar_auto_docking_messages.git
+ ```
+ 2. Next, git clone this package into your colcon workspace and then run colcon build. 
  If there are some dependencies that are not met, please run rosdep before building.<br>
  
  ## Usage
@@ -110,5 +115,3 @@ I strongly recommend testing this package in simulation first(gazebo etc.)<br>
  As the main docking program is an action server, you could write action clients to customise where and when you want the robot to engage in the docking/undocking sequence.
 
 If you wish, you could refer to dock_robot.py and undock_robot.py in the scripts folder as a reference.
-
-
